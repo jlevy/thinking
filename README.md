@@ -1,16 +1,24 @@
 # Thinking
 
-Evidence-ranked research reports on computation, mathematical foundations, physics, and
-biology.
+A kitchen sink repository to hold random thinking on different topics.
+
+The thinking is mostly AI.
+The topics and direction are mine, mostly to satisfy my own curiosity.
+
+I make it open source so I can share easily.
+It makes use of my own tools, including Practical Prose and tbd.
+
+## Reports
+
+These are evidence-ranked research reports on computation, mathematical
+foundations, physics, and biology.
+
+The [research report index](docs/project/research/README.md) gives each report’s scope
+and a suggested reading order.
 
 Each report separates what is proved from what is computed, conjectured, or merely
 asserted, links primary sources next to the claims they support, and ends with a
 consolidated reference list.
-
-## Reports
-
-The [research report index](docs/project/research/README.md) gives each report’s scope
-and a suggested reading order.
 
 | Date | Report |
 | --- | --- |
