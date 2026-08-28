@@ -1,0 +1,25 @@
+# Git hooks managed by lefthook (https://lefthook.dev).
+# Install once after cloning: `make hooks-install` (or `npx lefthook install`).
+# Bypass for an emergency commit: `git commit --no-verify` (avoid in PRs).
+
+pre-commit:
+  parallel: true
+  commands:
+    # Auto-format Markdown on commit and stage the result, so formatting is
+    # transparent rather than a gate the author has to satisfy by hand.
+    # Formatting drift deliberately does NOT fail CI; it is fixed here instead.
+    #
+    # Why the whole repo (`make format`) and not `{staged_files}`?
+    # flowmark reads .flowmarkignore relative to its target argument, so passing
+    # explicit file paths bypasses the exclusion list. Here that list protects the
+    # generated SKILL.md trees, which carry DO-NOT-EDIT markers and are rewritten
+    # byte-deterministically by their own installers. Formatting them would put
+    # two owners on the same bytes. Do not "optimise" this to staged files.
+    #
+    # The `glob` filter means the hook only fires when Markdown is actually
+    # staged; flowmark is fast enough across the whole tree that scoping further
+    # buys nothing.
+    format-markdown:
+      glob: "*.{md,markdown,mdc}"
+      run: make format
+      stage_fixed: true
