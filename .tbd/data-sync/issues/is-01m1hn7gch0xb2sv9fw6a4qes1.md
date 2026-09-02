@@ -5,7 +5,7 @@ title: "Named speaker attribution for parliamentary transcription: landscape sur
 kind: epic
 status: open
 priority: 1
-version: 26
+version: 46
 spec_path: docs/project/research/research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md
 labels:
   - research
@@ -36,7 +36,27 @@ child_order_hints:
   - is-01m1hnce99h0ah2yk0acm3t3an
   - is-01m1hncem29wpjyexcmrph4b8n
   - is-01m1hnff7vk9fgrn6j3geyft2m
+  - is-01m1hnqac48fy0ptsewn0mhetx
+  - is-01m1hnqb18ata87hbcz430gy0a
+  - is-01m1hnqbgnm2c2n76tgg0r59cz
+  - is-01m1hnqc084zhzr6f5xs25ww20
+  - is-01m1hnqcf8af97vr60pd7bvwef
+  - is-01m1hnqcy0j3j57takfhpt6404
+  - is-01m1hnqdbbwtgjy64byjz57te9
+  - is-01m1hnqdw766t7vh9j3a99zs3p
+  - is-01m1hnqeh882db7mgact1x1qzs
+  - is-01m1hnqf5vhnw7hem6t3tp4rha
+  - is-01m1hnqfy3znhf2y44z96d8vee
+  - is-01m1hnqgk47f2cb0fsw5ntftm2
+  - is-01m1hnqhdy9jc1854tdhe87pcj
+  - is-01m1hnqj74jzc8g0ja58wbdm0h
+  - is-01m1hnqjvx0wxwe66vmkbkg8je
+  - is-01m1hnqkm3jhx913hhgdb41s1c
+  - is-01m1hnqmhcjsmgd2vtgrjntrv8
+  - is-01m1hnqnfc8054evyp3mk2hve4
+  - is-01m1hnqpd689spmp39gq0rpsx3
+  - is-01m1hnqq5hgjgtqznsraqc3nss
 created_at: 2026-09-02T18:13:48.561Z
-updated_at: 2026-09-02T18:18:09.531Z
+updated_at: 2026-09-02T18:22:39.792Z
 ---
 Epic for the Madrid Open Track 02 research program: critical review and agenda (merged in PR #1), a link-verified tooling inventory with maturity labels, and a set of spikes/quick tests that validate hypotheses H-001..H-008 and rank what to pursue. Code for spikes lives in attic/ (gitignored) pending a separate repo per the architecture rule.

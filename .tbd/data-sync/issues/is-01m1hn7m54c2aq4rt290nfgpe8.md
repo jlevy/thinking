@@ -5,7 +5,7 @@ title: "Spike: scoring harness — TAA@coverage, cpWER/tcpWER/DER, ECE, latency/
 kind: task
 status: in_progress
 priority: 1
-version: 4
+version: 6
 spec_path: docs/project/research/research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md
 labels:
   - spike
@@ -14,8 +14,12 @@ dependencies:
     target: is-01m1hn7p30j4w673wv165jhmv7
   - type: blocks
     target: is-01m1hncem29wpjyexcmrph4b8n
+  - type: blocks
+    target: is-01m1hnqhdy9jc1854tdhe87pcj
+  - type: blocks
+    target: is-01m1hnqpd689spmp39gq0rpsx3
 parent_id: is-01m1hn7gch0xb2sv9fw6a4qes1
 created_at: 2026-09-02T18:13:52.419Z
-updated_at: 2026-09-02T18:16:30.594Z
+updated_at: 2026-09-02T18:22:39.013Z
 ---
 Opus agent; code attic/spikes/scoring-harness (package attrscore, pytest); report scratchpad/spike-scoring-harness.md. Must refuse empty hypotheses (instrument guard).
