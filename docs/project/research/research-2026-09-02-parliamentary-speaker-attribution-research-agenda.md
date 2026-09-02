@@ -1336,45 +1336,56 @@ ratio, which are the decoding-side guard under test (the decoder matches sherpa-
 C++ output on real speech).
 Two regimes: contiguous 30 s windows over the whole hour, and Silero VAD segments only;
 filters applied after decoding so every threshold is scored from the same units.
-Whisper-medium is out of memory on this box; the VAD arm had one of three streams scored
-when this section was written, and the run was slowed by memory contention with the
-other spikes.
+Whisper-medium is out of memory on this box, and the VAD arm completed on one of the
+three streams: repeated attempts to finish the other two were killed by container
+restarts.
+The VAD-versus-ungated contrast below is therefore reported **paired on the one
+stream both arms covered**, which is the honest comparison; the ungated per-class rates
+are also given across all three streams, where more data is available.
 
-**Result (run).** Without gating, whisper-small emits 401 hallucinated words per hour of
-non-speech: gavel 1,468 (repetition loops such as “toc toc toc…”), applause 697, murmur
-115, laughter 75, digital silence 72 (“y” twenty times), room tone 3.5. The applause
-output is the dangerous case for a record: “aplausos”, “gracias”, “muchas gracias”, “muy
-bien”, plausible chamber language rather than garbage.
-The guard signals overlap badly at this model size: `no_speech_prob` has a p95 of 0.68
-on real speech units and a p05 of 0.64 on non-speech units, so the threshold that
-suppresses every hallucination discards 14% of real words.
-Filter by filter: `no_speech_prob > 0.6` cuts the rate to 89 per hour but raises speech
-WER from 0.276 to 0.362; `avg_logprob < −1.0` alone leaves 318 per hour, because the
-long, confident hallucinations pass it; Whisper’s own default conjunction leaves 337;
-the compression-ratio filter (> 2.4) alone leaves 96 per hour at no WER cost (0.269);
-all three together leave 1.8 per hour at WER 0.355. VAD gating on the scored stream
-removes applause, gavel and both silences almost entirely (0.2%, 0.8%, 1.0% and 0% of
-their time passed as speech) but passes 92.5% of babble and 17% of laughter, so the
-decoded units inside murmur hallucinate at 3,216 words per hour and laughter at 311
-(“jajaja…” loops), 519 per hour overall on that stream; VAD plus all three filters
-leaves 7 per hour. VAD also costs speech: the deletion rate rises from 0.19 to 0.27.
-Speech WER on this synthetic material is high for every configuration (0.27–0.36) and is
-dominated by deletions, a property of the small model on reverberant TTS rather than of
-the guard.
+**Result (run).** Across all three streams, ungated whisper-small emits **401
+hallucinated words per hour** of non-speech: gavel 1,468 (repetition loops such as “toc
+toc toc…”), applause 697, murmur 115, laughter 75, digital silence 72 (“y” twenty
+times), room tone 3.5. The applause output is the dangerous case for a record:
+“aplausos”, “gracias”, “muchas gracias”, “muy bien”, plausible chamber language rather
+than garbage.
+
+Paired on the single stream both arms cover, **VAD gating makes the problem worse, not
+better**: 288.8 words per hour ungated against **518.8 with VAD**. The mechanism is
+visible per class. VAD removes the impulsive and silent classes almost entirely (0.2% of
+applause time, 0.8% of gavel, 1.0% of room tone and 0% of digital silence passed as
+speech, taking gavel from 1,415 to 11 words per hour and applause and digital silence to
+zero), and then passes **92.5% of babble**, which Whisper transcribes as fluent Spanish
+(“de la comunidad de la iglesia de los últimos días”): murmur goes from 139 to **3,216**
+words per hour, laughter from 66 to 311 (“jajaja…” loops).
+Gating also costs real speech, raising the deletion rate from 0.19 to 0.27.
+
+The decoding-side signals overlap badly at this model size: `no_speech_prob` has a p95
+of 0.68 on real speech units and a p05 of 0.64 on non-speech units, so the threshold
+that suppresses every hallucination discards 14% of real words.
+Filter by filter on the paired stream: `no_speech_prob > 0.6` reaches zero
+hallucinations but raises speech WER from 0.292 to 0.357; `avg_logprob < −1.0` alone
+leaves 212 per hour, because the long, confident hallucinations pass it; Whisper’s own
+default conjunction also leaves 212; the **compression-ratio filter (> 2.4) alone cuts
+289 to 89 per hour at essentially no WER cost** (0.292 to 0.295); all three together
+reach zero on the ungated arm at WER 0.361, and 7 per hour on the VAD arm at WER 0.319.
+Speech WER is high in every configuration (0.29–0.36) and deletion-dominated, a property
+of the small model on reverberant TTS rather than of the guard.
 
 **Verdict.** VAD gating alone does not satisfy the guard: it fixes applause, knocks and
 silence and fails on babble, which a chamber supplies constantly.
 The `no_speech_prob` gate cannot be tuned at whisper-small without losing real words,
 which reproduces the published warning that hallucinations carry high `avg_logprob` and
 low `no_speech_prob` exactly where the naive filters are needed.
-The one free filter is the compression ratio; the practical guard is VAD plus the
-compression-ratio filter plus a babble-aware VAD threshold, and the harness’s
-placeholder of 5 words per hour is reachable only with the full conjunction at a 30%
-speech cost.
-Set the guard from the first real baseline, but expect the order of 10 words
-per hour for a gated pipeline, not 5. Limitations: synthetic streams with a synthetic
-room; ESC-50 clapping close-miked rather than a chamber; one model size; the VAD arm
-partial at the time of writing.
+The one free filter is the compression ratio, which removes two thirds of the
+hallucinated words at no measurable WER cost.
+The practical guard is the compression-ratio filter plus a babble-aware VAD threshold
+rather than VAD alone, and the harness’s placeholder of 5 words per hour is reachable
+only with the full conjunction at a 30% speech cost.
+Set the guard from the first real baseline, but expect the order of 10 words per hour
+for a gated pipeline, not 5. Limitations: synthetic streams with a synthetic room;
+ESC-50 clapping close-miked rather than a chamber; one model size; the VAD arm partial
+at the time of writing.
 
 **Next.** Finish the VAD arm on all three streams and the `condition_on_previous_text`
 regime; run F1 (the co-official fine-tunes on the same streams); test the larger Whisper
