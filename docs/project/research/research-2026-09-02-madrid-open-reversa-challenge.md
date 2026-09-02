@@ -1684,10 +1684,12 @@ companion reports, the
 [research agenda](research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md)
 (cited as *agenda §n*) and the
 [tooling inventory](research-2026-09-02-parliamentary-transcription-tooling-inventory.md)
-(*inventory §n*). Where a claim rests on something measured in the agenda’s spike
-results (§10 there), it is marked measured; the rest is judgment, and the two are kept
-apart because most of the numbers below came from synthetic or text-only material and
-are upper bounds.
+(*inventory §n*). All four are published in full in
+[Track 02 Team Strategy — Four Analyses in Full](research-2026-09-02-track02-team-strategy-analyses.md),
+which carries the hour-by-hour detail this section compresses.
+Where a claim rests on something measured in the agenda’s spike results (§10 there), it
+is marked measured; the rest is judgment, and the two are kept apart because most of the
+numbers below came from synthetic or text-only material and are upper bounds.
 
 The four analyses were run separately and converged, which is the most useful thing
 about them.

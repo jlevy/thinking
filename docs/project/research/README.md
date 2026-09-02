@@ -24,6 +24,7 @@ access labels.
 | 2026-09-02 | [The Madrid Open (Vol.1) and the Reversa Real-Time Parliamentary Record Challenge](research-2026-09-02-madrid-open-reversa-challenge.md) | The 3 October 2026 Madrid competition, the three startups behind it, the state of the art in real-time multilingual parliamentary transcription and speaker attribution, and a strategy section for a team entering the democracy track |
 | 2026-09-02 | [Named Speaker Attribution for Parliamentary Transcription — Critical Review and Research Agenda](research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md) | A critical review of the Madrid Open dossier’s technical analysis, an evaluation protocol for named speaker attribution, the datasets and tools to use, a ranked research agenda with pre-registered hypotheses, the results of nine sandbox spikes with a catalogue of the rest, and an evaluation strategy for research–eval loops |
 | 2026-09-02 | [Tooling Inventory for Real-Time Parliamentary Transcription with Named Speaker Attribution](research-2026-09-02-parliamentary-transcription-tooling-inventory.md) | Every tool, dataset, service and evaluation resource surveyed for the agenda, with links, licences, language coverage, same-day repository signals, maturity and access labels, a shortlist by pipeline stage, and an index from research direction to toolchain |
+| 2026-09-02 | [Track 02 Team Strategy — Four Analyses in Full](research-2026-09-02-track02-team-strategy-analyses.md) | Five team bets with rubric arithmetic, five architectures differing in where the speaker’s name comes from, a differentiation memo, and a hedging plan for a brief revealed only on the day |
 
 ## Suggested Reading Order
 
@@ -40,6 +41,10 @@ Read it on its own terms.
 The speaker-attribution research agenda is its companion: it reviews the dossier’s §11
 critically and turns it into a measurement protocol and a set of experiments, so read
 the dossier’s §11 first and the agenda second.
+The tooling inventory is the reference behind the agenda’s §6 and §11 and is meant to be
+consulted rather than read straight through.
+The team-strategy analyses expand the dossier’s §12 and assume its rubric and technical
+landscape, so read them last.
 The tooling inventory is a reference behind the agenda’s §6 and §11: consult it by stage
 or by research direction rather than reading it through.
 
