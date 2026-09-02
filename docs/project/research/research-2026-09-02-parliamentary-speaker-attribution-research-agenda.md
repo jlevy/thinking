@@ -1433,13 +1433,42 @@ American chamber is in scope.
     gained 9 WER points by verbatimizing its training text.
     Any score against the published record is measuring editing policy as much as
     recognition until the two are separated.
+12. **The text-only floor is high.** Chair announcements alone put the right person on
+    93–95% of rostrum turns on two independent records of the Congreso, and 92–94% of
+    all regular turns with the rule that no announcement means the same speaker
+    continues (§10.1); an acoustic identifier earns its keep on the short-turn tail,
+    where the text reaches 49–55%, and must beat this floor, not chance.
+13. **The standard scoring tools forgive a wrong name.** A perfect transcript with every
+    speaker rotated to another member scores 0.0 on MeetEval cpWER and 0.0 on DER, and
+    1.49 on fixed-label cpWER (§10.2); only the fixed-label forms, identification error
+    rate and per-turn TAA measure what a record needs.
+14. **The benchmark’s size hinges on a variance nobody has measured.** Forty sessions is
+    the campaign minimum, short-turn claims need 45 or more, and the first draft’s
+    bootstrap rule was not a 5% test (§10.3); the interval estimator was worth more than
+    a dozen sessions.
+15. **The in-domain data is already free on the text side.** The Congreso XV dataset
+    gives 9,441 named clips (907 h), the roster, the agenda and minute-level timing for
+    180 sessions, so the text-side evaluation tiers run today (§10.10, §11.3); it has no
+    sub-minute stratum, so the short-turn hypotheses wait for audio alignment.
+16. **Cross-service ASR quality per language is unmeasured, and the tail is where the
+    references disagree.** No source combines ground truth, the services and the four
+    Spanish-state languages on parliamentary audio; on Basque and Galician the paid
+    panel disagrees with itself by 13–15 points (§11.5), so the protocol in the
+    companion inventory’s §10 is the only route to a defensible ranking.
+17. **Licences and maturity decide the stack as much as accuracy.** Of about 260 tools
+    inventoried, the shortlist is fourteen items (§6.2); DiariZen, MMS and InsightFace
+    weights are non-commercial, WeSep has no licence, two enrollment services are
+    retired, and anything without a push in a year is Legacy.
 
 ## Recommendations
 
 **[Analysis]**
 
-1. **Build R1 before anything else.** Twenty sessions with both reference layers and the
-   harness in §4.6 is enough to start; publish the manifests.
+1. **Build R1 before anything else.** Forty sessions with the record layer (verified
+   labels, spot-checked timing), a 4 h stratified verbatim sample, and the harness in
+   §4.6 and §10.2; publish the manifests.
+   Twenty sessions settle H-002 and any gain over four points; only forty make the
+   short-turn claims testable (§10.3).
 2. **Pre-register H-001 through H-003 and run them in that order.** They are cheap, they
    decompose the problem, and their stratified tables will reorder the rest of the list.
 3. **Ask the four questions that change the build** — audio channel and interpreter
@@ -1451,21 +1480,38 @@ American chamber is in scope.
    fraction of turns it would resolve; that is the production path.
 6. **Use the campaign discipline in §9.** The ranking in §7 is a prior; the ledger
    should be what changes it.
+7. **Stand up one box with a GPU, Hugging Face, YouTube and congreso.es access** and run
+   S1, S2, S8 and S13 in its first week (§10.11); everything the sandbox could not touch
+   is on the other side of that box.
+8. **Run the evaluation loop by tier (§11.3)** with the harness as the instrument and
+   the text-side evals in every commit; take headline numbers only from sessions after
+   the model cutoffs and from the fixed-label metrics.
 
 ## Next Steps
 
-- [ ] Download five Congreso sessions with co-official-language interventions and
-  inspect the MP4 audio layout with `ffprobe`; settle Q-003.
-- [ ] Write the Diario parser and the chair-announcement parser; measure announcement
-  coverage on those sessions (input to H-003).
-- [ ] Stand up the scoring harness (MeetEval plus the per-turn TAA/coverage scorer);
-  version it.
-- [ ] Build the R1 evaluation set (20 sessions) and enrollment set; run H-001.
-- [ ] Run H-002 and H-003; publish the stratified tables.
-- [ ] Open a campaign directory with the experiment-loop skill: idea board, registry
-  seeded from §9, accept rule as written.
-- [ ] Re-verify the search-summary figures flagged in §2.1 against their primary texts
-  when network access allows.
+- [x] Write the Diario parser and the chair-announcement parser; measure announcement
+  coverage (H-003 on the record: §10.1).
+- [x] Stand up the scoring harness; version it (attrscore 0.1.0, §10.2).
+- [x] Size the benchmark and fix the accept rule (§10.3, §4.7).
+- [ ] Send the chamber letter (S24; drafted) for the feeds, the event export and the
+  archive track layout.
+- [ ] Stand up the Net-tier box; download five Congreso sessions with co-official
+  interventions and settle Q-003 with `ffprobe` (S1); run S2, S8, S13 the same week.
+- [ ] Run S9 (announcement sentences through TTS and ASR) to see how much of the
+  text-only floor survives recognition.
+- [ ] Order the 4 h double-annotated verbatim sample and verify labels on five sessions
+  (§11.4); run the cheapest credible ASR pass from the sandbox services (§11.5).
+- [ ] Build the R1 evaluation set (40 sessions, record layer) and enrollment set from
+  the Congreso XV manifest; run H-001, then H-002 and H-003; publish the stratified
+  tables.
+- [ ] Run F1 and F2 (fine-tune silence robustness; temporal hold-out for the Basque and
+  Galician specialists) before any specialist model enters a results table.
+- [ ] Move the spike code out of the gitignored `attic/` into its own repository, per
+  the repository’s rule that a line of work with code and data gets one; open the
+  campaign directory there with the experiment-loop skill, registry seeded from §9 as
+  amended.
+- [ ] Re-verify the search-summary figures flagged in §2.1, and every `HF:` model id in
+  the companion inventory, against their primary pages when network access allows.
 
 ## Methodology
 
@@ -1496,6 +1542,23 @@ have not been checked line by line.
 The web-search budget was exhausted before the Parlamento.ai–Reversa relationship could
 be probed further; that question is open.
 
+**Third pass (same day).** §6, §10 and §11 were added.
+The tooling inventory was built from four parallel briefs (ASR; speaker; joint, text and
+multimodal; data and services), a same-day GitHub API sweep of 163 repositories for
+stars, licence, last push and archived flag, a consolidation pass into 266 rows with
+uniform columns, and a critical review of the labels against the definitions and the
+repository evidence; the full tables are the companion inventory report and §6 keeps the
+shortlist and the index.
+Nine spikes ran in the sandbox tier (§10); their code and data are under the gitignored
+`attic/` directory and their reports are summarised in §10, with the numbers tagged
+(run).
+The evaluation strategy (§11) was written from an inventory of about 80 evaluation
+resources and a cross-service ASR protocol, both in the companion report (§9 and §10
+there). Several agent runs were interrupted by a usage limit part-way and were resumed
+from their on-disk state; the §6 text was assembled from the writer’s completed part
+files, and the §11 draft was reconciled by hand with the final sizing result, which
+reversed the draft’s recommendation on the accept rule.
+
 **What could not be verified:**
 
 - Whether the Congreso’s co-official-language portal serves an original-only audio
@@ -1507,6 +1570,14 @@ be probed further; that question is open.
 - SpeakerLM’s cpWER, which no source reported.
 - Any relationship between Parlamento.ai and Reversa or the Madrid Open.
 - The existence and composition of the Albayzin 2020 parliamentary subset.
+- Every Hugging Face model and dataset id in §6 and the companion inventory: the pages
+  could not be opened, so ids, licences and language lists are as their authors
+  published them.
+- LDC and ELRA prices for DIHARD III, CALLHOME, REPERE and EPIC.
+- Whether the three Congreso XV sessions with placeholder MP4 URLs have audio on the
+  portal.
+- Deepgram’s handling of ca, eu and gl: the API was unreachable and no key was present,
+  so the adapter is written but untested.
 
 ## References
 
