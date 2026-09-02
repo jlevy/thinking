@@ -5,7 +5,7 @@ title: "Congreso XV-legislature per-speech dataset (OpenParliamentTV-Data-ES, 18
 kind: task
 status: in_progress
 priority: 1
-version: 4
+version: 5
 spec_path: docs/project/research/research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md
 labels:
   - data
@@ -17,6 +17,6 @@ dependencies:
     target: is-01m1hnqbgnm2c2n76tgg0r59cz
 parent_id: is-01m1hn7gch0xb2sv9fw6a4qes1
 created_at: 2026-09-02T18:36:07.341Z
-updated_at: 2026-09-02T18:36:10.199Z
+updated_at: 2026-09-02T18:36:36.469Z
 ---
-Cloned to attic/data/OpenParliamentTV-Data-ES (gitignored). Real in-domain metadata + text (no audio) reachable from the sandbox; media JSON carries direct MP4 links for a Net-tier download manifest (S1/S13). Licence of the data repo: none declared — check OpenParliamentTV terms and Congreso open-data terms before publishing derived manifests.
+Cloned to attic/data/OpenParliamentTV-Data-ES (gitignored). Inspected 2026-09-02: 180 XV-legislature plenary sessions (2023–2025), 10,569 speeches, 427 distinct speakers; per speech: people[] (name, group), agendaItem, dateStart/dateEnd (HH:MM; median 360 s, p10 60 s, p90 720 s, max 6,120 s), media.videoFileURI (direct MP4, duration), textContents (Diario text with page anchors, language tag), debug.confidence (1.0 for 9,399; 0.5 for 1,170 role-only chair turns). original/ has raw interventions JSON and Diario HTML incl. chair turns. Licence: Congreso aviso-legal on media/text; data repo declares none — check before publishing derived manifests. Chair-parser agent notified to extend its analysis; th-ikyq (S7/S9/S23) depends on this.
