@@ -898,6 +898,566 @@ fi-parliament-asr-benchmark, FPSC, audapolis, react-transcript-editor, salamandr
 latxa, aHoTTS, NOS-TTS-API, Matcha-TTS, tts-api, piper, piper1-gpl, IBERSPEECH-RTVE,
 pyannote-db-albayzin2016.
 
+## 9. Evaluation Resources
+
+Every evaluation resource located for the agenda, organised by the sub-problems of the
+agenda’s §3.1, with class A (public benchmark), B (proxy or synthetic) or C (to build);
+metrics are the agenda’s §4.2 under the §4.6 protocol.
+The agenda’s §11 uses these rows for its strategy and cites them as (inventory §9.n).
+
+Scope: evaluation resources only, organised by the sub-problems of §3.1 of
+`research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md`. Metrics are
+**not** redefined here; every row names the metric from **§4.2** (TAA@c, cpWER/tcpWER,
+record-WER, HTER, editorial gap, WER, DER, Cllr/minDCF/actDCF, speaker-count error,
+hallucination rate, finalization lag / name revision rate / normalized erasure,
+GPU-seconds per audio-hour) with the protocol fixed in **§4.6** (MeetEval collars,
+overlap always scored, roster ids) and the stratification of **§4.3**.
+
+**Provenance key.** (gh) = GitHub API or raw file read this session; (readme) =
+repository README read this session; (search) = web-search result, page not opened.
+Hugging Face pages cannot be opened in this environment: HF ids are cited from search
+results and marked *(search, not opened)*. Tags mark the sourced factual cells (sizes,
+labels, licences, reference results); every compute figure derives from the *Compute
+basis* below rather than from a per-row source.
+
+**Compute basis** (used in every “Compute per run” cell, so numbers are comparable):
+*GPU-A* = one 8 GB RTX 2060 SUPER, faster-whisper int8_float16 beam 1 — measured
+throughput `whisper-large-v3-turbo` **35.6 audio-h per wall-hour**, `large-v3` 9.6,
+Parakeet TDT 0.6B v3 86.8, Granite Speech 4.1 133.4 (readme,
+[Parlamento-ai/open-source-asr](https://github.com/Parlamento-ai/open-source-asr));
+*GPU-B* = one H100 — pyannote `community-1` diarization **31 s per audio-hour** (~116×
+real time), `precision-2` 14 s (readme,
+[pyannote-audio](https://github.com/pyannote/pyannote-audio)); *CPU* = 8 threads on an
+i7-12700K — faster-whisper `small` int8 batch 8 transcribes 13 min of audio in 51 s =
+**15× real time** (readme, [faster-whisper](https://github.com/SYSTRAN/faster-whisper));
+large-v3-turbo ≈ 3–4× and large-v3 ≈ 1.3× real time on the same CPU are *extrapolated*
+from that README’s relative GPU timings, not measured.
+Embedding extraction and scoring are negligible beside ASR. API cost anchor: paid ASR at
+**USD 0.71 per audio-hour** over 1,869 h in 30 days (gh,
+`research/results/economia.json` in open-source-asr).
+
+* * *
+
+### 9.1 ASR per language (es, ca, eu, gl; LatAm es, en, pt)
+
+| Eval | Class | Data (lang, size, labels) | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **VoxPopuli ASR** | A | es 166 h, **305 speakers**, 1.6M tokens; per-split `asr_[split].tsv` with id, transcript, **speaker id** (readme) | WER (§4.2 `mechanism`), Whisper normalizer; speaker ids allow a cpWER pilot | CC0-style, script download | free (~tens of GB) | test split a few h → GPU-A ≈10 min; CPU ≈1 h | s2t-transformer-L es: **15.3 WER** on Europarl-ST test (readme) | EP not Congreso; non-verbatim official transcripts; in almost every model’s training data | [gh](https://github.com/facebookresearch/voxpopuli), [ACL](https://aclanthology.org/2021.acl-long.80.pdf) |
+| **Europarl-ASR v1.0** | A | **en only**, 1,263 h / 33,002 speeches / 1,046 speakers; **17.5 h manually verbatimized** dev+test, *spk-dep* and *spk-indep*; 3 transcript tiers (readme) | WER offline and streaming per partition; the two tiers give the **editorial gap** | CC BY 4.0; 18 GiB tar.gz + SHA-256 | free | 17.5 h → GPU-A ≈30 min; CPU ≈5 h | verbatimization worth ~9 WER points (§3.11) | English — the value is the **two-layer reference design**, not an es number | [gh readme](https://github.com/mllpresearch/Europarl-ASR), [Interspeech 2021](https://www.isca-archive.org/interspeech_2021/garcesdiazmunio21_interspeech.html) |
+| **Europarl-ST v1.1** | A | 9 langs incl. **es**; dev/test 3–6 h per direction; 72 ST directions (search) | WER (ASR) / BLEU (ST); official splits | CC BY-NC 4.0, direct download | free | 3–6 h → GPU-A ≈10 min | es ASR **15.3 WER** (readme) | non-commercial licence; 2008–2012 material; non-verbatim | [mllp](https://www.mllp.upv.es/europarl-st/), [arXiv 1911.03167](https://arxiv.org/pdf/1911.03167) |
+| **EuroSpeech** | A | 22 parliaments, 61k h; **train/dev/test per language split by whole session**; CER tiers <10/20/30% (search) | WER on the language’s test split; report the CER tier used | HF `disco-eth/EuroSpeech` (search, not opened); repo licence **TBD** (readme) | free | 10 h slice → GPU-A ≈17 min; CPU ≈3 h | 41% of aligned segments under CER 10%, 65% under 20% (§3.11) | **Spain absent** (§3.10); no speaker labels; licence unresolved | [gh](https://github.com/SamuelPfisterer/EuroSpeech), [NeurIPS 2025](https://papers.neurips.cc/paper_files/paper/2025/file/58ea63de01321ee52d06b48026981c40-Paper-Datasets_and_Benchmarks_Track.pdf) |
+| **ParlamentParla v2/v3** | A | ca, Parliament of Catalonia, 611 h (211 clean + 400 other); **speaker ids + gender, speaker-disjoint splits** (readme) | WER on the released test split; usable for speaker-disjoint SV trials | CC BY 4.0, OpenSLR 59 | free | test ≈ few h → GPU-A ≈10 min | used as the base of the BSC code-switching test (search) | auto-aligned; single chamber; read-style long turns | [OpenSLR 59](https://www.openslr.org/59/), [gh](https://github.com/CollectivaT-dev/ParlamentParla) |
+| **Basque Parliament 1 / Albayzin-2024 BBS-S2T** | A | **eu+es**, 1,462 h, 759,192 segments of 3–10 s, per-segment **language tag**; train-clean 1315.5 h, **dev 7.6 h, test 9.6 h, eval 23.8 h** (search) | global WER on eval; challenge ranking protocol | HF `gttsehu/basque_parliament_1`, `gttsehu/Albayzin-2024-BBS-S2T` (search, not opened) | free | 9.6 h → GPU-A ≈16 min, CPU ≈2.5 h; 23.8 h → GPU-A ≈40 min | semi-supervised pipeline: WER 16.57 → **4.02**; PRHLT eval **3.44 WER**; Vicomtech won 2024 (search) | segment-level, no speaker labels; models trained on it (`whisper-large-v3-eu`) need a temporal hold-out (§3.3) | [HF](https://huggingface.co/datasets/gttsehu/basque_parliament_1), [eval plan](https://catedrartve.unizar.es/reto2024/BBS-S2T2024_Evalplan.pdf), [Varona 2024](https://gtts.ehu.eus/gtts/NT/fulltext/Varona2024.pdf) |
+| **Nos_ParlaSpeech-GL / TranscriSpeech-GL** | A | gl, 1,600+ h auto-aligned parliament 2015–2022; **53 h manual, 4 domains** (search) | WER; TranscriSpeech is the only manually transcribed gl reference | ParlaSpeech: HF `proxectonos/Nos_Parlaspeech-GL`; TranscriSpeech: **Zenodo, T&C + access request** | free after request | 53 h → GPU-A ≈1.5 h; CPU ≈16 h | none located for gl parliament ASR | ParlaSpeech transcripts are automatic; gl is the open tail (14.71% API disagreement, §3.3) | [HF](https://huggingface.co/datasets/proxectonos/Nos_Parlaspeech-GL), [Zenodo 7717140](https://zenodo.org/records/7717140) |
+| **3CatParla** | A | ca broadcast TV, **731 h 21 min**, manual transcripts verified with 4 ASR systems (search) | WER on released test split | CC BY 4.0, HF `projecte-aina/3catparla_asr` (search, not opened) | free | test ≈ few h → GPU-A ≈10 min | `projecte-aina/whisper-large-v3-ca-3catparla` published on it (search) | broadcast, not chamber; fine-tuned models on the leaderboard are in-domain-trained | [IberSPEECH 2024](https://www.isca-archive.org/iberspeech_2024/hernandezmena24_iberspeech.pdf) |
+| **Common Voice v26.0 es/ca/eu/gl** | A | test clips **es 15,904 / ca 16,416 / eu 14,809 / gl 15,368**; mean clip 4.9–5.4 s → **≈21–24 h each**; accent+variant tags (gh, computed) | WER, Whisper-normalized; accent stratum (es carries 11 accent labels: `mexicano`, `rioplatense`, `chileno`…) | CC0, direct download | free | 22 h → GPU-A ≈37 min; CPU ≈6 h | Open ASR Leaderboard includes `common_voice` (search) | read speech; heavy contamination; single-speaker clips → no attribution signal | [cv-dataset](https://github.com/common-voice/cv-dataset/tree/main/datasets/scripted-speech) |
+| **FLEURS ca_es / gl_es / es_419** | A | ~350 test sentences per language (~1–1.5 h); n-way parallel (search) | WER; also the standard LID protocol | CC BY 4.0, HF `google/fleurs` | free | 1.5 h → GPU-A ≈3 min | XTREME-S baselines (search) | **no Basque**; read, clean; tiny — a session-level bootstrap (§4.7) will not close on it | [HF](https://huggingface.co/datasets/google/fleurs), [lhotse recipe](https://github.com/lhotse-speech/lhotse/blob/master/lhotse/recipes/fleurs.py) |
+| **MLS Spanish** | A | es is the largest non-English subset; dev/test ~10 h each; read audiobooks (search — the exact es train hours were not confirmed in this session) | WER | CC BY 4.0, OpenSLR 94 | free | 10 h → GPU-A ≈17 min; CPU ≈3 h | MLS paper baselines (search) | audiobooks — furthest regime from a plenary; contamination | [OpenSLR 94](https://www.openslr.org/94/), [MLS paper](https://arxiv.org/pdf/2012.03411) |
+| **Open ASR Leaderboard** | A | en short-form (AMI, Earnings22, GigaSpeech, LibriSpeech, SPGISpeech, TEDLIUM, VoxPopuli) + multilingual + long-form; results CSV published (search) | WER + **RTFx**, one harness | Apache-2.0 code; HF datasets | free | full English suite ≈ 30–40 h audio → GPU-A ≈1 h | 74 models tracked; best open 4.46 WER vs best paid 4.43 (gh, cached in open-source-asr `leaderboard.json`) | English, clean audio; “no predice el rendimiento en audio parlamentario en español” (gh) | [gh](https://github.com/huggingface/open_asr_leaderboard), [paper](https://arxiv.org/html/2510.06961v1) |
+| **Artificial Analysis AA-WER** | A | ~8 h: AA-AgentTalk 50% (proprietary), VoxPopuli-Cleaned-AA 25%, Earnings22-Cleaned-AA 25% (search) | duration-weighted WER; streaming and non-streaming boards | leaderboard public; AgentTalk held out | free to read, not to rerun | n/a (vendor-run) | published per-provider WER | English; one third of the set is unreleasable → not reproducible | [methodology](https://artificialanalysis.ai/speech-to-text/methodology) |
+| **Parlamento.ai `open-source-asr`** | B | 168 parliamentary clips, **13.79 h**, 24 each in es/ca/gl/eu/en/pt/multilingual | **word-level edit distance vs the median of 3 paid APIs — agreement, not accuracy** | MIT code; **the clip manifest is deliberately not in the repo** (gh, `research/sample.py`) | free code; audio not redistributable | 13.79 h → GPU-A ≈23 min | turbo 3.25% (es), 9.56% (ca), 14.71% (gl), 21.29% (eu); paid APIs disagree 7.17% among themselves (readme) | agreement only; no ground truth, **no speaker metric**; not re-runnable on the same audio | [gh](https://github.com/Parlamento-ai/open-source-asr) |
+| **Diario-aligned Congreso verbatim layer** | C | es/ca/eu/gl, 20–50 plenary+committee sessions; verbatim + record layers, word timestamps, roster ids (§4.1, §5.1) | WER, record-WER, HTER, editorial gap | to build; publish manifests not audio (§5.1 step 8) | see §9.12 below | 250 h → GPU-A ≈7 h per full-system pass | none — would be the first (§8.1) | annotation cost dominates; see §9.12 | [Archivo audiovisual](https://www.congreso.es/es/archivo-audiovisual) |
+
+* * *
+
+### 9.2 Code-switching and language identification
+
+| Eval | Class | Data (lang, size, labels) | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **BSC Code-Switching CA-ES ASR Test** | A | 867 recordings, **4 h 09 min**, ca-dominant with systematic intra-sentential es segments; manually inspected; sourced from Corts Valencianes + ParlamentParla v3 (search) | WER; the only public ca–es CS reference | HF `BSC-LT/BSCs_Code_Switching_CA-ES_ASR_Test` (search, not opened) | free | 4.15 h → GPU-A **7 min**; CPU ≈1.2 h | comparative study of CS ASR for ca–es (search) | small; no speaker labels; parliament-derived but utterance-level | [HF](https://huggingface.co/datasets/BSC-LT/BSCs_Code_Switching_CA-ES_ASR_Test), [arXiv 2507.13875](https://arxiv.org/pdf/2507.13875) |
+| **Albayzin BBS-S2T (CS subset)** | A | eu+es, segments that contain a switch, inside the 9.6 h test / 23.8 h eval (search) | WER overall and on the bilingual stratum | HF `gttsehu/Albayzin-2024-BBS-S2T` (search, not opened) | free | as §1 | PRHLT 3.44 WER eval (search) | switch labels are per segment, not per word | [eval plan](https://catedrartve.unizar.es/reto2024/BBS-S2T2024_Evalplan.pdf) |
+| **CS-FLEURS** | A/B | 4 test sets, 113 CS language pairs / 52 langs, incl. a 60-pair {ar, zh, hi, **es**}-X set; TTS-generated + real-voice-read (search) | WER/CER per pair | Interspeech 2025 release (search) | free | per-pair sets are ~1 h → GPU-A ≈2 min | paper baselines (search) | **synthetic or read** switching; no Iberian-pair guarantee; lexical switching, not chamber prosody | [arXiv 2509.14161](https://arxiv.org/abs/2509.14161), [paper](https://www.isca-archive.org/interspeech_2025/yan25c_interspeech.pdf) |
+| **VoxLingua107 dev** | A | 1,609 segments, 33 languages (search) | LID error rate; segment level | CC BY 4.0 model + data | free | minutes on CPU | SpeechBrain ECAPA **6.7% error**, with elevated es–gl confusion (§3.2) | dev set is YouTube, not chamber; **no sub-utterance switch protocol** | [HF model](https://huggingface.co/speechbrain/lang-id-voxlingua107-ecapa), [SB recipe](https://github.com/speechbrain/speechbrain/tree/develop/recipes/VoxLingua107) |
+| **FLEURS LID** | A | 102 langs incl. ca/gl/es_419, ~350 test utts each | LID accuracy | CC BY 4.0 | free | minutes | XTREME-S LID baselines (search) | no Basque; utterance-level only | [HF](https://huggingface.co/datasets/google/fleurs) |
+| **Language-diarization on institutional speech** | A(ref) | broadcast + institutional, multilingual | language-diarization error; cascade diarize-then-LID | paper only | n/a | n/a | 10% rel. language-DER and >8% rel. WER reduction (§3.2) | data not released; reproduce the protocol, not the numbers | [arXiv 2406.09290](https://arxiv.org/abs/2406.09290) |
+| **Synthetic switch-point set** | B | concatenate ParlamentParla (ca) and VoxPopuli (es) segments at known switch times | frame-level LID error at known boundaries; switch-detection F1 with tolerance | free from two CC-licensed corpora | ~1 GPU-hour to build | build once, score in seconds | none | concatenation splices have no coarticulation → **overstates** switch detectability | [OpenSLR 59](https://www.openslr.org/59/), [voxpopuli](https://github.com/facebookresearch/voxpopuli) |
+
+* * *
+
+### 9.3 Diarization
+
+| Eval | Class | Data | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results (pyannote `legacy` / `community-1` / `precision-2`) | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **AMI (IHM, SDM)** | A | en meetings, ~100 h, 4 speakers, high overlap | DER, 0.25 s collar, overlap scored (§4.2 `mechanism`) | free download; standard BUT split | free | ~9 h eval: GPU-B ≈5 min; CPU ≈3–5 h | IHM **18.8 / 17.0 / 12.9**; SDM **22.7 / 19.9 / 15.6** (readme) | meeting acoustics ≠ chamber; 4 speakers, not 350 | [AMI](https://groups.inf.ed.ac.uk/ami/corpus/), [BUT setup](https://github.com/BUTSpeechFIT/AMI-diarization-setup) |
+| **NOTSOFAR-1 (CHiME-8 t2)** | A | en meetings, ~315 meetings / ~170 h SC; eval 102 h SC | **tcpWER** (speaker-attributed) primary, tcORC-WER secondary | MIT code; HF `microsoft/NOTSOFAR` (search, not opened) | free | eval 102 h: GPU-A ≈3 h ASR + GPU-B ≈1 h diar; CPU impractical | baseline **tcpWER 28.3%**; DiCoW 18.4% (§3.4) | far-field rooms; heavier overlap than a plenary | [gh](https://github.com/microsoft/NOTSOFAR1-Challenge), [task](https://www.chimechallenge.org/challenges/chime8/task2/index) |
+| **DIHARD III** | A | 11 domains, en+zh, eval ≈33 h (search) | DER **without collar**, overlap scored — the strict protocol | **LDC2022S12/S14, licence + fee (price not located)** | LDC fee | 33 h: GPU-B ≈17 min | full: **21.4 / 20.2 / 14.7** (readme) | paid; no parliamentary domain | [LDC2022S14](https://catalog.ldc.upenn.edu/LDC2022S14), [baseline](https://github.com/dihardchallenge/dihard3_baseline) |
+| **VoxConverse v0.3** | A | broadcast/press-event video, test **43.5 h**, 232 sessions, up to 15+ speakers (search) | DER, 0.25 s collar | free download | free | 43.5 h: GPU-B ≈22 min; CPU ≈15 h | **11.2 / 11.2 / 8.5** (readme) | **closest public acoustic analogue** to press-conference/chamber audio; still no named labels | [gh](https://github.com/joonson/voxconverse), [lhotse recipe](https://github.com/lhotse-speech/lhotse/blob/master/lhotse/recipes/voxconverse.py) |
+| **CALLHOME (part 2)** | A | telephone, multilingual incl. Spanish | DER, 0.25 s collar; BUT sublists fix the split | **LDC2001S97, fee (price not located)** | LDC fee | ~2 h: minutes | **28.5 / 26.7 / 16.6** (readme); DiarizationLM cut WDER 44.9% (§3.7) | 8 kHz telephone; 2–7 speakers | [LDC2001S97](https://catalog.ldc.upenn.edu/LDC2001S97), [sublists](https://github.com/BUTSpeechFIT/CALLHOME_sublists) |
+| **AliMeeting** | A | zh meetings, 118.75 h (test 10 h) (search) | DER; also cpCER for SA-ASR | OpenSLR 119, free | free | 10 h: GPU-B ≈5 min | ch1 **24.5 / 20.3 / 15.2** (readme) | Mandarin; cross-lingual transfer only | [OpenSLR 119](https://www.openslr.org/119/), [lhotse](https://github.com/lhotse-speech/lhotse/blob/master/lhotse/recipes/ali_meeting.py) |
+| **MSDWild** | A | in-the-wild video, 80 h, 2–4 speakers, 72 s mean (search) | DER; audio-visual variant available | free (repo) | free | 80 h: GPU-B ≈40 min | **25.4 / 22.8 / 17.3** (readme) | short clips; wild acoustics | [gh](https://github.com/X-LANCE/MSDWILD) |
+| **REPERE phase 2** | A | fr TV, multimodal, **named** persons | DER here; **EGER** for the named task (§3.6) | ELRA **REPERE Evaluation Package ELRA-E0044**, 620 Gb (search); price not located | ELRA fee | large | **7.9 / 8.9 / 7.4** DER (readme); PERCOL EGER 24.4% supervised / 36.3% unsupervised (§3.6) | the only public precedent for *named* attribution; French TV, 2012–14 | [ELRA-E0044](http://catalog.elra.info/en-us/repository/browse/ELRA-E0044/), [ISLRN](https://www.islrn.org/resources/360-758-359-485-0/) |
+| **AVA-AVD / Ego4D** | A | audio-visual, hard | DER | free / registration | free | large | AVA-AVD **49.7 / 44.6 / 37.1**; Ego4D dev **51.2 / 46.8 / 39.0** (readme) | worst-case anchors — useful only as a floor | [arXiv 2111.14448](https://arxiv.org/abs/2111.14448) |
+| **Replayed-room / RIR augmentation of a real session** | B | any session + MUSAN noise + simulated or measured RIRs | DER and speaker-count error under matched vs augmented conditions | lhotse `musan`, `rir_noise` recipes | free | negligible on top of the base run | none | simulated reverberation is optimistic vs a real chamber PA; **do not** report augmented DER as a headline | [lhotse recipes](https://github.com/lhotse-speech/lhotse/tree/master/lhotse/recipes) |
+| **Diario-aligned turn segmentation** | C | Congreso sessions with intervention boundaries from the record | speaker-count error (§4.2 `guard`), DER with roster ids | to build | §9.12 | as §1 | none | the record’s intervention boundaries are editorial, not acoustic → needs the verbatim layer to be a timing reference | [Diario](https://www.congreso.es/es/busqueda-de-publicaciones) |
+
+* * *
+
+### 9.4 Open-set speaker identification at ~350 enrolled speakers
+
+| Eval | Class | Data | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **VoxCeleb1-O / -E / -H** | A | en-dominant YouTube; official cleaned trial lists | EER, minDCF; cosine + AS-norm + QMF recipe | free | free | full-list scoring: minutes on 1 GPU after embedding extraction (~1–2 h for VoxCeleb1) | ReDimNet2-B6 **0.23/0.35/0.67**; W2V-BERT2.0-MFA **0.138/0.285/0.625**; CAM++ 0.659/0.803/1.569 (§3.5) | **closed-set verification**, not open-set identification; cross-condition internet audio; saturated | [WeSpeaker](https://github.com/wenet-e2e/wespeaker/tree/master/examples/voxceleb/v2), [ReDimNet2](https://github.com/PalabraAI/redimnet2) |
+| **VoxWatch (open-set on VoxCeleb)** | A | watchlists scaled from tens to thousands; **trial and speaker lists released by the authors** (search) | FAR at fixed FRR vs watchlist size; the OSI curve this project needs | lists in the paper’s release (search) | free | scoring only: minutes | FAR at 5% FRR improved 21% rel. (3.7%→2.9%) at the largest watchlist by calibration + fusion; **AS-norm alone not guaranteed to help** (§3.5) | VoxCeleb conditions, not same-room; no repo located in this session (search) | [arXiv 2307.00169](https://arxiv.org/pdf/2307.00169) |
+| **VoxBlink2 OSI benchmark** | A | 100k+ speakers; explicit open-set identification protocol | OSI accuracy / FAR–FRR | paper + corpus release (search) | free | large (embedding extraction dominates) | reported in-paper | scale far above 350; internet audio | [arXiv 2407.11510](https://arxiv.org/html/2407.11510v1) |
+| **Novoselov et al. open-set scaling** | A(ref) | 100 → 700 enrolled speakers | EER vs enrolled-set size | paper only | n/a | n/a | **EER roughly doubles from 100 to 700 enrolled** (§3.5) — the sizing curve for a 350-seat roster | not reproducible without their data | [arXiv 1904.01269](https://arxiv.org/pdf/1904.01269) |
+| **VoxSRC sets; CN-Celeb** | A | harder VoxCeleb-derived val/test trials; zh multi-genre cross-condition | EER/minDCF | free; OpenSLR 82 | free | ≤1 GPU-h each | challenge reports | both closed-set verification; CN-Celeb serves only as a domain-shift control | [VoxSRC 2022](https://arxiv.org/pdf/2302.10248), [OpenSLR 82](https://www.openslr.org/82/) |
+| **Iberian cross-lingual SV set** | A/B | **bilingual same-speaker** trials built from Common Voice 25.0: es–ca **300 speakers**, es–eu 64, es–pt 40, es–gl 21 (search) | EER / cross-lingual transfer matrix under constant identity | release status not established; **reconstructible from CC0 Common Voice** | free (rebuild) | embedding extraction on ~few h: minutes | language switching shifts embeddings systematically; language mismatch dominates; es–gl smallest shift (§3.5) | read speech; small eu/gl speaker counts; the exact list may not be published | [arXiv 2607.01161](https://arxiv.org/html/2607.01161v1), [cv-dataset](https://github.com/common-voice/cv-dataset) |
+| **Albayzin RTVE SDIAC (2018/2020/2022)** | A | es broadcast; **named, closed set (74 speakers in 2022)**; diarization + identity assignment | DER (mandatory) + identity assignment; official eval plan | **RTVE licence agreement, signed by a group representative** (search); free after signature | signature + waiting time | tens of hours → GPU-B <1 h | Intelligent Voice IberSPEECH 2022 system paper; 2022 overview in Applied Sciences (§3.5 refs) | broadcast, 74 not 350; a 2020 subset reportedly includes 2016 parliamentary material (§3.10) | [albayzin2022](https://catedrartve.unizar.es/albayzin2022.html), [SDIAC eval plan](https://catedrartve.unizar.es/reto2022/SDIAC2022_Evalplan.pdf), [results](https://catedrartve.unizar.es/albayzin2022results.html) |
+| **Archive-enrollment trials from ParlamentParla / Basque Parliament** | B | speaker-labelled parliamentary corpora with disjoint splits | build N-speaker watchlists (50/150/350) from real chamber audio; EER, FAR@FRR, Cllr | CC BY 4.0 / HF | free | embedding extraction 611 h ≈ 1–2 GPU-h | none published | **same chamber, same mics** — the closest proxy to the §7 R4 regime; but ca/eu, not Congreso | [OpenSLR 59](https://www.openslr.org/59/), [HF](https://huggingface.co/datasets/gttsehu/basque_parliament_1) |
+| **Congreso roster enrollment + session trials** | C | 350 archive-clip centroids + held-out session turns (§5.1 step 6) | **TAA@c** (`outcome`), FAR at fixed FRR, Cllr/minDCF/actDCF (`guard`) | to build | §9.12 | as §1 | none — this is H-001/H-004 | needs verified speaker labels on the eval side; enrollment must exclude eval sessions | [Archivo audiovisual](https://www.congreso.es/es/archivo-audiovisual) |
+
+* * *
+
+### 9.5 Speaker-attributed ASR (joint / cascade)
+
+| Eval | Class | Data | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **EMMA (JSALT25) leaderboard** | A | multi-domain multi-talker suite used by the DiCoW family; submission requires the model on the HF Hub (readme) | **tcpWER**, macro-averaged across domains | HF Space `BUT-FIT/EMMA_leaderboard` (search, not opened); submission script in TS-ASR-Whisper (readme) | free | dominated by the underlying sets (AMI, NOTSOFAR-1, LibriMix…) | SE-DiCoW **−52.4% rel. tcpWER** vs DiCoW; Dixtral macro cpWER **15.4%** vs Gemini 3.0 Flash 44.4% (§3.4) | English meeting-centric; no parliamentary domain; leaderboard submission couples eval to HF hosting | [Space](https://huggingface.co/spaces/BUT-FIT/EMMA_leaderboard), [gh](https://github.com/BUTSpeechFIT/TS-ASR-Whisper) |
+| **NOTSOFAR-1 / CHiME-8 DASR** | A | see §3 | tcpWER, tcORC-WER via MeetEval; `chime-utils` scoring | MIT | free | eval 102 h → ≈4 GPU-h end to end | baseline 28.3; DiCoW 18.4 (§3.4) | far-field, 4–8 speakers, heavy overlap — **overweights overlap** relative to a plenary (§3.4) | [gh](https://github.com/microsoft/NOTSOFAR1-Challenge), [chime-utils](https://github.com/chimechallenge/chime-utils) |
+| **AMI SDM/IHM cpWER** | A | see §3 | cpWER / tcpWER, 5 s collar (§4.6) | free | free | ≈9 h → 1 GPU-h | DiCoW cpWER **18.1% SDM**; SA-DiCoW 18.1%; TagSpeech best DER (§3.4) | as §3 | [MeetEval](https://github.com/fgnt/meeteval) |
+| **LibriCSS / Libri2Mix / Libri3Mix / LibriSpeechMix** | A/B | simulated and replayed mixtures of LibriSpeech | cpWER, ORC-WER; separation SI-SNRi | MIT (LibriMix), repo licence (LibriCSS) | free | 10 h → GPU-A ≈17 min | SA-DiCoW cpWER **17.2% Libri3Mix** (§3.4) | fully synthetic overlap; **replayed-room LibriCSS is the only one with real acoustics**; no named speakers | [LibriMix](https://github.com/JorisCos/LibriMix), [Libri-CSS](https://github.com/chenzhuo1011/libri_css), [lhotse](https://github.com/lhotse-speech/lhotse/blob/master/lhotse/recipes/libricss.py) |
+| **AliMeeting cpCER** | A | zh meetings | cpCER (M2MeT protocol) | OpenSLR 119 | free | 10 h → <1 GPU-h | MOSS Transcribe Diarize **cpCER 15.83 AISHELL-4**, 7.37 Podcast, 12.76 Movies (§3.4) | Mandarin; Podcast/Movies numbers are the nearest long-form low-overlap analogue | [M2MeT 2.0](https://arxiv.org/pdf/2309.13573) |
+| **VoxPopuli-es cpWER pilot** | B | es 166 h with **speaker ids** (readme) — build SegLST references from the ASR tsv | cpWER with speaker ids as labels (§4.6: roster ids, not name strings) | CC0 | free | test split → GPU-A ≈10 min | **nobody reports cpWER on VoxPopuli or Europarl-ASR** (§3.4) — an easy first public number | speaker ids are per segment, not per session turn; segments are pre-cut, so turn segmentation is given away | [gh](https://github.com/facebookresearch/voxpopuli), [MeetEval](https://github.com/fgnt/meeteval) |
+| **TTS multi-speaker session** | B | Piper `ca_ES` + `es_ES/es_AR/es_MX` voices reading Diario text in roster order (**no eu/gl Piper voices exist** — gh, VOICES.md) | cpWER/TAA against a perfect script | MIT | ~CPU-hours to synthesize | negligible | none | validates plumbing, turn logic and the scorer; **misleads on** acoustics, overlap, interjections, room, and enrollment realism; a system can score ~0 error here and fail on real audio | [piper](https://github.com/rhasspy/piper), [VOICES.md](https://github.com/rhasspy/piper/blob/master/VOICES.md) |
+| **Diario-aligned cpWER/TAA benchmark** | C | §5.1 | **TAA@{100,95,90}%** (`outcome`), cpWER/tcpWER with roster ids, stratified by §4.3 | to build | §9.12 | as §1 | none (§8.1) | the deliverable | [agenda §5.1](research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md) |
+
+* * *
+
+### 9.6 Target-speaker extraction under the interpreter voice-over
+
+| Eval | Class | Data | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **VoxPopuli speech-to-speech interpretation** | A/B | **17.3k h, 15×15 directions**; target-Spanish interpretation totals ≈1.2k h (En→Es 441 h, De→Es 204, Fr→Es 187…) — real interpreters, real lag, aligned to source (readme) | mix source + Spanish interpretation at a chosen gain and 2–4 s lag → score WER/TAA on the source speaker, and interpreter-ID accuracy, against clean-channel references | CC0-style; download script | free | mixing is CPU-cheap; scoring a 10 h mixed set → GPU-A ≈17 min | none for this use | **the closest available surrogate for the Congreso overlay**; but source languages are not ca/eu/gl, and the mixing ratio is a free parameter that must be calibrated against a real Congreso clip | [gh](https://github.com/facebookresearch/voxpopuli) |
+| **ESIC 1.0** | A | 370 EP speeches (**10 h**) en, with transcribed simultaneous interpreting into cs and de; disfluency and voice-mixing metadata, word timestamps; interpreter audio fetched by a bundled tool from the EP site (search) | source-vs-interpretation alignment; also the reference set for streaming latency (§9) | LINDAT, **CC BY-NC-SA 4.0** | free | 10 h → GPU-A ≈17 min | Whisper-Streaming **3.3 s latency** on EP speech (§3.9) | interpreter voices are not distributed inside the corpus; en→cs/de, not X→es; non-commercial | [LINDAT](https://lindat.mff.cuni.cz/repository/items/1200e094-1ae1-44ec-8fca-a4ff9d45cb08) |
+| **EPIC** | A | it/en/es EP speeches + interpretations, 357 speeches / 177,295 words (search) | translation-studies annotations; audio/video not online (search) | **ELRA-S0323** catalogue; price not located | ELRA fee | small | built for interpreting studies, no ASR baselines | no ASR/diarization protocol; distribution restricted (§3.2) | [ELRA-S0323](https://catalogue.elra.info/en-us/repository/browse/ELRA-S0323/), [EPIC docs](https://docs.sslmit.unibo.it/doku.php?id=corpora:epic) |
+| **Simulated overlay: es TTS over ca/eu/gl floor** | B | ParlamentParla (ca) / Basque Parliament (eu) / Nos_ParlaSpeech (gl) + a Spanish TTS or a second real speaker, summed at 2–4 s lag and a swept SNR | ΔWER and ΔTAA vs the isolated channel; SI-SNRi for the extraction stage; **H-005 criterion: recover ≥50% of the TAA loss** | all inputs CC BY 4.0 / CC0 | ~1 GPU-h to build a 10 h set | scoring 10 h → GPU-A ≈17 min + extraction cost | separation SOTA 23–26 dB SI-SNRi on synthetic 2-speaker mixtures, degrading sharply on real recordings (§3.2) | constant lag and linear summation — the **real broadcast mix has AGC, ducking, one encoder**; optimistic; calibrate against a real clip (`ffprobe` + listening, Q-003) | [OpenSLR 59](https://www.openslr.org/59/), [WeSep](https://github.com/wenet-e2e/wesep), [asteroid](https://github.com/asteroid-team/asteroid) |
+| **Interpreter-voice enrolment set** | C | ~12 interpreters × several clips from archive sessions (§3.2 attack 2) | closed-set ID accuracy on interpreter turns; then use interpreter output as the Spanish translation layer | to build from public archive | ~1 annotator-day | negligible | none | requires identifying interpreter voices by hand; interpreter roster changes between contracts | [Archivo audiovisual](https://www.congreso.es/es/archivo-audiovisual) |
+| **Real interpreted-segment subset** | C | the co-official-language interventions inside the 20–50 sessions, with both channel conditions kept (§5.1 step 2) | TAA and WER on the interpreted stratum, paired against isolated-channel turns | to build | §9.12 | as §1 | none — **no published work separates simultaneous interpretation from its source on real data** (§3.2) | the whole novelty claim of R5 rests on this subset; it may be only a few hours across 50 sessions | [BOE-B-2026-16554](https://www.boe.es/diario_boe/txt.php?id=BOE-B-2026-16554) |
+
+* * *
+
+### 9.7 Editorial normalization to the official record (incl. MT and punctuation/ITN)
+
+| Eval | Class | Data | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Europarl-ASR triple-tier transcripts** | A | en, 17.5 h with **official + manually verbatimized** transcripts (readme) | **editorial gap** = record-WER of the verbatim reference against the official text; HTER for post-editing effort | CC BY 4.0 | free | text-only scoring: seconds | filtering+verbatimization worth **9 WER points** (§3.11) | English; the only public corpus with both tiers manually produced | [readme](https://github.com/mllpresearch/Europarl-ASR) |
+| **EuroSpeech CER tiers** | A | 22 parliaments; per-segment CER of record-vs-audio alignment | distribution of alignment CER as an editorial-gap proxy | HF (search, not opened) | free | text-only | **41% <10% CER, 65% <20%, 78% <30%** (§3.11) | Spain absent; CER of an alignment, not of an edit | [NeurIPS 2025](https://papers.neurips.cc/paper_files/paper/2025/file/58ea63de01321ee52d06b48026981c40-Paper-Datasets_and_Benchmarks_Track.pdf) |
+| **ParlaMint-ES / -ES-CT / -ES-GA / -ES-PV 5.0** | A/B | text only, ~15M words (ES); speaker **name, party, gender, role**; TEI `vocal` (exclamations), `kinesic` (applause), `incident` (search) | text-only: chair-announcement coverage, agenda-constraint value, stage-direction base rates (§7 R3) | CC BY 4.0, CLARIN.SI | free | minutes on CPU | none for these tasks | **no audio alignment for any Spanish-state ParlaMint corpus** (§3.10); conventions vary by chamber | [CLARIN.SI](https://www.clarin.si/repository/xmlui/handle/11356/2004), [encoding](https://clarin-eric.github.io/ParlaMint/) |
+| **NeMo-text-processing es ITN/TN test cases** | A | 22 Spanish test-case files (cardinal, date, decimal, money, ordinal, telephone, time, measure, whitelist…) (gh) | exact-match pass/fail per grammar; a CPU regression eval that runs in seconds | Apache-2.0 | free | **seconds on CPU** | grammars ship green | unit tests, not a corpus; says nothing about chamber-specific forms ("señoría", article numbers) | [tests/es](https://github.com/NVIDIA/NeMo-text-processing/tree/main/tests/nemo_text_processing/es) |
+| **LibriSpeech-PC** | A | en; punctuation + capitalization benchmark | P/R/F1 per punctuation class | free | free | minutes | paper baselines (search) | English-only; **no Spanish equivalent located** | [arXiv 2310.02943](https://arxiv.org/pdf/2310.02943) |
+| **FLORES-200 devtest / NTREX-128** | A | 1,012 (FLORES) and 1,997 (NTREX) parallel sentences; **cat, eus, glg, spa all present in NTREX** (gh) | BLEU/chrF/COMET for the ca/eu/gl→es translation the record requires | FLORES repo (archived); NTREX **CC BY-SA 4.0** | free | minutes on CPU | Softcatalà ca–es reports BLEU 87.5 internal vs **24.2 on FLORES-200** (§3.11) — the gap between domain and general test sets | news/wiki domain, not chamber register; sentence-level | [NTREX](https://github.com/MicrosoftTranslator/NTREX), [flores](https://github.com/facebookresearch/flores) |
+| **Diario record layer** | C | published *Diario de Sesiones* HTML, with post-2023 original + Spanish-translation blocks (§3.10) | **record-WER** and **HTER against the record** (`outcome` for normalization work); edited-segment fraction | free HTML; scraping to build | parsing effort only (no annotation) | text-only: minutes | Estonia reports 93–95% against the final record; Portugal reports against the edited *Diário* (§3.11) | nearly free — **only the verbatim layer costs money**; alignment yield well under 100% (EuroSpeech tiers) | [Diario](https://www.congreso.es/es/busqueda-de-publicaciones), [ctc-forced-aligner](https://github.com/MahmoudAshraf97/ctc-forced-aligner) |
+
+* * *
+
+### 9.8 Stage-direction (applause / laughter / murmur) detection
+
+| Eval | Class | Data | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **AudioSet eval (Applause, Laughter classes)** | A | ~20k eval clips, 527 classes, 10 s YouTube segments (search) | per-class AP; mAP overall | clip list free, audio via YouTube (fragile) | free but lossy (dead videos) | eval set → minutes on 1 GPU | PANNs CNN14 **mAP 0.439** overall (§3.11); per-class AP for applause/laughter not located | weak labels, 10 s granularity; **unbenchmarked on chamber acoustics** (§3.11) | [audioset_tagging_cnn](https://github.com/qiuqiangkong/audioset_tagging_cnn), [PANNs](https://arxiv.org/abs/1912.10211) |
+| **ESC-50** | A | 2,000 clips, 50 classes (incl. clapping, laughing), 5-fold | accuracy, fixed folds | free, repo | free | seconds | many published | 5 s isolated clips, no PA, no overlap with speech | [gh](https://github.com/karolpiczak/ESC-50) |
+| **ParlaMint stage-direction base rates** | B | TEI `kinesic`/`vocal`/`incident` marks across ParlaMint-ES (search) | prior/base-rate calibration and a text-side upper bound on recall | CC BY 4.0 | free | minutes | none | transcriber conventions are inconsistent and **under-record** events; a text mark is evidence of a noticed event, not of all events | [encoding guide](https://clarin-eric.github.io/ParlaMint/) |
+| **Diario stage directions aligned to audio** | C | `(Aplausos.)`, `(Rumores.)`, `(Risas.)` in the record, time-anchored via the verbatim layer | precision/recall against the record’s annotations (§7 R9) | to build | ~0.2 h/session-hour on top of the verbatim pass | negligible | none | the record is the *only* reference and it is editorially filtered — recall against it is really “agreement with the stenographer” | [Diario](https://www.congreso.es/es/busqueda-de-publicaciones) |
+
+* * *
+
+### 9.9 Streaming latency and revision
+
+| Eval | Class | Data | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **ESIC unsegmented long-form** | A | 10 h EP speeches, word timestamps (search) | computation-aware AL/LAAL/StreamLAAL + WER; `--comp_unaware` gives the lower bound (readme) | LINDAT CC BY-NC-SA 4.0 | free | replay is wall-clock-bound: **10 h of audio takes ≥10 h** unless replayed faster than real time | Whisper-Streaming **3.3 s** mean latency; SimulStreaming ~5× faster (§3.9) | non-commercial; en source; latency replay does not parallelize cheaply | [LINDAT](https://lindat.mff.cuni.cz/repository/items/1200e094-1ae1-44ec-8fca-a4ff9d45cb08), [whisper_streaming](https://github.com/ufal/whisper_streaming) |
+| **IWSLT simultaneous track sets** | A | unsegmented ACL talks, en→de/zh/ja, cs→en dev (search) | **StreamLAAL** + BLEU/COMET, scored with SimulEval | free (task data) | free | wall-clock-bound | published system reports each year | speech *translation*, not attribution; talks not chamber | [IWSLT 2026](https://iwslt.org/2026/simultaneous), [SimulEval](https://github.com/facebookresearch/SimulEval) (archived, CC-BY-SA-4.0, gh) |
+| **Live-stream replay of Congreso sessions** | B/C | Canal Parlamento stream or archive MP4 replayed at 1× | **finalization lag p50/p95, name revision rate, normalized erasure, first-vs-final name accuracy** (§4.5); lags 30 s / 2 min / 5 min (R7) | free | free | 1× real time per session; 8 concurrent 5 s-window sessions sustained at **p95 2.36 s** on one 8 GB GPU (gh, `concurrency.json`) | none published for named attribution | an archive MP4 is not a live feed (no jitter, no encoder delay); H-007 needs the *stream* | [Canal Parlamento](https://www.youtube.com/@CanalParlamento-Congreso_Es), [SimulStreaming](https://github.com/ufal/SimulStreaming) |
+| **Stability metrics on any of the above** | A(protocol) | any streaming log | Unstable Partial Word/Segment Ratio, Normalized Erasure, flicker (§3.9) | metric definitions only | free | negligible | Shangguan et al.; Arivazhagan et al. (§3.9 refs) | **no reference implementation located** that computes all of them — write it into the versioned harness (§4.6) | [arXiv 2006.01416](https://arxiv.org/abs/2006.01416), [meta-eval](https://arxiv.org/html/2509.17349v2) |
+
+* * *
+
+### 9.10 Calibration and abstention
+
+| Eval | Class | Data | Metric & protocol | Access / licence | Cost to obtain | Compute per run (CPU / 1 GPU) | Reference results | Caveats | Links |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **VoxCeleb / VoxSRC trial scoring with Cllr, minDCF, actDCF** | A | any trial list above | **Cllr / minDCF / actDCF at the deployed threshold** (§4.2 `mechanism`/`guard`): actDCF ≫ minDCF means the threshold is wrong | free | free | scoring: seconds | trainable AS-norm **+4.1% EER, +10.6% minDCF** rel.; language-dependent s-norm ~3.3% (§3.5) | calibration transfers poorly across domains — the point of measuring it in-domain | [WeSpeaker](https://github.com/wenet-e2e/wespeaker), [Kiwano](https://arxiv.org/pdf/2606.22369) |
+| **VoxWatch open-set operating points** | A | watchlist sweeps | FAR at fixed FRR vs watchlist size; the abstention threshold set to FAR < 1/N per session (§3.5) | free lists (search) | free | seconds after embeddings | calibration + fusion gave the largest gains, **not** AS-norm (§3.5) | not same-room; the curve shape is what transfers, not the values | [arXiv 2307.00169](https://arxiv.org/pdf/2307.00169) |
+| **Coverage–TAA sweep on the in-domain benchmark** | C | the Congreso benchmark | sweep the abstention threshold; report **the full coverage–accuracy curve, its area, and TAA@{100,95,90}%**; ECE over turns (§4.4) | to build | included in §C | seconds once posteriors are logged | none | requires the system to emit a **distribution over the candidate set plus unknown mass**, not a top-1 label — a design constraint on every component, imposed before the first measurement | [agenda §4.4](research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md) |
+
+* * *
+
+### 9.11 Cross-cutting proxy and synthetic evals — cost, speed, validity
+
+| Proxy | Build cost / speed | What it validly measures | How it misleads |
+| --- | --- | --- | --- |
+| **TTS-synthesized multi-speaker sessions** (Piper `ca_ES`, `es_ES/AR/MX`; **no eu or gl Piper voice exists**, gh) | CPU-hours; a 5 h “session” for pennies; regenerable on every commit | harness plumbing, SegLST/RTTM round-trips, turn logic, roster-id bookkeeping, scorer correctness, speaker-count guard, throughput | perfect ground truth and no room, no overlap, no interjections, no PA, no channel; embeddings of a single TTS voice are unnaturally tight, so **open-set FAR looks far better than it is** |
+| **Interpreter overlay simulation** (Spanish TTS or a second real speaker summed over ca/eu/gl floor audio at 2–4 s lag, swept SNR) | ~1 GPU-hour to build 10 h; scoring adds ≈17 min on GPU-A | monotone degradation curves: ΔWER and ΔTAA vs mixing gain and lag; whether TSE with archive enrollment recovers the loss (H-005) | linear summation ≠ the broadcast chain’s AGC/ducking/single-encoder mix; constant lag ≠ a human interpreter’s variable lag; results will be optimistic — calibrate against one real clip (Q-003, `ffprobe` + listening) |
+| **VoxPopuli S2S interpretation mixing** (1.2k h with Spanish as target, real interpreters, real lag) | free download; mixing is CPU-cheap | the *only* proxy with **real interpreter voices and real interpreting lag**; interpreter-enrollment ID (attack 2 of §3.2) | source languages are en/de/fr…, not ca/eu/gl; EP interpreting booth conditions differ from remote Congreso interpreters |
+| **Replayed-room / RIR + MUSAN augmentation** | negligible on top of a base run (lhotse `rir_noise`, `musan`) | robustness ranking between systems under a fixed perturbation ladder | simulated RIRs are gentler than a real chamber PA + open mics; absolute augmented numbers are not comparable to published DER |
+| **Text-only ParlaMint evals** (chair-announcement coverage, agenda constraint, stage-direction base rates) | minutes on CPU; free | **the cheapest decisive experiment in the programme**: R3’s parser is worth nothing if the chair announces speakers rarely — measure coverage before building it (H-003) | the record’s chair announcements are edited text, so coverage in the record is an upper bound on what is audible; no timing |
+| **API-agreement evals (Parlamento.ai style)** | USD **0.71 per audio-hour** for paid APIs (gh); GPU-A time for the open model | drift detection, regression alarms, cheap coverage over many languages with no annotation | **agreement is not accuracy** — the operator says so explicitly (readme); on gl/eu the paid consensus may itself be wrong; no speaker metric at all; and the 168-clip sample is **not redistributable** (gh) |
+
+* * *
+
+### 9.12 Human-annotated benchmark to build (the Diario-aligned Congreso set, §5.1)
+
+Published anchors: professional transcription **USD 1–3 per audio-minute (≈USD 60–180
+per audio-hour)**, verbatim USD 1.75–3.50/min, timestamps +USD 0.25/min, crowd USD
+0.05–0.25/min
+([Rev calculator](https://www.rev.com/resources/transcription-cost-rate-calculator-with-estimates),
+[GMR rates](https://www.gmrtranscription.com/prices),
+[Ditto guide](https://www.dittotranscripts.com/blog/how-much-should-you-pay-for-transcription-factors-that-affect-transcription-rates/),
+search); professional transcription runs **3–6× real time**, up to 8× with 5+ speakers,
+and **manual speaker-boundary annotation to research precision 15–30× real time**
+([Kili audio-annotation guide](https://kili-technology.com/blog/audio-annotation),
+search); from-scratch high-quality transcription of a low-resource language measured
+**30 h of labour per audio-hour in the lab, 36 h in the field**
+([arXiv 2510.12781](https://arxiv.org/abs/2510.12781), search); post-editing ASR beats
+re-transcription **only below ~25% WER**, and edit time scales with word edit distance
+([Althingi, arXiv 1807.11893](https://arxiv.org/pdf/1807.11893), search); alignment
+yield sets how much survives: **41% of EuroSpeech segments under CER 10%, 65% under 20%,
+78% under 30%** (§3.11).
+
+| Layer | Method | Effort per session-hour | Cost per session-hour | 5-session smoke set (≈20 h) | 50-session full set (≈250 h) | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| (i) **Verbatim transcript correction** | correct a `whisper-large-v3-LoS` draft against audio, then force-align (§5.1 step 5) | **2–4 h** post-editing at the in-domain WER Parlamento.ai implies (well under the 25% Althingi break-even), vs 3–6 h from scratch | ≈EUR 60–160 (at EUR 25–40/h) or USD 60–180 at market transcription rates | 40–80 h, **EUR 1.2k–3.2k**, 2–3 weeks with 2 annotators | 500–1,000 h, **EUR 15k–32k**, 3–6 months with 4 annotators | dominates the budget; correct **only the verbatim subset**, not all 50 sessions, and keep the record layer as the cheap tier |
+| (ii) **Speaker-label verification** | accept/reject a proposed roster id per turn against the Diario’s own labels; hand-check only disagreements | **0.5–1.5 h** (verification, not annotation) | EUR 15–60 | 10–30 h, **EUR 0.3k–1.2k** | 125–375 h, **EUR 3k–15k** | the Diario gives the labels for free — this is *verification*; the expensive residue is interjections and unannounced interventions |
+| (iii) **Timestamp verification** | spot-check forced-alignment boundaries; full manual boundary marking only on a sample | **0.3–1 h** for spot-checks; **15–30×** real time if boundaries were marked from scratch (Kili) | EUR 10–40 spot-check | 6–20 h, **EUR 0.2k–0.8k** | 75–250 h, **EUR 2k–10k** | never mark boundaries by hand at scale — align, then verify a stratified sample; report the sampled boundary error |
+| (iv) **Stage directions** | mark applause/laughter/murmur spans, reconcile with the record’s `(Aplausos.)` marks | **0.2–0.5 h** | EUR 5–20 | 4–10 h, **EUR 0.15k–0.4k** | 50–125 h, **EUR 1.5k–5k** | cheap; do it in the same pass as (i) |
+| **Second-annotator agreement sample** | 10% double-annotated (§4.1) | +10% of (i)–(iv) | +10% | +EUR 0.2k | +EUR 2k–5k | without it the reference has no error bar and §4.7’s bootstrap is over-confident |
+| **Totals** | — | **3–7 annotator-hours per session-hour** | — | **≈EUR 2k–6k, 3–5 weeks** | **≈EUR 25k–65k, 4–8 months** | plus engineering: acquisition, Diario parsing, alignment, split freezing (§5.1 steps 1–4, 7–8) — weeks, not annotator-money |
+
+Cheaper variants worth pricing before committing: **record-layer-only** (no verbatim
+correction) costs the parsing effort alone and still supports TAA, record-WER and
+chair-announcement evals — it just cannot separate the editorial gap; and
+**alignment-filtered** sets (keep only segments under CER 10%, as EuroSpeech does) buy
+41% of the material for zero annotation, at the price of a biased-easy test set.
+
+* * *
+
+### 9.13 Eval harness tooling
+
+| Tool | Covers | Licence / status | Notes |
+| --- | --- | --- | --- |
+| [**MeetEval**](https://github.com/fgnt/meeteval) | cpWER, ORC-WER, MIMO-WER, **tcpWER / tcORC / tcMIMO with `--collar 5`**, greedy approximations, **DI-cpWER**, and **DER via a wrapped `md-eval-22`** (`meeteval-der dscore --collar .25`); STM/CTM/SegLST/RTTM I/O; error visualization (readme) | MIT, 178★, active (gh) | the natural home for §4.6’s single versioned harness; SegLST is the CHiME format |
+| [**dscore**](https://github.com/nryant/dscore) | DER/JER, collar and overlap options (readme via MeetEval) | BSD-2, 273★ (gh) | the reference DER implementation the literature quotes |
+| [**pyannote.metrics**](https://github.com/pyannote/pyannote-metrics) | DER components, identification error rate, purity/coverage | MIT, 259★ (gh) | needed for the *identification* error rate variants, which MeetEval does not do |
+| [**lhotse**](https://github.com/lhotse-speech/lhotse) | recipes for **ami, ali_meeting, callhome_english, dihard3, fleurs, commonvoice, libricss, librimix, librispeechmix, mls, notsofar1, voxceleb, voxconverse, voxpopuli, musan, rir_noise, fisher_spanish, mtedx** (gh) | Apache-2.0, 1,149★ (gh) | **no recipe exists for ParlamentParla, Basque Parliament, Nos_ParlaSpeech-GL, 3CatParla or EuroSpeech** — writing those five manifests is the first harness task |
+| [**Open ASR Leaderboard**](https://github.com/huggingface/open_asr_leaderboard) | end-to-end WER + **RTFx** scripts across many backends; multilingual and long-form suites | Apache-2.0, 245★ (gh) | reuse the normalizer and RTFx measurement; results CSV at `hf-audio/open-asr-leaderboard-results` (gh, cached in open-source-asr) |
+| [**chime-utils**](https://github.com/chimechallenge/chime-utils) | CHiME-8 DASR data prep, manifests and **MeetEval-based scoring** for CHiME-6/DiPCo/Mixer6/NOTSOFAR-1 | MIT, 27★ (gh) | the closest thing to a turnkey SA-ASR scoring pipeline |
+| [**NOTSOFAR1-Challenge**](https://github.com/microsoft/NOTSOFAR1-Challenge) | baseline system + tcpWER scoring | MIT, 66★ (gh) | tcpWER reference implementation in a full pipeline |
+| [**TS-ASR-Whisper**](https://github.com/BUTSpeechFIT/TS-ASR-Whisper) | DiCoW/SE-DiCoW training and inference; `./scripts/create_emma_submission.sh` for the **EMMA JSALT25 benchmark** (readme) | Apache-2.0, 121★ (gh) | the only public path to comparable tcpWER on the DiCoW family |
+| [**ESPnet egs2**](https://github.com/espnet/espnet) | `ami`, `commonvoice`, `fleurs`, `mls`, `chime6/7/8`, `fisher_callhome_spanish`, `slue-voxpopuli`, `slue-voxceleb`, `iwslt*` (gh) | Apache-2.0, 9,949★ (gh) | full recipes with published baselines; heavier setup than lhotse-only scoring |
+| [**SpeechBrain recipes**](https://github.com/speechbrain/speechbrain) | `VoxCeleb`, `VoxLingua107`, `VoxPopuli`, `AMI`, `CommonVoice`, `LibriMix`, `LibriParty`, `DNS`, `WHAM` (gh) | Apache-2.0, 11,802★ (gh) | LID and SV recipes are the fastest route to a calibrated baseline |
+| [**NVIDIA-NeMo/Speech**](https://github.com/NVIDIA-NeMo/Speech) + [**NeMo-text-processing**](https://github.com/NVIDIA/NeMo-text-processing) | ASR/diarization eval scripts; **Spanish ITN/TN grammars with 22 test-case files** (gh) | Apache-2.0, 18,376★ / 495★ (gh) | the es ITN tests are a seconds-long CPU regression gate |
+| [**WeSpeaker**](https://github.com/wenet-e2e/wespeaker) / [**3D-Speaker**](https://github.com/modelscope/3D-Speaker) / [**redimnet2**](https://github.com/PalabraAI/redimnet2) | VoxCeleb trial lists, cosine + AS-norm + QMF scoring, pretrained extractors with published EERs | Apache-2.0 / Apache-2.0 / MIT (gh) | supplies both the extractors of §3.5 and the trial-scoring code for §10 |
+| [**WeSep**](https://github.com/wenet-e2e/wesep) / [**asteroid**](https://github.com/asteroid-team/asteroid) | target-speaker extraction and separation training/eval (SI-SNRi, SDRi) | no licence declared / MIT (gh) | for the §6 overlay experiments; WeSep has no declared licence — check before use |
+| [**SimulEval**](https://github.com/facebookresearch/SimulEval) + [**SimulStreaming**](https://github.com/ufal/SimulStreaming) / [**whisper_streaming**](https://github.com/ufal/whisper_streaming) | AL/LAAL/StreamLAAL/AP/DAL scoring; `--comp_unaware` computation-unaware lower bound (readme) | CC-BY-SA-4.0 **archived** / MIT / MIT (gh) | SimulEval is archived (last push 2024) — pin it, or reimplement the three metrics §4.5 actually needs |
+| [**jiwer**](https://github.com/jitsi/jiwer) + HF `evaluate`/`datasets` | WER/CER primitives, dataset loading | Apache-2.0, 926★ (gh) | fine for speaker-agnostic WER only; **never** for cpWER |
+| [**SCTK**](https://github.com/usnistgov/SCTK) | `sclite`, CTM/STM format definitions | NIST, 242★ (gh) | the format authority MeetEval defers to |
+| [**ctc-forced-aligner**](https://github.com/MahmoudAshraf97/ctc-forced-aligner) / [**WhisperX**](https://github.com/m-bain/whisperX) | word-level alignment for es/ca/eu/gl; builds the timestamp layer of §4.1 | MIT / BSD-2 (gh) | MMS-300m windowed 30 s / 2 s overlap covers all four languages (§3.10) |
+| [**EuroSpeech `alignment_pipeline`**](https://github.com/SamuelPfisterer/EuroSpeech) | VAD+diarization segmentation, Whisper draft, two-stage CER-based alignment to PDF/DOCX/HTML/SRT transcripts (readme) | licence **TBD** (readme) | the reusable part of EuroSpeech for §5.1 step 4; unresolved licence is a real adoption risk |
+| **To be written** (§4.6, §7) | per-turn **TAA / coverage-curve scorer**; ECE over turns; **finalization lag, name revision rate, normalized erasure** logger; chair-announcement parser | — | no public implementation of any of these was located; they are the harness’s own deliverables |
+
+* * *
+
+### 9.14 Gaps — sub-problems with no credible public eval
+
+1. **Named speaker attribution on Spanish parliamentary audio.** Nothing exists.
+   REPERE (French TV, 2012–14, ELRA-paid) is the only public *named*-attribution
+   benchmark in any language, and pyannote still reports DER on it — not EGER.
+   Everything in §7 depends on building the §5.1 set.
+2. **Open-set identification at ~350 speakers with same-room enrolment.** VoxWatch and
+   VoxBlink2 measure cross-condition internet audio; Novoselov gives the 100→700 scaling
+   shape. No public curve exists for the matched-condition regime every deployment lives
+   in (§8.2).
+3. **Separation of simultaneous interpretation from its source on real audio.** No
+   dataset, no metric, no baseline.
+   VoxPopuli’s 17.3k h of interpretation and ESIC are the closest surrogates, and
+   neither carries the Congreso’s single mixed track.
+4. **cpWER/tcpWER on parliamentary speech.** Every published SA-ASR number is meetings
+   (AMI, NOTSOFAR-1, AliMeeting) or synthetic mixtures.
+   A VoxPopuli-es cpWER pilot would be the first, and it is nearly free.
+5. **Chair-announcement parsing as an attribution source.** No system, no eval set; the
+   ParlaMint text-only coverage measurement has to be run before R3 is worth building.
+6. **Stage-direction detection on chamber acoustics.** AudioSet/ESC-50 measure isolated
+   clips; the Diario’s own marks are the only in-domain reference and they are
+   editorially filtered.
+7. **Spanish punctuation/capitalization benchmark.** LibriSpeech-PC is English-only; the
+   NeMo es tests are unit tests.
+   Nothing measures record-form punctuation in Spanish parliamentary register.
+8. **Streaming stability metrics.** Definitions exist (UPWR, normalized erasure,
+   flicker); no reference implementation was located, and SimulEval — the nearest
+   toolkit — is archived.
+9. **Conference-system metadata (R11).** Not testable on public data at all; the
+   evaluation can only report what fraction of turns such metadata *would* resolve.
+
+## 10. Cross-Service and Cross-Language ASR Evaluation Protocol
+
+How to measure ASR quality per language and per service against ground truth, so that a
+claim like “service X is best for Basque” carries a confidence interval and a
+contamination flag. The agenda’s §11.5 summarises it and cites it as (inventory §10.n).
+
+Drafted 2026-09-02 for the parliamentary-transcription research program.
+Sources: the agenda (§3.3, §3.10, §4, §5), the briefs `inv-asr.md`,
+`inv-data-services.md`, `inv-evals.md`, and the Parlamento.ai `open-source-asr`
+repository read this session.
+Tags: **(brief)**, **(agenda)**, **(checked)** = verified this session, **(search)** =
+web snippet only, **(unverified)**.
+
+#### 10.10.1 What we already have, honestly
+
+| Source | Languages | Ground truth | Services | Why it does not answer the question |
+| --- | --- | --- | --- | --- |
+| Open ASR Leaderboard: English, multilingual (CoVoST-2 + FLEURS de/fr/it/es/pt), long-form (brief) | es, pt; **no ca/eu/gl** | yes, read speech | open models; a few APIs on English only (best open 4.46 vs paid 4.43, inv-evals) | FLEURS es is Latin-American read speech; nothing parliamentary; test sets sit in training mixes; the top spans under 1 point, inside normalizer noise |
+| Artificial Analysis AA-WER v2 (brief) | English | yes | most of the list in scope | English only; half proprietary, not reproducible; a quarter VoxPopuli, which several models train on |
+| Parlamento.ai `open-source-asr` (agenda §3.3; checked `comparacion.json`) | es (cl/pe/es pooled), ca, gl, eu, en, pt, EP mix; 24 five-minute chunks each | **no** — edit distance to gpt-4o-transcribe, gpt-transcribe, nova-3 | 3 paid + ~15 open | agreement, not accuracy; paid APIs disagree by a median 5.1 (es), 11.7 (ca), 13.0 (gl), 15.1 (eu), p90 42.6 on eu; Nova-3 excluded from the eu/gl reference; clips not redistributable; 24 clips → ±2–3 points |
+| Vendor claims (brief; search): Nemotron 3.5 FLEURS es 4.11; Voxtral Transcribe 2 5.9 avg; Canary-1B-v2 8.1 avg; Scribe ca 3.1 FLEURS / 5.5 CV, no eu tier | per vendor | yes; normalizer and subset unstated | self only | self-selected read sets; no eu/gl figure from anyone; not comparable across vendors |
+| Specialists’ WERs (brief): xezpeleta eu 4.84 CV18; HiTZ eu 10.62 CV13; 3catparla ca 0.96 in-domain broadcast; adriszmar es 5.34 CV17; Whisper-LM FLEURS ca 5.68 / gl 10.06 / es 15.01; BSC LoS none | one each | yes | none | different corpora, CV vintages, normalizers; parliamentary fine-tunes trained on the parliamentary corpora |
+| Albayzin 2024 BBS-S2T (inv-evals §1) | eu+es, Basque Parliament | yes, audited | challenge systems only (PRHLT 3.44) | no service or generalist; one chamber |
+| VoxPopuli / Europarl-ST / Europarl-ASR baselines (brief) | es (EP), en | yes; en has a manual verbatim 17.5 h layer | none | 2021 baselines (es 15.3); EP, not Congreso; non-verbatim except the en layer |
+| BSC ca–es code-switching study (brief) | ca–es CS, 4 h 09 min | yes | none | Whisper variants only |
+
+Nothing combines ground truth, the services, and the four Spanish-state languages on
+parliamentary audio.
+The eu/gl tails in the Parlamento.ai data sit exactly where open models and APIs
+disagree most, and nobody knows which side is wrong.
+
+#### 10.10.2 Sample design per language
+
+#### 10.2.1 Ground-truth sources
+
+Parliamentary first, read speech as a variety probe.
+“Verbatim enough” means produced or audited against the audio, not edited for the
+record.
+
+| Language | Parliamentary, audited transcript | Read speech / variety metadata |
+| --- | --- | --- |
+| es-ES | **Congreso verbatim sample (build, §2.4)**; Basque Parliament 1 es-tagged segments (CC0, audited; brief); VoxPopuli es test (EP official text; licence CC0 vs CC-BY-NC unresolved; contaminated); Europarl-ST es (2008–12, NC) | CV es test ≈22 h, 11 accent tags; MLS es test (contaminated) |
+| es-419 | **Chilean sample (build, same recipe)** — no public LatAm parliamentary set with audited text was found; Parlamento.ai’s Chile/Peru audio is not redistributable | FLEURS es_419 ≈1.5 h; CV es strata `mexicano`, `rioplatense`, `chileno`, `andino` — the only variety handle until the sample exists |
+| ca | ParlamentParla v2 clean_test **5.2 h** (2.71 F + 2.52 M, speaker-disjoint, CC BY 4.0, 2007–18; checked README) — aligned to official text, so hand-audit a 1 h subset and report its residual WER; BSC CS test 4 h 09 min | CV ca ≈22 h; FLEURS ca_es; 3CatParla is broadcast, not chamber |
+| eu | Basque Parliament 1 dev 7.6 h + test 9.6 h, audited, per-segment tag eu/es/bilingual, CC0; Albayzin eval 23.8 h — the best-licensed set in the program | CV eu ≈21 h; **no FLEURS eu** |
+| gl | Nos_TranscriSpeech-GL debates/speeches subset (53 h total across 4 domains, manual, gated — request on day one; subset size unverified); Nos_ParlaSpeech-GL is auto-aligned under parliament terms, not ground truth | CV gl ≈22 h; FLEURS gl_es |
+| en | Europarl-ASR 17.5 h manual verbatim + official layers (CC BY 4.0) — the two-layer shape the Congreso set needs; VoxPopuli en test | CV en |
+| pt | FalAR (Portuguese parliament, 2026 preprint, access unconfirmed); Brazil is the chamber in the workload (agenda §3.3) | MLS pt test; CV pt with pt-BR/pt-PT tags; FLEURS pt_br |
+| code-switched | Basque Parliament bilingual segments; BSC CS ca–es; Congreso co-official interventions (build) | — |
+
+#### 10.2.2 How many hours give a ±1-point CI
+
+Two arguments land on the same range.
+**Word-level, ignoring clustering:** SE ≈ √(p(1−p)/W); at WER 0.10 a 95% half-width of 1
+point needs ≈3,500 reference words (≈25 min at 140 wpm); at 0.20, ≈6,150 words (≈45
+min). **Clip-level, which is what matters:** errors cluster by clip and speaker.
+For 30 s clips at a mean of ~10 the per-clip standard deviation is typically 8–12
+points; the Parlamento.ai tails say the same (es median 5.1 vs p90 13.6; eu 15.1 vs
+42.6, checked).
+A bootstrap over clips needs N ≥ (1.96·σ)²: σ = 8 → ~250 clips (2.1 h); σ
+= 12 → ~550 clips (4.6 h) — a design effect of 4–8 over the word-level figure.
+
+So **2–3 h per language for es, ca, en, pt** (expected WER 5–12) and **4–6 h for eu and
+gl** (expected 10–25, heavier tails).
+The σ values are assumptions; the first 50 pilot clips re-estimate them and the sample
+is topped up.
+A **paired** difference on identical clips has σ_diff ≈ 0.4–0.6 σ, so ±1 on
+a difference costs a quarter to a third of the above — the reason the design is paired.
+With 24 five-minute chunks the Parlamento.ai per-language CIs are ±2–3 points, which is
+why its ca/gl/eu rankings cannot separate models.
+Cluster controls: ≥25 speakers per language, no speaker above 8% of words, stratified
+bootstrap (speakers, then clips).
+
+#### 10.2.3 Clip selection
+
+Unit: 20–60 s segments for the aligned public sets; 3–6 min turn-aligned chunks for
+parliamentary audio (Parlamento.ai’s unit is 5 min, checked `audio-audit.json`), cut at
+speaker turns so streaming is realistic.
+Strata, seeded random draw: speaker (capped), duration (<10 s, 10–30, 30–120, >120),
+noise tertile from an automatic audit (estimated SNR, silence fraction, longest pause —
+what the Parlamento.ai `audio_audit` computes), gender, variety tag, language tag
+(eu/es/bilingual), session date.
+Publish the manifest (ids, offsets, strata), not the audio (agenda §5.1 step 8).
+
+#### 10.2.4 The missing piece: a verbatim-corrected Congreso sample
+
+- **Size:** 4 h — 3 h es from ≥12 sessions and ≥30 speakers (plenary and committee,
+  question time and debate) as 36 five-minute chunks, plus 1 h of co-official
+  interventions (≈20 min each ca/eu/gl) with both channel conditions kept (agenda §5.1
+  step 2). A parallel 2 h Chilean sample if the second chamber matters.
+- **Who corrects:** native transcribers per language correct a `whisper-large-v3-LoS`
+  draft against the audio (agenda §5.1 step 5) under written verbatim conventions:
+  disfluencies kept, numbers as spoken and spelled out, no ITN, tags for unintelligible,
+  overlap, interpreter bleed, foreign words.
+- **Double annotation at 100%**, not 10%, because 4 h is cheap: two independent
+  corrections, inter-annotator WER reported, a third adjudicated version is the
+  reference. Inter-annotator WER (expect 1–3 points) is the floor below which service
+  differences are not interpretable.
+- **Effort:** 3–4 annotator-hours per audio-hour (inv-evals §C) × 4 h × 2 annotators +
+  ~6 h adjudication ≈ 34 h ≈ **EUR 1.0–1.4k** at EUR 30–40/h, two weeks; the Chilean
+  sample adds EUR 0.5–0.7k.
+- **Post-cutoff rule:** sessions after 2026-03 only, later than every disclosed training
+  date in scope (LoS trained Nov 2025; NeMo v3 and Granite 4.1 early 2026; vendor
+  cutoffs undisclosed); session dates in the manifest so the rule is re-applicable.
+
+#### 10.2.5 Contamination rule
+
+Declared training found this session: Granite Speech on CommonVoice 17, MLS, VoxPopuli
+(search); Parakeet/Canary/Nemotron v3 on Granary — YODAS, YouTube-Commons and MOSEL,
+which folds in VoxPopuli — plus an undisclosed NeMo ASR Set (search); xezpeleta eu on
+Basque Parliament 2013–2022, the whole corpus (brief); Nós gl presumably on
+Nos_ParlaSpeech-GL (brief); BSC LoS’s 8,110 h undisclosed at corpus level (unverified).
+Whisper and every service are undisclosed; assume public test splits have been seen.
+
+Each (system, set) cell carries a flag: **C0** post-cutoff or gated, **C1** undisclosed,
+**C2** declared. Headlines come only from C0 sets; C2 cells are greyed.
+Per set: CV and FLEURS → C1/C2 for all open models and for vendors quoting them, usable
+only as a relative variety probe; VoxPopuli es → C2 for Granite and NeMo, C1 for
+services on the AA-WER board; Basque Parliament test → C2 for xezpeleta and possibly
+LoS, C0/C1 for services; ParlamentParla clean_test → C2 for the BSC Catalan line
+(likely); Nos_TranscriSpeech-GL → C0 except Nós models; Congreso and Chilean samples →
+C0 for all.
+
+#### 10.10.3 Per-service run protocol
+
+1. **Language conditions.** Two runs per clip: *hinted* (BCP-47 per clip: es-ES, es-CL,
+   es-MX, es-PE, ca-ES, eu-ES, gl-ES, en-US, pt-BR) and *auto-detect*; report both, log
+   the detected language.
+   Support: AssemblyAI Universal and Soniox list ca/eu/gl (search); Speechmatics all
+   three (brief); Amazon Transcribe streams all three (brief); Azure lists `ca-ES`,
+   `eu-ES`, `gl-ES` (checked, raw docs); ElevenLabs Scribe lists ca and gl with WER
+   tiers, eu without one (search); Rev.ai ca and gl, eu not found (search); **Deepgram
+   Nova-3 lists none of the three** (search) — run es/en/pt hinted and everything auto,
+   record the failure mode; Google Chirp 3 ca-ES GA, eu/gl unconfirmed (page unreadable
+   here); OpenAI whisper-1 and gpt-4o-transcribe inherit Whisper’s declared 99; Gemini
+   takes a prompt.
+2. **Formatting off where a switch exists** (Deepgram `smart_format`/`punctuate`/
+   `numerals` false; AssemblyAI `format_text`/`punctuate` false; Google punctuation off;
+   Azure `lexical` output, the pre-ITN form).
+   Keep the formatted output too.
+   Where no switch exists (OpenAI, Gemini, Amazon) the normalizer does the work and the
+   cell says so.
+3. **One versioned normalizer on reference and hypothesis alike:** NFC; lowercase; unify
+   apostrophes (`'`, `’`, `ʼ`) and ela geminada (U+00B7, U+2027, `l.l`, `l-l` → `l·l`);
+   strip punctuation except intra-word apostrophes, hyphens, middle dots, then split on
+   whitespace; digits, percentages, currency, ordinals → words per language in *both*
+   texts (num2words for es/pt/ca; eu/gl coverage unverified, project table if missing);
+   acronym periods removed; accents kept (the Parlamento.ai normalizer is right on this,
+   checked `score.py`); Basque compounds never split — hyphen removed, one token;
+   Galician contraction spellings that are orthographic equivalents (`ó`/`ao`) mapped
+   through a versioned per-language equivalence list.
+   Whisper’s `BasicTextNormalizer` runs as a stricter second column to show sensitivity.
+4. **Diarization off; 16 kHz mono PCM WAV; identical bytes to every system**; no VAD
+   trimming beyond leading and trailing silence.
+5. **Pinning:** model id, response model/version fields, API version, region, SDK
+   version, every request parameter, timestamp; open models: HF revision hash, runtime
+   and version, compute type, beam, temperature 0, `condition_on_previous_text` off, VAD
+   setting.
+6. **Repeats:** three runs per clip for LLM-decoder services (gpt-4o-transcribe, Gemini,
+   Scribe v2) and any open model above temperature 0; report mean and run-to-run spread;
+   flag clips whose spread exceeds 5 points.
+7. **Streaming and batch as separate conditions.** Streaming replays PCM in 100 ms
+   frames at 1× wall-clock over the vendor socket; every partial and final logged with
+   wall time; the final transcript is scored; finalization lag p50/p95
+   (computation-aware, agenda §4.5) and normalized erasure (§3.9) reported.
+   Batch logs turnaround.
+8. **Timeouts, caps, cost.** 3 retries with backoff, then a logged failure; error and
+   empty-output rates are results.
+   Clips ≤5 min keep every system inside its synchronous limits except Google (60 s sync
+   → batch recognize); OpenAI’s 25 MB cap is fine at 16 kHz PCM to ~13 min.
+   Billed seconds or tokens from usage fields per request; realized $/h beside list
+   price.
+
+#### 10.10.4 Metrics and statistics
+
+- **WER** primary for es, ca, gl, en, pt; **CER** primary for eu, WER secondary.
+  Basque attaches case and number suffixes to the word, so one wrong suffix is a whole
+  word error, tokens per minute are ~30% fewer and per-clip variance higher; CER has
+  finer resolution and Albayzin reports it alongside.
+  Both metrics for every language.
+- **Intervals:** stratified bootstrap over clips within speakers, 10,000 resamples, WER
+  recomputed as a ratio of sums, 95% percentile CI.
+- **Paired comparison:** all systems on the same clips; per-clip differences with
+  bootstrap CI, a sign test, win counts.
+  Pre-register the primary contrasts (best service vs LoS per language; hinted vs auto;
+  streaming vs batch) so the pairwise matrix stays descriptive rather than a
+  multiple-testing exercise.
+- **Stratified reporting:** variety (es-ES vs each CV accent; pt-BR vs pt-PT), duration,
+  noise tertile, monolingual vs code-switched, hinted vs auto, batch vs streaming,
+  contamination flag; each stratum with n and CI.
+- **Code-switching:** (a) WER on embedded-language words (token-level tags from the
+  reference, or lexicon LID where only segment tags exist, as in Basque Parliament); (b)
+  switch-window WER on ±3 words around each switch; (c) language-collapse rate — share
+  of CS clips with under 10% of hypothesis tokens in the embedded language, i.e.
+  translated or dropped; (d) wrong-language rate overall.
+- **Guards:** hallucination rate on non-speech clips (insertions per hour), empty-output
+  rate, truncation rate (hypothesis/reference length ratio under 0.6; Parlamento.ai
+  alerts at 0.45, checked `paid.py`).
+- **“Accurate” means** 95% half-width ≤1.0 point on each language headline (CER for eu),
+  ≤1.0 on each pre-registered paired difference, ≤2.0 per stratum.
+  Cost: the hours in §2.2, and ≥60–100 clips for any stratum reported on its own.
+
+#### 10.10.5 Cost and time budget
+
+Audio, first pass: es-ES 3 h Congreso + 2 h Basque-Parliament/VoxPopuli es; es-419 2 h;
+ca 5 h (clean_test + 2 h CS); eu 5 h; gl 4 h; en 2 h; pt 2 h — **≈25 h**. Full matrix
+adds CV/FLEURS/MLS strata, the 23.8 h Albayzin eval and the Chilean sample: **≈60 h**.
+
+| Service | List price per audio-hour | From the AWS+Google sandbox |
+| --- | --- | --- |
+| Amazon Transcribe | $1.44 batch and streaming (brief) | yes |
+| Google Cloud STT Chirp 3 | $0.96; $0.18 dynamic batch (brief) | yes |
+| Gemini 2.5 transcription | ≈$0.12–0.30 by audio tokens (unverified) | yes, via Vertex AI |
+| Deepgram Nova-3 | $0.46 streaming (brief); batch ≈$0.26 (unverified) | no |
+| AssemblyAI Universal-3.5 | $0.45 streaming (brief); async ≈$0.15–0.27 (unverified) | no |
+| Speechmatics | ≈$0.30 batch / $0.40 realtime, sources conflict (brief) | no |
+| ElevenLabs Scribe v2 | $0.22 batch / $0.39 realtime (brief) | no |
+| OpenAI whisper-1, gpt-4o-transcribe | ≈$0.36 each (from $0.006/min, unverified); mini ≈$0.18 | no |
+| Azure Speech | ≈$1.00 (unverified) | no |
+| Gladia | $0.61 async / $0.75 realtime (brief) | no |
+| Soniox | $0.10 async / $0.12 streaming (brief) | no |
+| Rev.ai | $2.10 API; $1.20 Reverb (brief) | no |
+
+Batch across the 13 rows ≈ $8 per audio-hour, streaming ≈ $5.5. First pass: 25 h × 2
+language conditions × $8 ≈ $400, streaming ≈ $140, LLM repeats ≈ $50 — **≈$600**; full
+matrix ≈ $1.5–2k. Ground truth EUR 1.5–2.1k (§2.4). Engineering 3–4 weeks for harness,
+normalizer and manifests (no lhotse recipes for ParlamentParla, Basque Parliament or Nós
+— inv-evals). GPU: 25 h through ~15 open models on the 8 GB reference card (turbo 35.6
+audio-h/h, large-v3 and LoS 9.6, Qwen3-ASR 4.9, xezpeleta 5.0, Granite 133, Parakeet 87,
+Nemotron 28; brief) ≈ 40 GPU-h, ≈6 h on an H100. Streaming replay is wall-clock bound:
+25 h per system, 8 concurrent → ~3 h each.
+Open models need Hugging Face Hub, which this environment lacks — mirror weights into
+S3/GCS first.
+
+**Cheapest credible first pass** (one week, ≈$60 API + 10 GPU-h): Basque Parliament
+test, ParlamentParla clean_test, BSC CS, Europarl-ASR subset, CV strata for es-419/pt;
+the three sandbox services plus turbo, large-v3 and LoS. It answers how far the
+reachable services sit from LoS on eu/ca/gl.
+The Congreso sample and the internet-box services follow in weeks two and three.
+
+#### 10.10.6 Approaches compared
+
+| Approach | Pros | Cons | Can conclude | Cannot conclude |
+| --- | --- | --- | --- | --- |
+| A. Public read-speech sets (CV, FLEURS, MLS) | free; variety tags; tiny compute | read, clean, single speaker; contaminated for most open models and quoted by vendors; no FLEURS eu | variety sensitivity; a sanity floor; whether a language code is accepted | in-domain WER; robustness to noise, overlap, interpreter bleed; any absolute ranking |
+| B. In-domain parliamentary public sets | real chamber acoustics; audited text for eu and gl; CC0/CC-BY; 5–10 h per language now | not Congreso; ParlamentParla and VoxPopuli aligned to official text; contaminated for the specialists | the eu/ca/gl service-vs-open gap with ±1 CIs; auto-LID failure rates; CS behaviour | Congreso register and mic chain; es-419 |
+| C. Verbatim-corrected Congreso sample | C0 for everyone; verbatim layer; what the agenda’s benchmark needs (§4.1, §5.1) | EUR 1–1.4k and two weeks; ±1.2–1.5 on es, wider on the 20-min co-official strata | the headline es-ES number; interpreter-channel effects; record-vs-verbatim gap on the same clips | co-official rankings on their own (B covers those) |
+| D. API agreement, no ground truth (Parlamento.ai) | $0.71/h; no annotation; scales to every language and month | agreement ≠ accuracy; consensus wrong exactly on eu/gl; ±2–3 points | drift and regressions; candidate shortlist | which system is right; anything about the tail |
+| E. Synthetic TTS clips | perfect script; regenerable | no room, disfluency or overlap; no eu/gl Piper voices (inv-evals §B); TTS is unnaturally easy | harness plumbing, normalizer round-trips, streaming timing | any quality number |
+
+**Recommendation:** run B this week from the sandbox with the open baselines; build C in
+parallel and run every service on it in weeks 2–3; run A only as the es-419/pt variety
+probe and as a contamination check (a system whose A-rank and B-rank diverge sharply has
+seen the read sets); keep D as a monthly drift monitor, never a ranking; use E for
+harness tests and never report it.
+
+#### 10.10.7 Pitfalls that make cross-service comparisons wrong
+
+| Pitfall | What goes wrong | Harness control |
+| --- | --- | --- |
+| Normalizer asymmetry | spelled-out vs digit numbers, `l·l` variants, curly apostrophes, accents stripped on one side — several points on ca | one versioned normalizer on both sides (§3.3); strict column alongside; normalizer version in every row |
+| Vendor-side ITN | numbers, dates, currency rewritten; no switch at OpenAI, Gemini, Amazon | lexical/raw output where possible; digits verbalized in both texts; a numbers-only error stratum |
+| Punctuation and casing | punctuated outputs tokenize differently | strip after preserving apostrophes and hyphens; punctuation never inside WER — a separate P/C metric if the record needs it |
+| Auto-LID on co-official languages | ca and gl decoded as es, eu as es or nothing; es–gl is the known weak pair (inv-evals §2) | hinted and auto both reported; wrong-language guard; detected language logged per clip |
+| LLM transcribers paraphrasing or translating | fluent output in other words; co-official speech returned in Spanish; run-to-run variance | temperature 0, fixed prompt, three repeats; language-collapse and truncation guards; paraphrase flagged when WER is high but chrF low |
+| Rate limits and length caps | partial coverage silently biases toward easy clips | a cell is reported only at 100% manifest coverage (the Parlamento.ai “piloto” rule, checked `METHODOLOGY.md`); failures logged as data |
+| Sample rate, codec, chunk edges | MP3 to one vendor, WAV to another; SDK resampling; context loss and hallucinated openings at cuts | identical 16 kHz PCM bytes; codec and rate logged; cut at turns and trim identically; hallucination guard on silent clips |
+| API drift mid-study | a vendor ships a new model | version fields per request; a 30-clip canary weekly; dated results |
+| Contamination | inflated scores on public splits | C0/C1/C2 flag per cell (§2.5); headlines from C0 only |
+
 ## Methodology
 
 **Inputs and passes.** Four inventory briefs were written in parallel on 2026-09-02 from
