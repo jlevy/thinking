@@ -1059,8 +1059,8 @@ and PyPI only, on four CPU cores with no GPU, no Hugging Face, no congreso.es an
 YouTube. **Net**: a GPU box with Hugging Face, YouTube and congreso.es access.
 **Chamber**: floor feeds, interpreters’ feeds or conference-system events that only the
 Congreso can supply.
-Ten spikes ran in the sandbox; the rest are catalogued in §10.12 with tier, effort and
-the decision each changes.
+Eleven spikes ran in the sandbox; the rest are catalogued in §10.13 with tier, effort
+and the decision each changes.
 
 Every spike’s code, data and full report live under `attic/spikes/` in the working tree,
 which is gitignored; the reports are summarised here and a separate repository is the
@@ -1641,7 +1641,73 @@ action descriptions to a bare “El señor” or “La señora”, which are exa
 chair-handover lines the Diario writes in full.
 Work that needs chair attribution should parse the Diario, not ParlaMint.
 
-#### 10.12 Catalogue of further spikes
+#### 10.12 Does the chair’s hand-off survive recognition? (S9; the load-bearing test)
+
+**Hypothesis.** The text-only floor of §10.1 was measured on the edited record.
+Live, the announcement is spoken and the surname is the rare token ASR gets wrong.
+S9 tests how much of the floor survives recognition, because every recommendation
+resting on §10.1 is an upper bound until it does.
+
+**What ran (Sandbox).** 200 announcement turns sampled from the 12,179 Congreso XV
+regular turns, stratified over ten rule and mention-form classes, plus 24
+no-announcement controls to test whether ASR *invents* hand-offs.
+The synthesised span is the tail of the linked chair turn capped at 60 words (median 15
+words, 6.1 s), so the thank-you clause that must be masked sits inside the clip.
+Six Piper Spanish voices; a degraded arm adds a synthetic room (RT60 0.35–0.60 s),
+three-talker bench babble at 12 dB SNR and pink room tone at 22 dB. ASR is whisper-small
+int8 and a Spanish NeMo FastConformer CTC model, both from disk, greedy, one thread.
+Scoring uses the §10.1 spike’s own resolver and definitions; the port was checked
+against its stored predictions with zero mismatches on all 224 turns.
+
+**Result (run).**
+
+| Condition | coverage | resolved | precision | overall | rostrum-scaled |
+| --- | --- | --- | --- | --- | --- |
+| Record text (the §10.1 baseline) | 1.000 | 0.945 | 0.979 | **0.925** | 0.931 |
+| whisper-small, clean, parser as written | 0.710 | 0.490 | 0.949 | **0.465** | 0.505 |
+| whisper-small, clean, + punctuation and case repair | 0.960 | 0.675 | 0.963 | 0.650 | 0.643 |
+| whisper-small, clean, + repair + phonetic fallback | 0.960 | 0.825 | 0.939 | **0.775** | **0.787** |
+| whisper-small, degraded, + repair + phonetic | 0.945 | 0.780 | 0.891 | 0.695 | 0.699 |
+| NeMo CTC es, clean, + repair + phonetic | 0.935 | 0.825 | 0.921 | 0.760 | 0.774 |
+
+**The dominant failure is not name garbling.** It is a lost sentence boundary: ASR
+writes “Gracias, señor presidente, señora Nogueras, cuando quiera” as one comma-spliced
+sentence, the parser’s backward-looking *gracias* mask swallows it, and the hand-off
+disappears. That single defect accounts for 24.5 of the 53.5 points lost, and a roughly
+40-line repair (split clauses before a vocative, restore capitals after an honorific)
+recovers coverage from 0.710 to 0.960 while costing nothing on record text.
+
+The announced surname survives ASR verbatim only **44.7%** of the time clean and 36.2%
+degraded, against a word error rate of 0.161 on the same spans: **WER understates the
+damage to attribution threefold**. Surnames marked Basque or Catalan survive 32.3%
+against 48.2% for Castilian.
+A Spanish phonetic key beats plain fuzzy matching (0.775 against 0.735) with thresholds
+flat between 70 and 78, at a precision cost of 0.963 to 0.939.
+
+**Confident misattribution stays rare.** Wrong-member errors run 1–2.5%, and a
+same-surname collision occurred once in 200 turns.
+The parser abstains rather than guessing, so ASR damage shows up as **lost coverage, not
+false names** — which is the failure mode the rubric’s restraint line rewards.
+
+By stratum, role-only announcements ("señora ministra") barely notice ASR because they
+never depended on a name; the bare vocative and last-mention strata, which need both a
+sentence boundary and a surname, lose the most.
+
+**Verdict.** The text-first spine survives recognition at a discount of roughly fifteen
+points, but only with two repairs the current parser lacks.
+Quote **~0.79 rostrum clean and ~0.70 degraded** for the live path, not 0.93–0.95. Two
+further findings change tool choice: whisper-small and the Spanish CTC model land within
+1.5 points of each other despite the CTC model’s much better WER elsewhere, and CTC is
+ten times cheaper (real-time factor 0.11 against 1.16), so **punctuation quality and
+name-token accuracy, not WER, should pick the ASR**. Roster-biased decoding, which was
+never tested, becomes the highest-value untested lever.
+
+**Limitations.** TTS is cleaner and more evenly paced than a chair speaking over a noisy
+chamber, and the degraded arm is synthetic.
+At n = 200 the 95% interval is about ±0.058. No cross-talk, and no real hand-off clipped
+by a chair talking over applause.
+
+#### 10.13 Catalogue of further spikes
 
 **[Proposed]** The remaining spikes, each the cheapest test that could falsify or
 de-risk a hypothesis, with tier, effort and the decision it changes.
@@ -1661,7 +1727,6 @@ and §10.2; S11, S16 and S22 follow S2; S12 then S17; S5 then S18 and S19.
 | S13 | Per-intervention clip identification on the Congreso: enroll from sessions A–C, test on D; TAA@100% by clip duration; out-of-set via held-out members | Net, CPU | two days | H-001’s rostrum clause on the real chamber; real trials for R2 |
 | S14 | Candidate set, AS-norm and calibration on S4 or S13 scores through the harness: coverage–TAA curve | Net | one day | H-002 on proxies; whether the constraint alone carries the gain |
 | S15 | Cross-lingual enrollment shift in-domain on Basque Parliament 1 (enroll es, test eu and vice versa; language-dependent s-norm) | Net, CPU | one day | whether bilingual members need per-language enrollment |
-| S9 | Parser robustness to ASR name errors: 200 announcement sentences, Piper to Whisper to parser, with and without fuzzy matching | Sandbox | one day | how much of H-003 survives ASR; whether a phonetic matcher is needed |
 | S12 | Editorial gap on 30 hand-verbatimized minutes (rostrum, bench, chair): record-WER and HTER of verbatim against the Diario | Net, human | two days | whether the campaign can score against the record before R6 |
 | S17 | Prompted-LLM normalizer on S12’s pairs, post-cutoff sessions only | Net | one day | whether H-006 needs training |
 | S16 | Interpreter pool count: embed interpreter-only windows from ten sessions, cluster, check stability | Net, CPU | one day | R5 attack 2 |
@@ -1680,7 +1745,7 @@ diarizer over six hours; any spike whose only outcome is DER; hallucination test
 isolated 5 s clips; a same-room enrollment test on TTS voices; estimating the commercial
 cap from an API trial rather than from the candidate-set histogram.
 
-#### 10.13 What the spikes changed
+#### 10.14 What the spikes changed
 
 - **§4.6 harness.** Turn assignment by intersection over union, not raw overlap;
   fixed-label cpWER/tcpWER and identification error rate as outcomes with the permuted
@@ -1694,9 +1759,12 @@ cap from an API trial rather than from the candidate-set histogram.
   prior decision because the Diario-derived list has no sub-minute stratum; the Congreso
   XV dataset supplies the record layer, the roster and the per-clip manifest for free.
 - **§7 R3 and §9 H-003.** Supported for rostrum turns on two records (0.93–0.95),
-  refuted for all turns (0.77–0.78, 0.92–0.94 with the continuation rule), open for
-  short turns and for the live setting; the text-only floor becomes the baseline
-  acoustic identifiers must beat.
+  refuted for all turns (0.77–0.78, 0.92–0.94 with the continuation rule), and now
+  measured through recognition: about **0.79 clean and 0.70 degraded**, and only with a
+  punctuation-and-case repair and a phonetic roster fallback the parser did not have
+  (§10.12). The live floor, not the record floor, is what an acoustic identifier must
+  beat; the failure mode is lost coverage rather than false names, which suits the
+  restraint line.
 - **§7 R2 and §9 H-002.** Candidate-set sizes are measured (median 2 per numbered item,
   10–12 per debate section, 37–39 per session); the commercial caps fit (S23), so an
   enrollment API is admissible as a comparison row.
@@ -1812,13 +1880,16 @@ Ablate constraint, AS-norm and calibration separately; the gain may be all const
 | One run | text in seconds; fusion on 5 sessions in minutes |
 | Invalidated by | announcements edited into the record (text coverage bounds the audible rate from above); ASR-garbled surnames; an LLM fuser that has read the Diario |
 
-The chair-parser spike (§10.1) settles H-003 for rostrum turns and refutes it as a claim
-about all turns: on two independent records of the Congreso the text-only pipeline puts
-the right person on 93–95% of rostrum turns (150 words or more with a speaker change)
-and 97% of turns over 600 words, on 77–78% of all regular turns, 92–94% with the rule
-that no announcement means the previous speaker continues, and on 49–55% of turns under
-30 words. The short-turn claim waits for the benchmark, and the live claim waits for S9,
-because the record’s clean hand-off sentence is an upper bound on what survives ASR.
+S9 (§10.12) measures the live path at about 0.79 on rostrum turns clean and 0.70
+degraded, after a punctuation repair and a phonetic fallback.
+The chair-parser spike (§10.1) settles H-003 for rostrum turns on the record and refutes
+it as a claim about all turns: on two independent records of the Congreso the text-only
+pipeline puts the right person on 93–95% of rostrum turns (150 words or more with a
+speaker change) and 97% of turns over 600 words, on 77–78% of all regular turns, 92–94%
+with the rule that no announcement means the previous speaker continues, and on 49–55%
+of turns under 30 words.
+The short-turn claim waits for the benchmark, and the live claim waits for S9, because
+the record’s clean hand-off sentence is an upper bound on what survives ASR.
 
 ##### R4. Weakly supervised in-domain speaker modelling
 
@@ -2139,11 +2210,13 @@ American chamber is in scope.
     gained 9 WER points by verbatimizing its training text.
     Any score against the published record is measuring editing policy as much as
     recognition until the two are separated.
-12. **The text-only floor is high.** Chair announcements alone put the right person on
-    93–95% of rostrum turns on two independent records of the Congreso, and 92–94% of
-    all regular turns with the rule that no announcement means the same speaker
-    continues (§10.1); an acoustic identifier earns its keep on the short-turn tail,
-    where the text reaches 49–55%, and must beat this floor, not chance.
+12. **The text-only floor is high, and survives recognition at a discount.** Chair
+    announcements alone put the right person on 93–95% of rostrum turns on two
+    independent records, and 92–94% of all regular turns with the continuation rule
+    (§10.1). Through ASR that becomes about 79% clean and 70% degraded, and only with a
+    punctuation-and-case repair and a phonetic roster fallback (§10.12). An acoustic
+    identifier earns its keep on the short-turn tail, where text reaches 49–55%, and
+    must beat the live floor, not chance.
 13. **The standard scoring tools forgive a wrong name.** A perfect transcript with every
     speaker rotated to another member scores 0.0 on MeetEval cpWER and 0.0 on DER, and
     1.49 on fixed-label cpWER (§10.2); only the fixed-label forms, identification error
@@ -2260,14 +2333,13 @@ stars, licence, last push and archived flag, a consolidation pass into 266 rows 
 uniform columns, and a critical review of the labels against the definitions and the
 repository evidence; the full tables are the companion inventory report and §6 keeps the
 shortlist and the index.
-Ten spikes ran in the sandbox tier (§10); their code and data are under the gitignored
-`attic/` directory and their reports are summarised in §10, with the numbers tagged
-(run).
-The evaluation strategy (§11) was written from an inventory of about 80 evaluation
-resources and a cross-service ASR protocol, both in the companion report (§9 and §10
-there). Several agent runs were interrupted by a usage limit part-way and were resumed
-from their on-disk state; the §6 text was assembled from the writer’s completed part
-files, and the §11 draft was reconciled by hand with the final sizing result, which
+Eleven spikes ran in the sandbox tier (§10); their code and data are under the
+gitignored `attic/` directory and their reports are summarised in §10, with the numbers
+tagged (run). The evaluation strategy (§11) was written from an inventory of about 80
+evaluation resources and a cross-service ASR protocol, both in the companion report (§9
+and §10 there). Several agent runs were interrupted by a usage limit part-way and were
+resumed from their on-disk state; the §6 text was assembled from the writer’s completed
+part files, and the §11 draft was reconciled by hand with the final sizing result, which
 reversed the draft’s recommendation on the accept rule.
 
 **What could not be verified:**

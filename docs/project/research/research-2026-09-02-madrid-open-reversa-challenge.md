@@ -1746,7 +1746,9 @@ parser, a roster matcher, the agenda candidate set and an LLM fallback.
 Every name carries its evidence.
 The bet rests on a measured floor: on two independent records of the Congreso seven
 years apart, the parser names the right member on 93–95% of rostrum turns and 92–94% of
-all regular turns with no audio at all (agenda §10.1).
+all regular turns with no audio at all (agenda §10.1), and **about 79% of rostrum turns
+once the announcement has been through ASR** — clean, with a punctuation repair and a
+phonetic roster fallback; 70% on degraded audio (agenda §10.12).
 
 **2. Ready Before They Sit Down.** Bounded-lag streaming: publish at T+30 s, finalize at
 T+2 min, log finalization lag, name revision rate and first-versus-final accuracy.
@@ -1775,8 +1777,10 @@ The architectures differ in their theory of attribution, not in model choice.
 
 - **A1 Chair-Spine (text-first, conservative).** The name comes from the chair’s
   hand-off parsed out of the ASR transcript, plus the continuation rule, regex first
-  with an LLM fallback (measured: 0.94 projected, agenda §10.8). Audio supplies words
-  and change points only.
+  with an LLM fallback (measured: 0.94 projected on record text, agenda §10.8; about
+  0.79 measured through ASR, agenda §10.12, and only with a punctuation-and-case repair
+  and a phonetic roster fallback).
+  Audio supplies words and change points only.
 - **A2 Cascade (acoustic-first modular).** pyannote to embeddings to archive enrollment
   to AS-norm and calibration to an agenda-constrained open-set match with explicit
   unknown mass. Sits on the known-bad 100-to-700-speaker operating point (§11.7), and the
@@ -1908,9 +1912,12 @@ In descending value per hour spent:
    anything after 09:30.
 3. **The chair parser and roster matcher**, packaged, with the per-language rules and
    the hybrid LLM prompt (agenda §10.1, §10.8).
-4. **Run the missing spike now**: 200 announcement sentences through TTS, ASR and the
-   parser. Every A1 number is measured on clean record text and is an upper bound until
-   this runs; if survival is below 60%, pre-build the phonetic matcher.
+4. **The two repairs S9 identified** (agenda §10.12), in this order: a
+   punctuation-and-case robust parse, worth 18.5 points and about 40 lines, since the
+   dominant ASR failure is a comma-spliced sentence boundary rather than a garbled name;
+   then a Spanish phonetic roster matcher, worth a further 12.5 points.
+   Both are free on record text.
+   Roster-biased decoding is the highest-value lever nobody has tested.
 5. **The hallucination guard**: VAD plus a compression ratio above 2.4 plus a
    babble-aware threshold, retuned on turbo rather than the small model.
 6. **Mirrored weights and a container**, since credits arrive on the day and several
@@ -1937,13 +1944,17 @@ confirms named enrollment audio and a channel that is not interpreter-mixed.
 Fold A3’s agenda structure into A1 as its candidate-set prior.
 Leave A5 to the research programme.
 
-Two honest caveats.
-The headline number for this recommendation is measured on the edited
-record, not on ASR output, and the spike that would test whether the chair’s hand-off
-survives recognition has not been run — which is why it is item 4 on the pre-build list.
-And if the second chamber is not Spanish, the parser’s structure transfers but its rules
-do not: precision held at 0.95 on a Galician corpus while coverage fell to 0.44 (agenda
-§10.1).
+Two caveats, one of them now resolved.
+The spike that tests whether the chair’s hand-off survives recognition **has since run**
+(agenda §10.12). It does, at about 0.79 clean and 0.70 degraded rather than 0.93–0.95,
+and only after two repairs the parser did not have.
+The recommendation stands with the lower number, for a reason worth stating: almost all
+of the loss is coverage rather than wrong names, because the parser abstains when the
+surname is garbled. Confident misattribution stayed at 1–2.5% and a same-surname
+collision happened once in 200 turns, so ASR damage lands on the metric rather than on
+the restraint line. The second caveat stands: if the second chamber is not Spanish, the
+parser’s structure transfers but its rules do not, with precision holding at 0.95 on a
+Galician corpus while coverage fell to 0.44 (agenda §10.1).
 
 ## Key Insights
 
