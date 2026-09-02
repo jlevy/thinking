@@ -981,16 +981,83 @@ Highest ceiling, highest cost.
 precision and recall against the record’s annotations.
 Small, separable, and part of what “official record” means.
 
-**R10. Multimodal identity.** Active-speaker detection plus face matching against a
-roster gallery, and OCR of the on-screen overlay, as fuser inputs — PERCOL with 2026
-components. Hypothesis: on interjections and bench replies, visual identity raises TAA
-more than any acoustic change.
+**R10. Multimodal identity.** *Superseded by R13, which splits it by signal and gates it
+on the camera question.*
 
 **R11. Conference-system integration as the production path.** Where CoCon or DICENTIS
 events are available, attribution is a join; the research question becomes the exception
 rate. Hypothesis: microphone metadata resolves over 95% of turns, and the residual is
 concentrated in interjections and the chair.
 Not testable on public data; listed so the design keeps the slot.
+
+**R12. The member knowledge base as a versioned artifact.** One store keyed by roster
+id: both surnames and every observed alias, sex, group and role by date, government
+portfolio by date, floor languages, voice centroids from held-out archive clips, a face
+gallery conditional on R13, and Wikidata ids as the join key.
+Evidence: merging the Diario’s 23 typographic label variants moved XV parser precision
+from 0.929 to 0.974, both surnames are near-unique where 39% of members share a first
+surname, and the residual title-only errors are dated-portfolio lookups the parser did
+not have (agenda §10.1). Hypothesis: dated roles and alias merge lift the title-only
+stratum to the both-surnames stratum’s precision with no audio.
+Cost: days of text-side work in the sandbox; the voice layer is agenda §5.1 step 6.
+Absorbs R3’s roster-matcher clause; every consumer pins a KB version.
+
+**R13. Visual identity, split by signal and gated on the camera.** Supersedes R10 and
+retires H-008. Chyron OCR is a text source that exists only if the overlay is on the
+feed being scored (S3); active-speaker detection plus face matching exists only if the
+director shows the speaker (S8). Bundled, a null result cannot say which failed.
+OCR is registered on the stratum where the parser is weak (announcement absent, first
+surname only, or title only: a third to a half of regular turns by the class shares in
+agenda §10.1), because on announced rostrum turns the text sits at 0.999 precision and
+nothing can add. Face is registered on turns under 10 s with S8’s on-camera fraction as
+its ceiling. PERCOL reached EGER 24.4% in 2013 fusing these sources (agenda §3.6;
+components in inventory §3.12). Cost: the Net box, 1 fps over archive and live video, a
+gallery only after S8.
+
+**R14. Contextual and role priors as a fusion input.** A prior over who speaks next,
+conditioned on agenda-item type and the previous turn’s role, plus content
+self-reference (“como ministra de”, “señoría”) as a weak feature, since content-based
+identity is a fallback in the literature (dossier §11.10). That sequence carries
+information is measured: the rule “no announcement means the same speaker continues”
+alone moved text-only accuracy from 0.77–0.78 to 0.92–0.94 (agenda §10.1). A count-based
+prior fitted on ParlaMint-ES and tested on Congreso XV has no contamination problem; an
+LLM prior has read the Diario (agenda §11.6). Cost: a day in the sandbox.
+
+**R15. Plausibility validation that turns wrong names into abstentions.** A checker
+after fusion, over the KB: the named member sat in that legislature on that date, the
+role fits the slot, no member speaks in two places, the language matches the member’s
+floor languages, self-reference agrees.
+Under the rubric a wrong name costs twice (the 45% metric and the 20% restraint weight)
+and an abstention once, so trading wrong names for unknowns at a good rate improves the
+coverage–TAA curve without touching a model.
+The measured residual is exactly this class: the parser’s title-only errors all violate
+the dated-portfolio constraint (agenda §10.1). Cost: rules over R12, scored in seconds
+on logged posteriors (agenda §11.2 R2); first run on the parser’s XV residuals.
+
+**R16. Cross-condition enrollment.** Volume is settled; condition is not.
+The archive is the broadcast mix, the live input may be a floor feed or the stream,
+bench and rostrum microphones differ, and bilingual members shift embedding by language
+(agenda §3.5). With 85% of members above ten minutes, volume can be held at five minutes
+and condition varied.
+Hypothesis: matched condition at five minutes beats mismatched at any volume, and the
+median member’s remaining 42 minutes buy under a point.
+Cost: a re-scoring of S13’s embeddings (agenda §10.11) plus S15 for language; no new
+audio. Gives R4 the number adaptation must beat.
+
+**Considered and not registered: linking published coverage to interventions.** A
+retrieval layer that surfaces a member’s prior public statements and their press
+coverage beside an intervention.
+It is a publication direction, not an attribution one: it moves no metric in agenda
+§4.2, and its honest case is the gap between USD 0.71 per audio-hour for raw ASR and the
+EUR 1.65–2.85 per minute a chamber pays for a record (agenda §3.3, dossier §11.14). No
+criterion in §4.2’s vocabulary scores it; retrieval precision against human relevance or
+an editorial-utility measure would be new instruments, so it is marked unmeasurable
+under this protocol.
+Its weak feedback path into attribution is circular where the coverage derives from the
+record; this layer’s judgment is that it stays out of the posterior.
+The question it does raise, provenance separation between record, retrieved and
+generated text and the cost of an editorialising link against an unattributed turn, is
+Q-008.
 
 ### 8. What would be genuinely new
 
@@ -1042,10 +1109,21 @@ Hypothesis registry seeds:
 | H-005 | Target-speaker extraction on interpreted segments recovers at least 50% of the TAA loss versus isolated floor audio | TAA on the interpreted subset; paired | R5 subset | mixed channel |
 | H-006 | A learned normalizer closes at least 50% of the editorial gap without raising verbatim WER | record-WER and WER; paired | R6 harness | Congreso plenaries |
 | H-007 | At a 2-minute lag, name revision rate is under 5% and TAA is within the session interval of offline | revision rate, TAA; determination | streaming logger | live-stream replay |
-| H-008 | Visual identity (ASD + face + overlay OCR) raises TAA on turns under 10 s by more than the best acoustic change | TAA stratified; paired | R10 harness | archive video |
+| H-008 | *Retired: split into H-010 (is the chyron there) and H-011 (is the speaker on camera), which failed together as one claim* | — | — | — |
+| H-009 | A KB with dated portfolios and merged aliases raises the text-only parser’s precision on the title-or-role-only announcement stratum from 0.86–0.94 to at least 0.97 at unchanged coverage | TAA on that stratum, text-only; determination | text-side scorer (agenda §10.1) | XV and ParlaMint-ES records; sandbox, minutes |
+| H-010 | Where the chyron is present on at least 80% of rostrum turns, OCR resolved against the KB raises TAA@95% on the weak-announcement stratum by at least 10 points over the text-plus-acoustic standing best | TAA@95% on that stratum; paired transition count (§3); +10 | R1 harness with the video track | archive video, then live replay; conditional on S3 |
+| H-011 | The camera shows the speaker on at least 50% of turns under 10 s; given that, ASD plus face matching raises TAA@95% on the under-10 s stratum by at least 10 points over the text-plus-acoustic standing best | on-camera fraction, determination (S8); then TAA@95% stratified; paired; +10 | manual count, then R1 harness | archive video; audio-aligned reference list; 45 sessions |
+| H-012 | A turn-sequence prior conditioned on agenda-item type raises text-only TAA on turns under 30 words from 0.49–0.55 by at least 10 points, fitted on ParlaMint-ES, tested on Congreso XV | TAA on the under-30-word stratum, text-only; determination; +10 | text-side scorer | records only; sandbox, one day |
+| H-013 | A KB-constraint validator removes at least two wrong names per right name lost, so the coverage–TAA curve dominates the unvalidated curve at every coverage and actDCF closes at least half its gap to minDCF | coverage–TAA curve; Cllr, actDCF, minDCF; paired | R1 harness coverage sweep; trial scorer | the standing best’s logged posteriors; first pass on the parser’s XV residuals |
+| H-014 | At five minutes of enrollment per member, matched-condition enrollment lowers FAR at FRR 5% by at least 30% relative to mismatched; beyond five minutes the rest of the archive raises TAA@100% on rostrum clips by under one point | FAR at FRR 5%; TAA@100% by clip duration; paired by member and by session | trial scorer over S13 embeddings; S15 for language | XV clips, enrollment from earlier sessions, held-out members as impostors |
 | Q-001 | Which audio channel does the inherited pipeline consume, and is an isolated floor feed or the interpreters’ feed obtainable? | open question | — | — |
 | Q-002 | Which two chambers, and which five languages? | open question | — | — |
 | Q-003 | Does the co-official-language portal serve an original-only or reduced-interpretation audio variant? | open question; settle with `ffprobe` and a listening test | — | — |
+| Q-004 | Does the live Canal Parlamento feed carry the same name-and-group overlay as the archive MP4s, on the same turns, with the same lead time? | Net box (S3 on both feeds) | — | — |
+| Q-005 | What is the director’s camera policy on interjections and bench replies, and does it differ between question time and legislative debate? | Net box (S8); the chamber for the policy | — | — |
+| Q-006 | Does the Congreso’s conference system drive camera switching from microphone events, as DICENTIS can (agenda §3.8)? If so the camera cut is microphone metadata by another route and R13’s face signal becomes near-deterministic | chamber only (add to S24) | — | — |
+| Q-007 | Under what terms may portraits and archive face tracks build a gallery, and does biometric matching of members need the chamber’s consent? | chamber and counsel; a legal question | — | — |
+| Q-008 | For a coverage-linking layer: does the record policy admit retrieved context beside the record, what provenance separation (record, retrieved, generated) does it require, and is there a defensible utility criterion? Unmeasurable under §4.2 until answered | chamber; editorial staff | — | — |
 
 ### 10. Spikes and quick tests
 

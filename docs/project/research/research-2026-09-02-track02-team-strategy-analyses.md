@@ -1,6 +1,6 @@
 ---
 title: Track 02 Team Strategy — Four Analyses in Full
-description: The four independent strategy analyses behind §12 of the Madrid Open dossier — a portfolio of five team bets, five architectures differing in where the speaker's name comes from, a differentiation memo, and a hedging plan for a brief nobody has seen
+description: The strategy analyses behind §12 of the Madrid Open dossier — a portfolio of five team bets, five architectures differing in where the speaker's name comes from, a differentiation memo, a hedging plan for a brief nobody has seen, and the design of a member knowledge base and multimodal identity stack
 author: Claude Code
 ---
 # Research: Track 02 Team Strategy — Four Analyses in Full
@@ -1160,3 +1160,316 @@ improvement under this rubric (A §4.4); revert it.
 The floor at every hour is one artifact: the pipeline’s transcript, text-only names with
 their evidence, abstentions where the evidence is thin.
 It is never nothing.
+
+## 5. Multimodal Identity, the Member Knowledge Base and Contextual Priors
+
+The design memo behind the agenda’s R12 to R16 and the dossier’s architecture A4.
+Written after the four analyses above, in response to the question of whether member
+profiles built up front, from official and open sources, would improve attribution.
+
+Deepens R10 (agenda §7) and A4 (dossier §12.3). Tags: **(measured)** for numbers run in
+this programme (agenda §10 and this session’s archive coverage); **(technical)** for
+published figures; **(estimate)** for my own; **(proposed)** for design.
+S3 and S8 are unrun; every visual claim says which branch it assumes.
+
+### 1. The member knowledge base
+
+The XV manifest holds 370 deputies, 32 government members and 33 other persons over
+9,441 clips (measured).
+The roster file carries a Wikidata id, names and 4 to 11 alias spellings for 3,830
+members across legislatures, plus 11 groups with abbreviations (measured).
+Three layers attach to it.
+
+**(a) Voice.** Enrollment needs 5 to 30 s per person (dossier §11.5), several clips for
+a centroid (agenda §3.5). The archive gives 97% of the 427 named members at least 5 min
+and a median of 47 min (measured), two orders of magnitude more.
+Open-web audio (interviews, party channels, podcasts) therefore adds nothing to coverage
+except for the four members under a minute, new entrants and non-members, and two
+objections say it subtracts.
+Condition mismatch: the same-room advantage behind R4 and H-004 is matched microphone
+chain, room and codec; a centroid averaged with a studio interview is pulled off the
+chamber condition, and condition dominates the embedding shift (agenda §3.5). Label
+bootstrap: archive labels come from a surname-sequence merge with about 2.4% unmatched
+(agenda §10.10); open-web audio has no label beyond a caption, so a human labels it or
+the model being built does, which is circular.
+Co-official clips may enroll the interpreter until S1 confirms the track layout.
+Its one legitimate use is a cross-condition *test* set.
+The layer holds one centroid per language and legislature (per-language until S15 says
+otherwise), with the clip and session ids behind each so evaluation sessions can be
+excluded; the AS-norm cohort is the other members.
+
+**(b) Face.** Three sources.
+First, the archive: every per-intervention MP4 is named, so a gallery bootstraps without
+annotation: detect faces at 1 fps, keep the dominant frontal track in podium framing,
+label it with the clip’s speaker, drop clips where two large faces compete.
+Second, the official congreso.es portrait (a scraper; the site returns 403 to bare
+requests, inventory §2) and the Wikidata P18 image reachable from the roster ids, both
+with clear licence terms.
+Third, party and press photographs, with unclear reuse terms; skip unless the archive
+fails a member.
+One clean portrait gives usable verification; the gallery stabilises at 5
+to 20 in-domain stills across sessions, lighting and pose (estimate).
+Recognition models take a 112 px aligned crop, so a face under about 60 px in the frame
+is unreliable (estimate); podium framing on a 1080p feed gives 150 px and more, wide
+shots 10 to 30 px.
+Drift over a legislature (glasses, beards, weight, the mask period) is
+handled by dating every template, preferring those within twelve months, and refreshing
+after each session from turns where announcement, voice and face agreed, each refresh
+logged so it can be rolled back.
+
+**(c) Non-biometric context.** Group with aliases (per speech in the processed session
+files, measured); role state by date: chair and vice-presidents (the chair changes 3.07
+times per session and 70% of chair markers carry only the office, measured S7),
+ministers with portfolio and dates (the parser’s table, agenda §10.1), spokespersons,
+committee chairs; committee membership and constituency from the diputados open data
+(network); name variants plus a phonetic key per surname built for the four
+orthographies, since Soundex-family keys are English; sex from the honorific; speaking
+history from the manifest: agenda types, turns per session, median duration, addressed
+minister at question time.
+
+Schema (proposed):
+
+```yaml
+member:
+  id: Q…                                   # Wikidata id, the roster key
+  names: {canonical, surnames: [s1, s2], aliases: [...], phonetic: [...], sex}
+  affiliations: [{group_id, from, to}]
+  roles: [{role, portfolio, organ, from, to}]   # chair, minister, spokesperson, ...
+  constituency: …
+  committees: [{organ_id, from, to}]
+  presence: [{session_id, present, source}]
+  speaking: {agenda_types, turns_per_session, median_turn_s, addresses: [Q…]}
+  voice: [{centroid_id, language, legislature, clip_ids, seconds, snr, model, built}]
+  face:  [{template_id, source, date, face_px, model, built}]
+  provenance: {roster_source, last_refresh, refresh_events: [...]}
+```
+
+Buildable today from files in hand: roster, aliases, group per speech, agenda items and
+types, speaking history, the minister table, surname keys.
+Needing a networked box: archive MP4s (voice and face), portraits, Wikidata images,
+committee and constituency tables, attendance.
+Needing only hours: phonetic keys and the role state machine.
+
+**Licensing and data protection.** Archive media carry the Congreso’s aviso legal, not a
+CC licence; research reuse is customary, redistribution of derived material is not
+covered. Voice centroids and face templates built to identify people are GDPR Article 9
+biometric data; a deputy speaking in public does not lift the category, it makes the
+“manifestly made public” and “substantial public interest” bases arguable, and the
+chamber as controller has a cleaner basis than a third party.
+The AI Act treats remote biometric identification as high-risk, so a product, as opposed
+to a study, needs a DPIA and a conformity position.
+None of this forbids work on public officials’ public conduct; it means the position has
+to be written down: templates stay in-house and manifests are published instead (agenda
+§5.1 step 8), identification is restricted to the roster and never applied to visitors
+or staff, retention is tied to the legislature, and dossier §12.8’s text-first design
+keeps a biometric-free mode available.
+
+### 2. What each layer buys, per failure mode
+
+| Failure mode | Anchor | Layer that fixes it | Expected effect |
+| --- | --- | --- | --- |
+| 350-roster open-set ceiling | EER doubles from 100 to 700 enrolled (technical, dossier §11.7) | context: candidate sets, median 2 per numbered item, 10 to 12 per debate section (measured §10.1, §10.10) | moves acoustics below the 100-speaker end of the curve; H-002’s +10 TAA@95% is unmeasured; text-only gained only +0.012 to 0.016 (measured) |
+| Short turns | text 49 to 55% under 30 words (measured); EER +46% relative from 3.6 s to 2 s (technical) | face and ASD, duration-insensitive: a 2 s turn is 50 frames | if S8 finds a usable face on most sub-10 s turns, 50% to 75 to 85% (estimate); under wide-shot direction, near zero |
+| Cross-lingual shift | systematic, condition-dominated (technical, agenda §3.5) | voice: per-language centroids; face, chyron and context are language-invariant | visual and context cross-check exactly the turns where voice is least trusted |
+| Interpreter overlay | embedding flips at 0 dB (measured §10.7); acoustics gated off above −6 dB | chyron, context, face; ASD’s audio branch under a two-voice mix is unmeasured | on the co-official tail (0.6% of speeches, 43 sessions), non-acoustic evidence carries attribution alone |
+| Same-surname collisions | 39% share a first surname; group halves it; both surnames near-unique (measured) | context (group, sex, portfolio, agenda), then face or voice | most of the first-surname-only stratum, 10 to 19% of announcements (measured) |
+| ASR-garbled names | S9 unrun (agenda §10.1) | phonetic keys against the candidate set, not the roster; chyron OCR as a second textual name outside ASR | fuzzy matching against 350 would false-match; against a dozen it is safe (estimate) |
+
+### 3. The visual stack
+
+**Active-speaker detection.** TalkNet 92.3, Light-ASD 94.1, LoCoNet 95.2, LoCoNet with
+TalkNCE 95.5 mAP on AVA-ActiveSpeaker (technical, agenda §3.6), scored per face track
+for audio-visual sync on movie frames.
+Chamber conditions sort into four regimes.
+Podium framing: one large frontal face, trivially easy; the useful output is the
+negative, an off-camera interjector whose voice does not match the visible lips.
+Wide shots: dozens of faces at 10 to 30 px, below the size at which any ASD model works
+(estimate).
+Cutaways: the director cuts to a reacting minister or the chair while someone
+else speaks, so the visible face is not the speaker; this is REPERE’s distinction
+between “who is on screen” and “who is speaking”, catching it is ASD’s job, and the
+system must abstain visually when the best track scores low.
+The unmeasured case is the overlay, where the audio branch hears two voices (F-V4).
+Light-ASD is the practical pick (weights in-repo, Apache-2.0, real-time); LoCoNet has no
+licence (inventory §3.12).
+
+**Face recognition at roster scale.** 350 identities is small.
+ArcFace-class models report verification above 99.5% on LFW-style pairs and mid-90s TAR
+at FAR 1e-4 on IJB-C (technical, not re-verified here).
+With a dated in-domain gallery, rank-1 on podium frames should exceed 98%, with errors
+in profile views, occlusion, motion blur and small faces (estimate).
+Against acoustics: voice open-set at 350 sits at 2 to 3% EER on clean full-length trials
+and 9 to 13% on 2 to 3 s segments (technical, dossier §11.7), whereas face has no
+duration axis and its out-of-set population (ushers, staff, gallery) is separable by
+screen region rather than by score.
+No published face-ID number exists for parliamentary broadcast; the 98% is a claim to
+test (F-V3). InsightFace weights are research-only; facenet-pytorch or DeepFace are the
+permissive swaps (inventory §3.12).
+
+**Chyron OCR.** A fixed-position, fixed-font, high-contrast overlay is an easy OCR
+problem; PaddleOCR PP-OCRv5 covers Spanish and the co-official orthographies (inventory
+§3.12). The open questions are not accuracy: whether the archive MP4 carries a chyron at
+all (a search summary says yes, unverified, agenda §3.6), whether the live feed does,
+when it appears and how long it persists, whether it names the member or only the group,
+and whether the co-official subtitle collides with it.
+The string goes through the chair parser’s alias and phonetic matcher; if present, this
+is REPERE’s unsupervised naming from overlaid text, a name that never passed through
+ASR.
+
+**The VLM route.** A Qwen3-VL-class model reading the frame holistically, constrained to
+a JSON schema: shot type (podium, wide, cutaway, bench, chair), overlay text verbatim,
+visible face count, rostrum occupied.
+Its value is scene classification and robustness to a broadcast redesign.
+Its hazards: no calibrated score; cost (1 fps over six hours is 21,600 frames, roughly 1
+to 2 GPU-hours for a 4B to 8B model, estimate); and face hallucination, since asked “who
+is this” a VLM names a politician from pretraining, uncontrollable and the regulatory
+case to avoid. Use it at shot changes only, never for identity.
+
+**What PERCOL got right and what changed.** REPERE’s winning design named clusters, not
+frames: diarize audio, track faces, propagate names from overlaid text to co-occurring
+voice and face clusters (technical, agenda §3.6). It separated “who speaks” from “who is
+on screen”, and it scored fixed named identities, the move agenda §4.2 makes against
+permutation-invariant cpWER. What 2026 changes: ASD replaces co-occurrence heuristics;
+ArcFace-class embeddings replace the 2013 face leg, PERCOL’s weakest; OCR on clean
+overlays is solved; a VLM adds scene understanding; and a parliament supplies what
+television never did, a closed roster with an agenda.
+EGER 24.4% was measured on open television; with candidate sets the floor should be far
+lower (estimate).
+
+### 4. Contextual interpretation as its own signal
+
+**Disambiguation.** The role state machine resolves office-only references: every
+residual parser error on “señor ministro” was the wrong minister (measured §10.1), and
+the per-question agenda heading, which names the addressed minister and is empty for 42%
+of rows today, holds essentially all of the LLM fallback’s residual error (measured
+§10.8). Group halves first-surname collisions; sex and the agenda item take most of the
+rest.
+
+**Validation.** The knowledge base lets an attribution be checked for plausibility, not
+only scored (proposed): a member named on a turn who is in no candidate set for the item
+and was not announced; a reply slot attributed to someone other than the addressed
+minister; a member attributed simultaneously in two organs (up to five committees run in
+parallel, dossier §11.11); a minister named outside their term; a member recorded absent
+in the sitting’s votes.
+Each contradiction lowers the posterior and pushes toward abstention, not toward the
+next-nearest name.
+These are the wrong-person errors that DER and permuted cpWER score at
+zero (measured §10.2), so the check is the only cheap detector of silent failures
+(testable today, F-V5).
+
+**Enrichment.** The entry carries group, role, constituency, agenda item, initiative and
+addressee: what the Diario prints and what a legislative twin joins on.
+
+#### Linking press coverage to what members say
+
+A retrieval layer that surfaces, for an intervention, what the member has said publicly
+on the topic and how it was reported.
+
+It earns nothing on the 45% metric line, since it changes no name on any turn.
+It earns on the product surface: shippability, ambition and demo, and the gap between
+transcription at USD 0.71 per audio-hour and the EUR 1.65 to 2.85 per minute a chamber
+pays for a record (agenda §3.3, dossier §11.14). That gap is attribution, editing and
+publication, and this is publication.
+
+The feedback into attribution is weak and should stay out of the posterior: a member
+recently in the news is marginally likelier to speak on the matching item, but the
+agenda and the spokesperson list predict that far better; the prior would favour
+ministers and party leaders, the easy cases; and same-day coverage quotes the stream or
+the record, so the prior would be derived from the thing being attributed.
+Presentation only; circularity is the decisive argument.
+
+The real constraint is integrity.
+An official record must not absorb press framing or model commentary, and a wrong or
+editorialising link on a member’s words is a worse failure than an unattributed turn.
+Three layers, physically separated (proposed): the **record** (turn, attribution,
+evidence ledger); the **retrieved** layer (source, canonical URL, publisher, date,
+retrieval query, similarity score, title and a short snippet under the publisher’s
+terms, never paraphrased into the record); the **generated** layer (any summary, marked
+with model id, prompt version and date, in a sidecar the record never includes).
+Links get their own relevance threshold and abstain path, a date window, and a flag when
+coverage predates the legislature.
+
+Practicalities: publisher RSS, GDELT (free, Spanish coverage), Europe Media Monitor,
+paid aggregators; publisher terms mostly forbid full-text storage, so keep metadata and
+snippet. Retrieval is an embedding index over member plus topic entities, deduped by
+canonical URL and near-duplicate title.
+Coverage arrives hours to days after a same-day record, so the link layer is
+asynchronous and revisable under §4.5. Cost is tens of euros a month at a few thousand
+interventions a week (estimate).
+It needs egress this environment lacks; none of it has been tested.
+
+### 5. Fusion
+
+Per turn (proposed): a candidate set from the agenda, the roster, the chair and an
+explicit “none of these”; four sources, each emitting a calibrated log-likelihood ratio
+per candidate or a gate state: text (parse class, alias match, continuation), acoustic
+(the §3.5 recipe), visual (face LLR on ASD-positive tracks; chyron string with OCR
+confidence and roster-match score), and context as the prior, never double-counted with
+the candidate-set constraint.
+Fusion is a weighted sum of calibrated LLRs with weights fit by logistic regression on
+the benchmark, since calibration plus fusion gave VoxWatch its largest gain (technical,
+agenda §3.5). Gates: acoustic weight to zero above −6 dB estimated overlay ratio
+(measured rule §10.7), visual to zero when ASD finds no synced face, text to zero with
+no announcement in the window.
+The unknown mass takes its prior from the out-of-set rate; the threshold is set for a
+false-alarm rate under 1/N per session and swept for the coverage-TAA curve (§4.4). When
+two strong sources disagree the fuser abstains and emits both with evidence; that is the
+plausibility check’s output path.
+Provenance is a ledger row per source per turn: time window, raw observation
+(announcement sentence, OCR string, face track and frame ids, score vector), calibrated
+LLR, gate state, model and knowledge-base version; dossier §12.5’s citation chip is a
+view of it.
+Scoring follows §4.2, with Cllr and actDCF on the fused posterior, stratified
+per §4.3 plus a visual-condition stratum (shot type, on camera, chyron present).
+Chyrons arrive seconds late, so fused names are revisable and the revision rate is
+logged (§4.5).
+
+### 6. Build order, cost, and when the visual stack is worth it
+
+Offline, before any event (proposed): the context and name-variant layers from files in
+hand (hours; they serve A1 through A5 alike); voice centroids from the archive (about 3
+GPU-hours for 907 h, scaling inventory §9.4); the bootstrapped face gallery from the
+same clips (3.3 M frames at 1 fps, 5 to 9 GPU-hours, estimate) plus Wikidata portraits;
+calibrators and thresholds from held-out sessions; the chyron region template; fusion
+weights on the smoke benchmark.
+Live: streaming ASR into the chair parser, Light-ASD and face matching on the stream,
+OCR at shot changes, the fuser and ledger; one GPU.
+
+The verdict, with S3 and S8 unrun: two conditions decide it.
+If S3 finds a named chyron on the live feed for most rostrum turns, OCR is an afternoon
+of work and joins the fuser at once, as dossier §12.3 already prescribes.
+If S8 finds the speaker on camera with a face above about 60 px on most sub-10 s turns,
+face plus ASD is the only signal that lifts the short-turn stratum, and it carries the
+interpreter-overlaid tail as a side effect.
+If the chyron is absent and the director holds wide shots for interjections, the stack
+costs a GPU, days of engineering and a biometric compliance position for a few points on
+rostrum turns the chair parser already names at 93 to 95% (measured), and it is not
+worth it; nor where conference-system events exist (R11, a join), nor in a hackathon
+whose inherited pipeline is audio-only.
+Independently of both spikes, the context and name layers are worth building now; the
+face gallery script is worth writing but not running live until S8 reports.
+
+### 7. Falsification and the cheapest tests
+
+- **F-V1, S3 extended.** Chyron yield by turn type and seconds-to-appearance; name
+  versus group-only; archive versus live.
+  Falsified if named chyrons cover under half of rostrum turns.
+- **F-V2, S8 extended.** For every sub-10 s turn in five sessions, code shot type,
+  speaker visibility and face size, and count interjections where the camera stays on
+  the rostrum, where ASD must reject the visible face.
+  Falsifies H-008 if visible-face coverage is under about 50%.
+- **F-V3.** Face rank-1 at N = 350 on the bootstrapped gallery, enrol sessions A to C,
+  test D, by face-size bucket and shot type; then a XIV gallery tested on XV members
+  present in both, for the template-decay curve behind the twelve-month rule.
+  Falsifies “face at 350 is easy” below 95% on podium frames.
+- **F-V4.** Light-ASD on the 54 co-official clips: does it still mark the deputy active
+  under the two-voice mix.
+  Falsifies the claim that visual evidence is unaffected by the overlay.
+- **F-V5, sandbox today.** Inject rotated names into the XV record (within group, across
+  group, minister for deputy) and measure the fraction the plausibility checks catch at
+  a fixed false-alarm rate; falsified if the catch rate is low.
+- **The knowledge-base thesis itself.** If S9 shows the chair’s hand-off survives ASR
+  above 90% and S8 shows short turns off camera, the name-variant layer is the whole
+  story and the visual stack is a demo.
+  If S13 shows archive-enrolled acoustics above 90% on short turns, which dossier §11.7
+  makes unlikely, the face layer’s margin is small.
