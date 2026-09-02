@@ -1791,8 +1791,13 @@ The architectures differ in their theory of attribution, not in model choice.
   §10.10), but as a primary signal this is proposed, not measured.
 - **A4 PERCOL-2026 (multimodal).** Chyron OCR, active-speaker detection and face
   matching fused with the chair parser.
-  The precedent is REPERE at EGER 24.4% (agenda §3.6); chyron presence on the live feed
-  is unverified.
+  The precedent is REPERE at EGER 24.4% (agenda §3.6). The agenda now splits this into
+  two independently gated signals (R13): OCR is a text source that exists only if the
+  overlay is on the feed being scored, and face plus active-speaker detection exists
+  only if the director shows the speaker.
+  Bundled as one claim a null result cannot say which failed, which is why H-008 was
+  retired and split. Both gates are unverified and both are half-day manual counts (S3,
+  S8).
 - **A5 Enrolled-Joint (joint SA-ASR, ambitious).** DiCoW or SE-DiCoW with pyannote masks
   and a roster-naming step.
   The highest ceiling, no Iberian evaluation, and no calibrated identity score.
@@ -1925,6 +1930,17 @@ In descending value per hour spent:
 7. **Enrollment assets** if the acoustic path is in scope: cached centroids, trials,
    calibrator, threshold.
    Without these, A2 cannot run on the day.
+8. **The member knowledge base**, the highest-value pre-build item that needs no network
+   (agenda R12). Two of its three layers are buildable from data already held: the
+   name-variant and phonetic layer, the only thing that addresses ASR-garbled surnames
+   and which S9 measured as worth 12.5 points; and the role state machine with dated
+   portfolios and agenda candidate sets, which turns the base into a validator catching
+   wrong-person errors that permuted scoring cannot see.
+   The voice and face layers need the networked box.
+   Face templates and voice centroids built to identify people are Article 9 data under
+   the GDPR and sit near the AI Act’s remote-biometric category; the text-first design
+   keeps a biometric-free operating mode available, which is worth preserving
+   deliberately rather than by accident.
 
 #### 12.8 Recommendation
 
