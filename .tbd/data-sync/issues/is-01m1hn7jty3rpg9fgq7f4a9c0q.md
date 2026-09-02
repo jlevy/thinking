@@ -3,9 +3,9 @@ type: is
 id: is-01m1hn7jty3rpg9fgq7f4a9c0q
 title: "Inventory: joint SA-ASR, text-side attribution, multimodal, audio events, text post-processing (Opus agent)"
 kind: task
-status: in_progress
+status: closed
 priority: 1
-version: 6
+version: 7
 spec_path: docs/project/research/research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md
 labels:
   - inventory
@@ -20,6 +20,10 @@ dependencies:
     target: is-01m1hncdvbe5dq4why0g6v36ag
 parent_id: is-01m1hn7gch0xb2sv9fw6a4qes1
 created_at: 2026-09-02T18:13:51.069Z
-updated_at: 2026-09-02T18:16:29.803Z
+updated_at: 2026-09-02T18:17:15.714Z
+closed_at: 2026-09-02T18:17:15.713Z
+close_reason: "Inventory brief delivered: scratchpad/inv-joint-text-mm.md (58 rows; Dixtral repo and weights found; SpeakerLM/DM-ASR/SA-SOT have no code)"
+resolution: null
+duplicate_of: null
 ---
 Agent brief -> scratchpad/inv-joint-text-mm.md. DiCoW/SE-DiCoW/TS-ASR-Whisper, MOSS-TD, VibeVoice-ASR, TagSpeech, SpeakerLM, multitalker-parakeet; DiarizationLM; TalkNet/LoCoNet/InsightFace/OCR; SenseVoice/PANNs/BEATs; NeMo ITN, punctuation, MT for ca/eu/gl->es.
