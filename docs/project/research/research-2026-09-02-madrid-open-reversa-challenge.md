@@ -7,7 +7,7 @@ author: Claude Code
 
 **Date:** 2026-09-02 (last updated 2026-09-02; second pass: Track 02 technical deep
 dive; third pass: fact-check corrections and companion-report cross-links, fourth pass
-2026-09-02 (inventory corrections))
+2026-09-02 (inventory corrections); fifth pass 2026-09-02: §12 team strategy)
 
 **Author:** Claude Code
 
@@ -1674,6 +1674,274 @@ long-form decode; speaker-count collapse past four speakers on streaming diariza
 false-alarm inflation as the watchlist grows; identity drift when a deputy switches
 language mid-intervention; and timestamp divergence between the interpreted and floor
 channels.
+
+### 12. Strategy for a team
+
+**[Analysis]** Sections 1 to 11 describe the competition and the problem.
+This section is the layer above them: what a team should actually do on 3 October.
+It was produced by four independent analyses working from this dossier and its two
+companion reports, the
+[research agenda](research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md)
+(cited as *agenda §n*) and the
+[tooling inventory](research-2026-09-02-parliamentary-transcription-tooling-inventory.md)
+(*inventory §n*). Where a claim rests on something measured in the agenda’s spike
+results (§10 there), it is marked measured; the rest is judgment, and the two are kept
+apart because most of the numbers below came from synthetic or text-only material and
+are upper bounds.
+
+The four analyses were run separately and converged, which is the most useful thing
+about them.
+All four independently put the chair’s announcement, not the waveform, at the
+centre of the design, and all four made calibrated abstention with visible provenance
+the second pillar. That convergence is the recommendation in §12.8.
+
+#### 12.1 The rubric is the specification, and most of it is bankable in advance
+
+The metric is 45% of the score (§5). Restraint is 20%, auditability 15%, shippability
+10%, ambition and demo 10%. The 55% that is not the metric depends barely at all on
+which chambers, which languages or which data arrive at 09:00, which means it can be
+built before the event.
+That is the single most important strategic fact in this document.
+
+Whatever bet a team takes, this floor applies:
+
+- **Ask the questions that change the build in the first thirty minutes** (§12.6), and
+  run the inherited pipeline unchanged on one session, scored, before 11:30. That
+  baseline is the thin slice; everything after is a paired comparison against it (agenda
+  §4.7).
+- **Score with fixed labels.** Permutation-invariant cpWER and DER score 0.0000 on a
+  transcript where every name is wrong (measured, agenda §10.2). A team optimising them
+  is optimising diarization consistency and calling it attribution.
+- **Never emit a nearest neighbour below threshold.** Emit “unidentified speaker” with
+  the candidate list. Open-set EER roughly doubles from 100 to 700 enrolled speakers
+  (§11.7), so a cosine match against a 350-member roster names the nearest neighbour,
+  not the speaker.
+- **Attach evidence to every name**, and gate the decoder with VAD plus the
+  compression-ratio filter: ungated whisper-small emitted 401 hallucinated words per
+  hour of non-speech, and VAD alone passes 92.5% of babble (measured, agenda §10.6).
+- **Never attribute acoustically on an interpretation-mixed segment.** Flag it
+  (measured, agenda §10.7).
+- **Do not present Spanish transcription as the contribution.** Both chambers already
+  run it in production (§11.14), and turbo differs from the paid consensus by 3.25%,
+  less than the paid APIs differ from each other (agenda §3.3).
+
+#### 12.2 Five strategies
+
+Five coherent bets, each optimising a different thing.
+The scores are the analysis’s honest estimates against the rubric lines, not
+predictions.
+
+| Strategy | The bet | Metric /45 | Restraint /20 | Audit /15 | Ship /10 | Demo /10 | Robustness |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **1 Read the Chair** | The name is in the text; audio breaks ties | 32 | 13 | 12 | 6 | 7 | High; exposed to chamber B’s chair habits |
+| **2 Ready Before They Sit Down** | Win the speed clause with bounded-lag streaming | 28 | 10 | 9 | 8 | 9 | Medium; needs a GPU and latency scored as a gradient |
+| **3 Defend Every Name** | Calibrated abstention as the product | 25 | 18 | 14 | 8 | 5 | High; exposed only to how abstention is scored |
+| **4 The Chamber Knows Its Own** | Same-room acoustic identification from the archive | 20–38 | 11 | 9 | 5 | 8 | Low; needs enrollment audio, a GPU and a clean channel |
+| **5 Where the Name Is Lost** | Deliver the instrument, not the system | 18 | 12 | 15 | 4 | 8 | High on delivery, low on score |
+
+**1. Read the Chair.** Keep the inherited pipeline for words; add the chair-announcement
+parser, a roster matcher, the agenda candidate set and an LLM fallback.
+Every name carries its evidence.
+The bet rests on a measured floor: on two independent records of the Congreso seven
+years apart, the parser names the right member on 93–95% of rostrum turns and 92–94% of
+all regular turns with no audio at all (agenda §10.1).
+
+**2. Ready Before They Sit Down.** Bounded-lag streaming: publish at T+30 s, finalize at
+T+2 min, log finalization lag, name revision rate and first-versus-final accuracy.
+Five minutes is not a throughput problem — a six-hour session is roughly 40 seconds of
+GPU time for ASR (§11.12) — it is a behaviour, and nobody has published a revision
+logger.
+
+**3. Defend Every Name.** Concede coverage deliberately and spend the day on the
+coverage–accuracy curve, an evidence ledger and the shipping story.
+The highest floor and the lowest variance of the five, because it targets the 35% of the
+rubric that most teams treat as documentation.
+
+**4. The Chamber Knows Its Own.** Enrollment from the named archive, ReDimNet2-B6
+embeddings, adaptive s-norm, a calibrator, agenda-only candidate sets, and an overlay
+gate at −6 dB. The highest ceiling and the lowest robustness: it needs enrollment audio
+for both chambers, a GPU, and a channel that is not interpreter-mixed.
+
+**5. Where the Name Is Lost.** Do not chase the 45%. Produce a fixed-label, stratified
+error decomposition of the inherited pipeline and fix the largest stratum.
+This is aimed at the hiring conversation the organizers say the event is for (§6), and
+it is the right play only if the metric is out of reach for everyone.
+
+#### 12.3 Five architectures: where the name comes from
+
+The architectures differ in their theory of attribution, not in model choice.
+
+- **A1 Chair-Spine (text-first, conservative).** The name comes from the chair’s
+  hand-off parsed out of the ASR transcript, plus the continuation rule, regex first
+  with an LLM fallback (measured: 0.94 projected, agenda §10.8). Audio supplies words
+  and change points only.
+- **A2 Cascade (acoustic-first modular).** pyannote to embeddings to archive enrollment
+  to AS-norm and calibration to an agenda-constrained open-set match with explicit
+  unknown mass. Sits on the known-bad 100-to-700-speaker operating point (§11.7), and the
+  in-domain trial that would validate it has not run.
+- **A3 Skeleton (record-structure-first).** The published order of business becomes a
+  slot sequence and ASR is aligned into it; attribution is a slot id.
+  Candidate windows are measured small (median 2 speakers per numbered item, agenda
+  §10.10), but as a primary signal this is proposed, not measured.
+- **A4 PERCOL-2026 (multimodal).** Chyron OCR, active-speaker detection and face
+  matching fused with the chair parser.
+  The precedent is REPERE at EGER 24.4% (agenda §3.6); chyron presence on the live feed
+  is unverified.
+- **A5 Enrolled-Joint (joint SA-ASR, ambitious).** DiCoW or SE-DiCoW with pyannote masks
+  and a roster-naming step.
+  The highest ceiling, no Iberian evaluation, and no calibrated identity score.
+  The right research direction and the wrong eleven-hour build.
+
+| Situation at 09:00 | Build | Reason |
+| --- | --- | --- |
+| Mixed public stream; es plus co-official; no GPU | A1, Spanish-only CTC for words, co-official turns flagged unknown | Overlay flips at 0 dB (agenda §10.7); only Spanish CTC fits four cores (agenda §10.4) |
+| Public stream; one 8 GB GPU | A1 spine, A2 as a tie-break on rostrum turns gated below −6 dB | turbo runs 35.6 audio-hours per hour; A2 needs a pre-built calibrator |
+| Isolated floor feed available | A1 plus A2 in full | Enrollment pays once the overlay is gone |
+| Conference-system events exported | A join, then A1 for the residual | A database join, not machine learning (§11.3) |
+| Video with chyrons in the pipeline | A4’s OCR as a fuser input to A1 | An hour-1 yield count decides |
+| Second chamber non-Spanish | A3 if a machine-readable agenda exists, else A1 with the LLM-only parser | Regex coverage falls to 0.438 without per-language rules (measured on Galician, agenda §10.1) |
+| Scored reference is the edited record | Add Spanish ITN, keep both text layers | §11.13; agenda §3.11 |
+
+#### 12.4 What the field will miss
+
+Assume most teams build Whisper plus a diarizer plus cosine similarity.
+These are the traps that costs them points without their noticing, all of them measured:
+
+- **DER hides exactly the turns the metric counts.** A two-second interjection inside a
+  four-minute speech is under 1% of the time.
+  The literal maximal-overlap turn-matching rule scored 0.49 on interjections for a
+  *perfect* hypothesis; intersection-over-union matching scores 1.00 (agenda §10.2).
+- **VAD is not a hallucination guard.** It removes applause, gavel and silence and then
+  passes babble, where decoded units hallucinate at 3,216 words per hour.
+  Paired on one stream, gating raised the rate from 289 to 519 words per hour (agenda
+  §10.6).
+- **The leaderboard fine-tunes are fragile, and two are contaminated.** All three
+  co-official fine-tunes lose to generic turbo on the operator’s own sample, and the
+  Open ASR Leaderboard correlates at ρ −0.14 with parliamentary agreement (agenda
+  §10.5). `BSC-LT/whisper-large-v3-LoS-punctuated` declares ParlamentParla and
+  Nos_ParlaSpeech-GL in its training data, and the Basque specialists declare Basque
+  Parliament (inventory §11.2). If a held-out chamber is one of those, a contaminated
+  model looks good for the wrong reason.
+- **Whisper’s language token is not a switch detector**, and at 0 dB it reports the
+  floor language on only half of full turns (agenda §10.7).
+- **Whisper’s basic normalizer inflates Catalan WER by up to 7 points** by splitting
+  `l'home` and `col·legi` (agenda §10.9). One versioned normalizer, applied to both
+  sides.
+- **The record is not verbatim.** Scored against the published record, a perfect
+  transcript loses about 9 points to editing policy (agenda §3.11).
+
+#### 12.5 Three demo moments
+
+The 10% for the live demo and much of the 20% for restraint are won or lost in the last
+few minutes.
+
+**“The chair told us.”** A name appears on a rostrum turn with a citation chip; clicking
+it plays the four seconds where the chair says *“Tiene la palabra el señor X”* and shows
+the agenda slot and the acoustic score as secondary evidence.
+*“We did not recognise his voice first.
+We heard the chair say his name, and here is the sentence.
+The voice agreed two seconds later.”*
+
+**“It declined, then it earned the name.”** On a co-official intervention or a
+sub-three-second interjection, the card shows the channel flag, the acoustic margin
+below threshold, and *“Unidentified speaker.
+Candidates from the order of business: X, Y, Z.”* Three seconds later the chair’s
+hand-off resolves it, the card updates with the citation, and the revision counter
+ticks. The presenter says nothing about restraint; the judge watches it happen.
+Then a threshold slider lets a judge pick the operating point on held-out sessions.
+This is restraint made visible rather than claimed, which is the difference between
+scoring the 20% and asserting it.
+
+**“Rotate every name, score zero.”** Two scoreboards on the same output with every
+speaker rotated to another member.
+Left: MeetEval cpWER 0.00, DER 0.00. Right: fixed-label cpWER 1.49, per-turn accuracy
+0.00, identification error rate 0.999 (measured, agenda §10.2). *“The default tool
+cannot see a wrong name.
+Ours can.”*
+
+#### 12.6 Planning under a brief nobody has seen
+
+Three unknowns dominate, ranked by hours of rework if guessed wrong.
+
+1. **What “you inherit a live pipeline” means** — a running modifiable service, a black
+   box, code to stand up, or only its outputs.
+   It decides whether the team builds ASR and diarization at all.
+   Reversa publishes no code (§9.1), so nothing narrows it before 09:00. Three to five
+   hours.
+2. **The scored reference text** — verbatim or the edited record.
+   If the record is scored, editorial error can exceed ASR error and a normalizer joins
+   the critical path. Two to four hours.
+3. **How latency and accuracy compose** — a five-minute cap or a weighted term.
+   The five-minute figure appears only on Luma (§10). Cap versus term decides whether
+   the streaming runner or the attribution fuser gets the afternoon.
+   Two to three hours.
+
+The remaining unknowns — which chambers, which languages, the audio channel, GPU
+availability, the input format — are afternoon adjustments once the invariant core
+exists.
+
+**Abort conditions**, each with a fallback that still runs on stage.
+At **hour 4**, if no session has gone end to end to a scored number, stop component work
+and run the text-only fuser on the inherited pipeline’s raw output.
+At **hour 7**, if acoustic identification adds nothing over the text-only floor when
+paired by session, demote acoustics to evidence-only and spend the time on the coverage
+curve and the abstention threshold.
+At **hour 9**, if the input format is unhandled or a session exceeds the cap, freeze
+features and build only the adapter; failing that, replay a pre-processed session
+labelled as a replay, with the coverage curve and the abstentions visible.
+Standing rule: a change that raises accuracy at 100% coverage and lowers it at 90% is
+not an improvement under this rubric (agenda §4.4).
+
+#### 12.7 What to build before the day
+
+In descending value per hour spent:
+
+1. **The attribution fuser with abstention and per-turn provenance**, consuming generic
+   timestamped anonymous turns and emitting a name with its evidence or an explicit
+   unknown with candidates.
+   It is independent of pipeline shape, chamber, GPU and metric definition, and it
+   serves the 45%, 20% and 15% lines with one mechanism.
+2. **The scoring harness** with fixed-label metrics, intersection-over-union turn
+   matching and the coverage curve (agenda §10.2). It is what lets the team decide
+   anything after 09:30.
+3. **The chair parser and roster matcher**, packaged, with the per-language rules and
+   the hybrid LLM prompt (agenda §10.1, §10.8).
+4. **Run the missing spike now**: 200 announcement sentences through TTS, ASR and the
+   parser. Every A1 number is measured on clean record text and is an upper bound until
+   this runs; if survival is below 60%, pre-build the phonetic matcher.
+5. **The hallucination guard**: VAD plus a compression ratio above 2.4 plus a
+   babble-aware threshold, retuned on turbo rather than the small model.
+6. **Mirrored weights and a container**, since credits arrive on the day and several
+   model hosts are slow or gated.
+7. **Enrollment assets** if the acoustic path is in scope: cached centroids, trials,
+   calibrator, threshold.
+   Without these, A2 cannot run on the day.
+
+#### 12.8 Recommendation
+
+**Build A1, the Chair-Spine, as the system, with Strategy 3’s abstention and evidence
+ledger as its floor.** The two combine naturally: the fuser produces the evidence the
+ledger displays, and the abstention threshold is set on the fused posterior.
+
+The reasons are measured rather than aesthetic.
+The text-side floor is 92–94% of regular turns with no audio at all, which is the number
+any acoustic identifier must beat, and beating chance is not the same as beating that.
+It needs no GPU, no credits and no enrollment audio, so it survives every branch of
+§12.6. And this dossier’s own reference architecture places non-acoustic evidence first,
+after microphone metadata (§11.16).
+
+Add the acoustic path as a gated tie-break on rostrum turns only, and only once 09:00
+confirms named enrollment audio and a channel that is not interpreter-mixed.
+Fold A3’s agenda structure into A1 as its candidate-set prior.
+Leave A5 to the research programme.
+
+Two honest caveats.
+The headline number for this recommendation is measured on the edited
+record, not on ASR output, and the spike that would test whether the chair’s hand-off
+survives recognition has not been run — which is why it is item 4 on the pre-build list.
+And if the second chamber is not Spanish, the parser’s structure transfers but its rules
+do not: precision held at 0.95 on a Galician corpus while coverage fell to 0.44 (agenda
+§10.1).
 
 ## Key Insights
 
