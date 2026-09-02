@@ -1,7 +1,7 @@
 ---
 title: The Madrid Open (Vol.1) and the Reversa Real-Time Parliamentary Record Challenge
 description: A full dossier on the 3 October 2026 Madrid Open competition, the three startups that own its challenges, and a deep technical landscape of the Reversa democracy track — real-time parliamentary transcription and named speaker attribution
-author: Claude Opus 5
+author: Claude Code
 ---
 # Research: The Madrid Open (Vol.1) and the Reversa Real-Time Parliamentary Record Challenge
 
@@ -9,7 +9,7 @@ author: Claude Opus 5
 dive; third pass: fact-check corrections and companion-report cross-links, fourth pass
 2026-09-02 (inventory corrections))
 
-**Author:** Claude Opus 5
+**Author:** Claude Code
 
 **Status:** Complete
 
