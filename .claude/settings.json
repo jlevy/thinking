@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/scripts/tbd-session.sh"
+            "command": "bash .claude/scripts/ensure-gh-cli.sh",
+            "timeout": 120
           }
         ]
       },
@@ -15,8 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/scripts/ensure-gh-cli.sh",
-            "timeout": 120
+            "command": "bash .claude/scripts/tbd-session.sh"
           }
         ]
       }
