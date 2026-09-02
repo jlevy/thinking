@@ -956,7 +956,7 @@ The rubric’s 55% does not depend on the data (dossier §5). In priority order:
 - **Chasing WER or fine-tuning ASR.** Settled at 3.25% on Spanish; the metric may not
   score words.
 - **Blind separation of the interpreter mix.** Nothing validated on real mixtures
-  (agenda §3.2); a listed dead end (§10.11).
+  (agenda §3.2); a listed dead end (agenda §10.12).
 - **Face recognition or chyron OCR as a fuser input.** Overlay presence on the live feed
   is unverified and the camera-cut count (S8) never ran; a gallery is a day for an
   unknown gain.

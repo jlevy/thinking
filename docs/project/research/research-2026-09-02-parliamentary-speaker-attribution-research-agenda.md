@@ -1059,7 +1059,7 @@ and PyPI only, on four CPU cores with no GPU, no Hugging Face, no congreso.es an
 YouTube. **Net**: a GPU box with Hugging Face, YouTube and congreso.es access.
 **Chamber**: floor feeds, interpreters’ feeds or conference-system events that only the
 Congreso can supply.
-Nine spikes ran in the sandbox; the rest are catalogued in §10.11 with tier, effort and
+Ten spikes ran in the sandbox; the rest are catalogued in §10.12 with tier, effort and
 the decision each changes.
 
 Every spike’s code, data and full report live under `attic/spikes/` in the working tree,
@@ -2260,7 +2260,7 @@ stars, licence, last push and archived flag, a consolidation pass into 266 rows 
 uniform columns, and a critical review of the labels against the definitions and the
 repository evidence; the full tables are the companion inventory report and §6 keeps the
 shortlist and the index.
-Nine spikes ran in the sandbox tier (§10); their code and data are under the gitignored
+Ten spikes ran in the sandbox tier (§10); their code and data are under the gitignored
 `attic/` directory and their reports are summarised in §10, with the numbers tagged
 (run).
 The evaluation strategy (§11) was written from an inventory of about 80 evaluation
