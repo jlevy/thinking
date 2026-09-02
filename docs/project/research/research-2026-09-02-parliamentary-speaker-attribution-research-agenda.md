@@ -795,12 +795,19 @@ published by their authors and marked `HF:` where they were not opened.
 | **Preview** | announced or API-only; weights not released, or an unreleased successor | model card or paper without downloadable weights; vendor preview |
 | **Legacy** | still useful as a reference implementation or baseline but no longer maintained | archived flag, or no push in over a year (before 2025-09-02) |
 
-Licence matters as much as maturity: a **non-commercial weight licence** (DiariZen’s CC
-BY-NC 4.0, several challenge-derived models) is fine for the benchmark and the research
-campaign and disqualifying for a product, and the tables say which.
-A **no-licence** repository is not open source, whatever its README says.
-Commercial services and datasets do not take a maturity label; they take an access class
-instead.
+**Licence is recorded, not scored.** It is an independent axis: it says what you may
+later do with a result, never how good or how mature the tool is, and it is not a
+selection filter here.
+This programme is research, benchmarking and demo work, so a **non-commercial weight
+licence** (DiariZen’s CC BY-NC 4.0, the MMS aligner weights, InsightFace’s models,
+several challenge-derived checkpoints) is fully in scope, and those tools are ranked on
+performance and ease of use like any other.
+What the licence column buys is foresight: it names, per row, what would have to be
+swapped or relicensed if a demo became a product, so that decision is costed rather than
+discovered late. A **no-licence** repository is likewise not excluded; it is flagged,
+because “no licence” is not open source whatever the README says, and it makes
+redistribution the user’s problem rather than the author’s. Commercial services and
+datasets do not take a maturity label; they take an access class instead.
 
 **Access** (datasets and services): **open** (download without agreement) / **gated**
 (registration, token or click-through) / **restricted** (institutional agreement or
@@ -826,12 +833,13 @@ directions of §7 the row feeds.
 | 2 ASR | `whisper-large-v3-turbo` on [faster-whisper](https://github.com/SYSTRAN/faster-whisper) + [CTranslate2](https://github.com/OpenNMT/CTranslate2) | permissive (MIT) | nominal for all four via Whisper’s language set; beat the Galician specialist in the Parlamento-ai sample, 14.71% vs 20.37% (readme) | Production | repo-meta; local `open-source-asr/README.md` | R1, R6, R7 |
 | 2 ASR | `HF: BSC-LT/whisper-large-v3-LoS-punctuated` | not verified (card not opened) | es, ca, eu, gl in one model, 8,110 h balanced (search) | Mature research | search only; no published WER table found | R1, R6, R8 |
 | 2 ASR | [facebookresearch/omnilingual-asr](https://github.com/facebookresearch/omnilingual-asr), the permissive fallback | permissive (Apache-2.0 code and models, README §License) | `spa_Latn`, `cat_Latn`, `eus_Latn`, `glg_Latn` in `lang_ids.py`; 7B-LLM-ASR CER 1.3 / 1.4 / 0.8 / 1.4 on Meta’s own sets (review, raw) | Research | README and `lang_ids.py` read raw by the review; 2,911★ pushed 2025-12-30 (review API check, not in repo-meta) | R1, R5 |
-| 3 Diarization | [pyannote.audio 4.x](https://github.com/pyannote/pyannote-audio) + `HF: pyannote/speaker-diarization-community-1`; its masks, not DiariZen’s, feed DiCoW | permissive code (MIT); weights CC BY 4.0, gated | language-agnostic | Production | local README: multi-corpus DER table, 31 s per audio hour; repo-meta 10,500★ pushed 2026-09-02 | R1, R7, R8 |
+| 3 Diarization | [pyannote.audio 4.x](https://github.com/pyannote/pyannote-audio) + `HF: pyannote/speaker-diarization-community-1` | permissive code (MIT); weights CC BY 4.0, gated | language-agnostic | Production | local README: multi-corpus DER table, 31 s per audio hour; repo-meta 10,500★ pushed 2026-09-02 | R1, R7, R8 |
+| 3 Diarization | [DiariZen](https://github.com/BUTSpeechFIT/DiariZen), run head to head with pyannote and used where it wins | permissive code; weights CC BY-NC 4.0 (usable here; pyannote masks are the swap for a product) | language-agnostic | Mature research | local README DER table; the WavLM-based system that tops several challenge sets | R1, R8 |
 | 4 Embeddings | [WeSpeaker](https://github.com/wenet-e2e/wespeaker): extractors, AS-norm, QMF, calibration and DET scripts | permissive (Apache-2.0; weights follow VoxCeleb CC BY 4.0) | no Iberian evaluation | Production | `examples/voxceleb/v2/README.md` (raw); `wespeaker/bin` files (gh) | R1, R2, R4, R5 |
 | 4 Embeddings | [ReDimNet2](https://github.com/PalabraAI/redimnet2)-B6 `vb2+vox2` LM checkpoint as the extractor | permissive (MIT) | no Iberian evaluation | Mature research | local README: 0.29 EER Vox2-only, 0.23 with the LM checkpoint; repo-meta 85★ pushed 2026-08-28 | R1, R2, R4 |
 | 5 Scoring | [pyannote.metrics](https://github.com/pyannote/pyannote-metrics) `IdentificationErrorRate`; [MeetEval](https://github.com/fgnt/meeteval) cpWER and tcpWER; [dscore](https://github.com/nryant/dscore) DER | permissive (MIT; MIT; BSD-2) | n/a | Production | gh tree (`identification.py` present); local MeetEval README; repo-meta | every R |
 | 5 Scoring | [PYLLR](https://github.com/bsxfan/PYLLR) and [expected_cost](https://github.com/luferrer/expected_cost) for Cllr; [net:cal](https://github.com/EFS-OpenSource/calibration-framework) for ECE | permissive (MIT; MIT; Apache-2.0) | n/a | Legacy; Legacy; Production | repo-meta: pushed 2023-02-21, 2025-06-11, 2026-04-16 | R2, R3, R4 |
-| 6 Alignment | torchaudio [`MMS_FA`](https://github.com/pytorch/audio) or [ctc-forced-aligner](https://github.com/MahmoudAshraf97/ctc-forced-aligner), benchmark only | permissive API (BSD-2; BSD per README); default MMS weights CC BY-NC 4.0 | MMS covers es, ca, eu, gl | Production; Mature research | README §License (raw); `LICENSE` returns 404 at `main`; repo-meta | R1 |
+| 6 Alignment | torchaudio [`MMS_FA`](https://github.com/pytorch/audio) or [ctc-forced-aligner](https://github.com/MahmoudAshraf97/ctc-forced-aligner) | permissive API (BSD-2; BSD per README); default MMS weights CC BY-NC 4.0 | MMS covers es, ca, eu, gl | Production; Mature research | README §License (raw); `LICENSE` returns 404 at `main`; repo-meta | R1 |
 | 6 Alignment | `HF: Qwen/Qwen3-ForcedAligner-0.6B`, or NeMo NFA with `HF: HiTZ/stt_eu_conformer_ctc_large`, for anything shipped | permissive (Apache-2.0; Apache-2.0 toolkit, HiTZ card not opened) | 11 languages claimed, list not confirmed; eu only on the NFA path | Research; Production (NFA) | search; repo-meta for the parent repos | R1, R6, R7 |
 | 7 Manifests | [lhotse](https://github.com/lhotse-speech/lhotse) + [pyannote.database](https://github.com/pyannote/pyannote-database) | permissive (Apache-2.0; MIT) | no recipe yet for ParlamentParla, Basque Parliament, Nos_ParlaSpeech-GL, 3CatParla or EuroSpeech (gh) | Production | gh recipe listing; repo-meta | R1, R4 |
 | 8 Adaptation data | `HF: gttsehu/basque_parliament_1` (CC0-1.0); ParlamentParla v2 (CC BY 4.0) | permissive | eu and es bilingual, 1,462 h; ca, 211 h clean + 400 h other, speaker ids with gender, speaker-disjoint splits | access: open | HF cards (search); local ParlamentParla README | R1, R4, R6 |
@@ -844,7 +852,7 @@ directions of §7 the row feeds.
 | 12 Text | [NeMo-text-processing](https://github.com/NVIDIA/NeMo-text-processing) ITN (es) + `HF: BSC-LT/salamandraTA-7b-instruct` for the record | permissive (Apache-2.0); SalamandraTA card not opened | ITN has es only; SalamandraTA covers es, ca, eu, gl | Production; Mature research | gh directory listing; search | R6 |
 | 12 Text | [Salamandra](https://github.com/langtech-bsc/salamandra), [ALIA](https://github.com/langtech-bsc/alia), [Latxa](https://github.com/hitz-zentroa/latxa) as the LLM fuser | permissive (Apache-2.0; Apache-2.0; MIT) | in-language LLMs for ca, eu, gl | Research | review repo check; signals not collected | R3, R6 |
 | 13 Multimodal | [Light-ASD](https://github.com/Junhua-Liao/Light-ASD) (weights in `weight/`) | permissive (MIT) | n/a | Legacy (no push since 2025-03-23) | README (mAP 94.06 on AVA val); repo-meta | R10 |
-| 13 Multimodal | [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) PP-OCRv5; [facenet-pytorch](https://github.com/timesler/facenet-pytorch) instead of InsightFace’s NC weights | permissive (Apache-2.0; MIT) | Spanish explicit; Latin recogniser covers ca/gl/eu orthography (search) | Production; Mature research | repo-meta 88,695★; review API check, pushed 2025-09-16 | R3, R10 |
+| 13 Multimodal | [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) PP-OCRv5; [facenet-pytorch](https://github.com/timesler/facenet-pytorch); InsightFace’s models are stronger and are usable here, with facenet as the permissive swap | permissive (Apache-2.0; MIT) | Spanish explicit; Latin recogniser covers ca/gl/eu orthography (search) | Production; Mature research | repo-meta 88,695★; review API check, pushed 2025-09-16 | R3, R10 |
 | 14 Annotation | [Label Studio](https://github.com/HumanSignal/label-studio) for the verbatim layer | permissive core (Apache-2.0); Enterprise commercial | n/a | Production | repo-meta 28,190★ pushed 2026-09-02 | R1 |
 
 #### 6.3 Index from research direction to toolchain
@@ -852,39 +860,55 @@ directions of §7 the row feeds.
 **[Proposed]** One row per research direction of §7, so a reader starting from a
 hypothesis finds its toolchain in one place.
 
-| Direction | Shortlist tools | Data | Scorer | Open licence question |
+| Direction | Shortlist tools | Data | Scorer | Licence note (tracked, not a filter) |
 | --- | --- | --- | --- | --- |
-| **R1** in-domain benchmark and baseline | Congreso open data + Diario HTML + Archivo MP4; OpenParliamentTV-Tools ES as merge template; yt-dlp, FFmpeg; MMS_FA or ctc-forced-aligner; lhotse + pyannote.database; Label Studio; baseline `whisper-large-v3-LoS-punctuated`, pyannote community-1, ReDimNet2-B6 cosine | 20–50 Congreso sessions to be built (§5.1 of the agenda); basque_parliament_1 and ParlamentParla v2 for adaptation | pyannote.metrics identification error rate; MeetEval cpWER and tcpWER (fixed-label variant to be written); dscore DER; per-turn TAA and coverage scorer (to be written) | MMS aligner weights are CC BY-NC (benchmark only); community-1 weights are gated; Diario text terms for redistribution of manifests |
+| **R1** in-domain benchmark and baseline | Congreso open data + Diario HTML + Archivo MP4; OpenParliamentTV-Tools ES as merge template; yt-dlp, FFmpeg; MMS_FA or ctc-forced-aligner; lhotse + pyannote.database; Label Studio; baseline `whisper-large-v3-LoS-punctuated`, pyannote community-1, ReDimNet2-B6 cosine | 20–50 Congreso sessions to be built (§5.1 of the agenda); basque_parliament_1 and ParlamentParla v2 for adaptation | pyannote.metrics identification error rate; MeetEval cpWER and tcpWER (fixed-label variant to be written); dscore DER; per-turn TAA and coverage scorer (to be written) | MMS aligner weights are CC BY-NC and community-1 weights are gated: both fine here, both would need swapping in a product; Diario text terms govern redistribution of manifests |
 | **R2** candidate-set constraint, normalization, calibration | WeSpeaker AS-norm, QMF, `score_calibration.py`; ReDimNet2; PYLLR and expected_cost for Cllr; net:cal for ECE | R1 trials; agenda (orden del día) as the candidate set; VoxWatch protocol as the reference curve | Cllr, min-Cllr, actDCF vs minDCF; FAR at fixed FRR; coverage–TAA curve | none blocking; PYLLR and expected_cost are Legacy (MIT, dormant) |
 | **R3** structured-context fusion | chair-announcement parser (to be written); spaCy es and ca, Stanza; RapidFuzz; SPARQLWrapper and Wikidata Toolkit; PaddleOCR for the overlay; Salamandra, ALIA or Latxa as the LLM fuser in the DiarizationLM pattern | Congreso roster and intervention open data; ParlaMint ES metadata; the on-screen overlay where present (existence unverified) | TAA by turn type with per-source ablation; chair-announcement coverage | DiarizationLM weights carry Llama licences and are English-only (Legacy); Salamandra and ALIA Apache-2.0, Latxa MIT |
 | **R4** weakly supervised in-domain speaker modelling | WeSpeaker training recipes; ReDimNet2 training pipeline; clovaai voxceleb_trainer; VoxBlink2 OSI scripts (Legacy) | Diario-aligned trials from R1; basque_parliament_1 speaker labels; VoxCeleb2 and VoxBlink2 for pretraining | FAR at fixed FRR against watchlist size vs the VoxWatch curve; EER and minDCF via WeSpeaker `compute_det.py` | VoxCeleb CC BY 4.0; VoxBlink2 licence not confirmed; VoxWatch has no code |
-| **R5** interpretation-mixed tail | interpreter enrolment with WeSpeaker; WeSep as a reimplementation target; SpeechBrain SepFormer and ESPnet TF-GridNet as blind baselines; asteroid for SI-SNRi | VoxPopuli speech-to-speech pairs (es ≈1.6k h source) to synthesize overlays; real interpreted Congreso segments; EPIC (ELRA, paid) only if licensed | MeetEval cpWER and tcpWER; TAA recovered vs isolated floor audio; SI-SNRi on synthetic mixes | WeSep has no licence and no released weights; USEF-TSE NOASSERTION and Legacy; LExt has no code; VoxPopuli models CC BY-NC (data CC0) |
+| **R5** interpretation-mixed tail | interpreter enrolment with WeSpeaker; WeSep as a reimplementation target; SpeechBrain SepFormer and ESPnet TF-GridNet as blind baselines; asteroid for SI-SNRi | VoxPopuli speech-to-speech pairs (es ≈1.6k h source) to synthesize overlays; real interpreted Congreso segments; EPIC (ELRA, paid) only if licensed | MeetEval cpWER and tcpWER; TAA recovered vs isolated floor audio; SI-SNRi on synthetic mixes | WeSep has no released weights and USEF-TSE and LExt no usable artifact, so all three are reimplementation targets rather than licence problems; VoxPopuli models CC BY-NC (data CC0), usable here |
 | **R6** record-form normalization | `whisper-large-v3-LoS-punctuated`; NeMo-text-processing ITN es; punctuators; SalamandraTA for the co-official leg; Salamandra or Latxa fine-tune; Apertium as auditable baseline; Europarl-ASR verbatimization recipe (Legacy) and SPC_R recipe (paper only) | (verbatim ASR, Diario) pairs from R1; EuroSpeech CER distribution; Europarl-ASR transcript layers | record-WER and HTER with jiwer under a versioned normalizer; sacrebleu and COMET on the translation leg | ITN has no ca/eu/gl grammars; SalamandraTA card not opened; Apertium GPL-2.0 applies on distribution; Europarl-ASR NOASSERTION |
 | **R7** bounded-lag architecture with revision accounting | SimulStreaming inside WhisperLiveKit; Streaming Sortformer v2 with state reset per window; NeMo cache-aware FastConformer (es only via Nemotron); diart; Silero VAD | R1 sessions replayed at wall-clock rate | SimulEval AL and LAAL (archived; vendor or reimplement); finalization lag, name revision rate, normalized erasure logger (to be written) | SimulEval CC BY-SA 4.0 and archived; Sortformer v2 CC BY 4.0 per card (search), v2.1 NVIDIA OML; Nemotron licence unverified |
-| **R8** enrolment-conditioned joint SA-ASR | TS-ASR-Whisper (DiCoW, SE-DiCoW) with pyannote masks; MOSS-Transcribe-Diarize baseline; Dixtral for the LLM decoder; multitalker-parakeet as the English streaming comparison | R1 benchmark; AMI and NOTSOFAR-1 for sanity; EMMA leaderboard submission script | MeetEval tcpWER; pyannote.metrics identification error rate on roster ids; TAA | DiCoW weights CC BY 4.0 per HF card, unverified; DiariZen weights CC BY-NC (avoid); NOTSOFAR data licence and HF token; multitalker-parakeet NVIDIA OML |
+| **R8** enrolment-conditioned joint SA-ASR | TS-ASR-Whisper (DiCoW, SE-DiCoW) with pyannote masks; MOSS-Transcribe-Diarize baseline; Dixtral for the LLM decoder; multitalker-parakeet as the English streaming comparison | R1 benchmark; AMI and NOTSOFAR-1 for sanity; EMMA leaderboard submission script | MeetEval tcpWER; pyannote.metrics identification error rate on roster ids; TAA | DiCoW weights CC BY 4.0 per HF card, unverified; DiariZen weights CC BY-NC (usable here; swap for a product); NOTSOFAR data licence and HF token; multitalker-parakeet NVIDIA OML |
 | **R9** stage-direction detection | PANNs (has the Applause, Laughter, Chatter, Hubbub classes; Legacy); BEATs; EfficientAT (Legacy, low compute); CLAP zero-shot (Legacy, CC0); SenseVoice inline events (no Iberian ASR) | Diario stage directions from R1 as reference; AudioSet class set | precision and recall per class against the record’s annotations (scorer to be written) | BEATs checkpoint terms separate from the MIT repo; SenseVoice model under the FunASR model licence; AST weights on Dropbox |
-| **R10** multimodal identity | Light-ASD (weights in-repo, Legacy); facenet-pytorch and DeepFace for face matching; face-alignment; PaddleOCR or Tesseract for the overlay; Qwen3-VL for layout-plus-text reasoning | Archivo Audiovisual video; member photo gallery from Congreso open data; AVA-AVD; REPERE (ELRA) as the precedent | TAA lift on interjections and bench replies; ASD mAP on a labelled subset | InsightFace pretrained models are non-commercial; LoCoNet has no licence; overlay presence on every intervention unverified |
+| **R10** multimodal identity | Light-ASD (weights in-repo, Legacy); facenet-pytorch and DeepFace for face matching; face-alignment; PaddleOCR or Tesseract for the overlay; Qwen3-VL for layout-plus-text reasoning | Archivo Audiovisual video; member photo gallery from Congreso open data; AVA-AVD; REPERE (ELRA) as the precedent | TAA lift on interjections and bench replies; ASD mAP on a labelled subset | InsightFace models are research-only and LoCoNet has no licence: both usable here, both flagged for a product; overlay presence on every intervention unverified |
 | **R11** conference-system integration | Televic CoCon control API; Bosch DICENTIS .NET or REST API; no public tool | the chamber’s own microphone events (private) | exception rate: turns not resolved by microphone metadata; TAA on the residual | API access is contractual; not testable on public data |
 
 #### 6.4 Avoid or withdrawn
 
-**[Technical]** The review’s attractive-but-avoid list, kept here so it survives edits
-to the tables; the companion report’s §7 carries the full version with sources.
+**[Technical]** Two separate lists.
+The first is what to actually avoid, on the merits: the tool does not exist, does not
+run, does not cover the languages, or would corrupt a measurement.
+The second is licence foresight, which excludes nothing here — every row in it is
+admissible for this programme’s research, benchmarking and demo work, and is selected on
+performance like anything else.
+The companion report’s §7 carries the full version with sources.
+
+**Avoid on the merits.**
 
 | Item | Why | Use instead |
 | --- | --- | --- |
-| DiariZen weights | CC BY-NC 4.0 (README §License), inherited by DiCoW’s bundled pipeline | pyannote community-1 masks into DiCoW |
-| InsightFace pretrained models | research-only terms, including the pip auto-downloads (readme) | facenet-pytorch (MIT), DeepFace |
-| Meta MMS, XLS-R, `mms-lid` | weights CC BY-NC 4.0; fairseq host repo archived 2025-09-30 | Omnilingual ASR (Apache-2.0); VoxLingua107 ECAPA for LID |
-| Speechmatics, pyannoteAI or OpenAI enrolment as the identifier | caps of 50, unpublished, and 4 enrolled speakers; vendor lock | a roster matcher on WeSpeaker or ReDimNet2; keep one vendor as a comparison row |
-| Azure AI Speaker Recognition | retired 2025-09-30; APIs no longer accessible (search) | the open stack above; Picovoice Eagle if on-device closed weights are acceptable |
-| Amazon Connect Voice ID | closed to new customers 2025-05-20; end of support 2026-05-20 (search) | same |
-| WeSep, USEF-TSE, LExt for R5 | no licence and no released weights; NOASSERTION and Legacy; no code | reimplement in WeSep’s architecture set; SepFormer and TF-GridNet as blind baselines |
-| Moonshine for Spanish | non-English models under the Moonshine Community Licence, non-commercial below USD 1M revenue (search) | `whisper-large-v3-turbo` on faster-whisper |
+| WeSep, USEF-TSE, LExt for R5 | no released weights, no code, or an unresolved licence *and* no artifact — nothing to run | reimplement in WeSep’s architecture set; SepFormer and TF-GridNet as blind baselines |
 | Kyutai STT; Canary, Parakeet, Nemotron for the co-official tail | en and fr only; no ca/eu/gl | SimulStreaming; LoS, BSC, HiTZ and Nós specialists |
-| `xezpeleta/whisper-large-v3-eu` as an evaluation model | trained on Basque Parliament plenary audio; no temporal hold-out | `HiTZ/whisper-large-v3-eu` (Common Voice 13) with a held-out period |
+| `xezpeleta/whisper-large-v3-eu` as an *evaluation* model | trained on Basque Parliament plenary audio, so it scores its own training set; fine as a *system*, invalid as a measurement | `HiTZ/whisper-large-v3-eu` (Common Voice 13) with a held-out period; or keep it and report a temporal hold-out (F2) |
 | 3CatParla as parliamentary data | broadcast television despite the name | ParlamentParla v2 |
-| whisper-timestamped, aeneas, tssep, audapolis, LinTO inside a hosted service | AGPL-3.0 propagates into the service | CrisperWhisper or WhisperX timestamps; CTC aligners; Label Studio; Apertium’s GPL bites only on distribution |
+| Azure AI Speaker Recognition | retired 2025-09-30; APIs no longer accessible (search) | pyannoteAI, Picovoice Eagle, or a self-hosted roster matcher |
+| Amazon Connect Voice ID | closed to new customers 2025-05-20; end of support 2026-05-20 (search) | same |
+| Speechmatics, pyannoteAI or OpenAI enrolment as the *sole* identifier | enrolment caps of 50, unpublished and 4 against a 350-member roster; the cap, not the licence, is the problem | a roster matcher on WeSpeaker or ReDimNet2; keep one vendor as a comparison row (agenda §10.10 shows the caps do fit per agenda item) |
+
+**Licence and terms to track, not to avoid.** Admissible now; the note says what a
+productisation would have to change.
+
+| Item | Terms | Note for later |
+| --- | --- | --- |
+| DiariZen weights | CC BY-NC 4.0 (README §License), inherited by DiCoW’s bundled pipeline | strong diarizer, use it; swap in pyannote community-1 masks if the work is productised |
+| Meta MMS, XLS-R, `mms-lid`, and the `MMS_FA` aligner weights | CC BY-NC 4.0; fairseq host repo archived 2025-09-30 | the only aligner weights covering es, ca, eu and gl; Omnilingual ASR (Apache-2.0) is the permissive replacement |
+| InsightFace pretrained models | research-only terms, including the pip auto-downloads (readme) | strongest face models; facenet-pytorch (MIT) or DeepFace if shipped |
+| VoxPopuli pretrained models | CC BY-NC 4.0 (data is CC0) | data and models both usable here |
+| Moonshine non-English models | Moonshine Community Licence, non-commercial below USD 1M revenue (search) | usable; `whisper-large-v3-turbo` is the permissive alternative |
+| NVIDIA Sortformer and multitalker-parakeet checkpoints | NVIDIA Open Model Licence, not OSI (v2 is CC BY 4.0 per its card) | usable; resolve before deployment |
+| whisper-timestamped, aeneas, tssep, audapolis, LinTO | AGPL-3.0 | fine locally and for a demo; propagates only if you host it as a service |
+| Gated weights (pyannote community-1, several datasets) | click-through or token | costs an account, not a licence problem |
 
 ### 7. Research directions, ranked
 
@@ -2042,10 +2066,15 @@ American chamber is in scope.
     Spanish-state languages on parliamentary audio; on Basque and Galician the paid
     panel disagrees with itself by 13–15 points (§11.5), so the protocol in the
     companion inventory’s §10 is the only route to a defensible ranking.
-17. **Licences and maturity decide the stack as much as accuracy.** Of about 260 tools
-    inventoried, the shortlist is fourteen items (§6.2); DiariZen, MMS and InsightFace
-    weights are non-commercial, WeSep has no licence, two enrollment services are
-    retired, and anything without a push in a year is Legacy.
+17. **The stack is chosen on performance; licence is tracked beside it, not against
+    it.** Of about 260 tools inventoried, the shortlist is fourteen items (§6.2), picked
+    for accuracy, language coverage and ease of running.
+    Licence is a separate axis recorded per row: DiariZen, MMS and InsightFace weights
+    are non-commercial and are used anyway, since this is research and demo work, with
+    the permissive swap named so a productisation is costed rather than discovered late.
+    What genuinely excludes a tool is having nothing to run (WeSep, LExt), the wrong
+    languages (Kyutai, Parakeet for ca/eu/gl), a retired service, or training on the
+    data it would be evaluated on.
 
 ## Recommendations
 
