@@ -783,9 +783,13 @@ The label is a judgment, but it is made from recorded signals (stars, licence, l
 push, release cadence, whether weights are downloadable, and whether the thing has been
 reproduced or deployed by someone other than its authors), and the signals are printed
 next to it so the judgment can be checked.
-GitHub signals were collected in one sweep on 2026-09-02 with the GitHub API; Hugging
-Face model pages could not be opened from this session, so model ids are given as
-published by their authors and marked `HF:` where they were not opened.
+GitHub signals were collected in one sweep on 2026-09-02 with the GitHub API. Hugging
+Face pages are blocked at this environment’s network gateway, so the 85 cited `HF:` ids
+were resolved through a server-side fetch instead (companion report §11) and carry
+values tagged `(gemini-url_context)`: checked, but without citation metadata, so weaker
+than a page read directly.
+Three cited ids do not exist and one failed a fabrication check; all four are marked in
+place.
 
 | Label | Meaning | Typical signals |
 | --- | --- | --- |
@@ -831,7 +835,7 @@ directions of §7 the row feeds.
 | 1 Acquisition and record parsing | [OpenParliamentTV-Tools](https://github.com/OpenParliamentTV/OpenParliamentTV-Tools), `ES` implementation: merges the `intervenciones` JSON with the Diario HTML by Needleman-Wunsch on surname sequence, aeneas sentence alignment, Wikidata linking over 3,830 MPs | copyleft (GPL-3.0) | n/a; ~95% match on substantive speeches, role-only chair turns unmatched (readme) | Research | raw `optv/parliaments/ES/README.md`; not in the same-day signal sweep | R1, R3 |
 | 1 Acquisition and record parsing | [yt-dlp](https://github.com/yt-dlp/yt-dlp); [FFmpeg](https://github.com/FFmpeg/FFmpeg) | permissive (Unlicense); LGPL or GPL by build | n/a | Production | repo-meta: 188,537★ pushed 2026-08-30; 63,888★ pushed 2026-09-02 | R1, R7 |
 | 2 ASR | `whisper-large-v3-turbo` on [faster-whisper](https://github.com/SYSTRAN/faster-whisper) + [CTranslate2](https://github.com/OpenNMT/CTranslate2) | permissive (MIT) | nominal for all four via Whisper’s language set; beat the Galician specialist in the Parlamento-ai sample, 14.71% vs 20.37% (readme) | Production | repo-meta; local `open-source-asr/README.md` | R1, R6, R7 |
-| 2 ASR | `HF: BSC-LT/whisper-large-v3-LoS-punctuated` | not verified (card not opened) | es, ca, eu, gl in one model, 8,110 h balanced (search) | Mature research | search only; no published WER table found | R1, R6, R8 |
+| 2 ASR | `HF: BSC-LT/whisper-large-v3-LoS-punctuated` | apache-2.0 (gemini-url_context) | es, ca, eu, gl in one model, 8,110 h balanced (search) | Mature research | card read (gemini-url_context): **trained on ParlamentParla v3, Nos_ParlaSpeech-GL, 3CatParla and Common Voice**, so it cannot be scored on any of them | R1, R6, R8 |
 | 2 ASR | [facebookresearch/omnilingual-asr](https://github.com/facebookresearch/omnilingual-asr), the permissive fallback | permissive (Apache-2.0 code and models, README §License) | `spa_Latn`, `cat_Latn`, `eus_Latn`, `glg_Latn` in `lang_ids.py`; 7B-LLM-ASR CER 1.3 / 1.4 / 0.8 / 1.4 on Meta’s own sets (review, raw) | Research | README and `lang_ids.py` read raw by the review; 2,911★ pushed 2025-12-30 (review API check, not in repo-meta) | R1, R5 |
 | 3 Diarization | [pyannote.audio 4.x](https://github.com/pyannote/pyannote-audio) + `HF: pyannote/speaker-diarization-community-1` | permissive code (MIT); weights CC BY 4.0, gated | language-agnostic | Production | local README: multi-corpus DER table, 31 s per audio hour; repo-meta 10,500★ pushed 2026-09-02 | R1, R7, R8 |
 | 3 Diarization | [DiariZen](https://github.com/BUTSpeechFIT/DiariZen), run head to head with pyannote and used where it wins | permissive code; weights CC BY-NC 4.0 (usable here; pyannote masks are the swap for a product) | language-agnostic | Mature research | local README DER table; the WavLM-based system that tops several challenge sets | R1, R8 |
@@ -840,7 +844,7 @@ directions of §7 the row feeds.
 | 5 Scoring | [pyannote.metrics](https://github.com/pyannote/pyannote-metrics) `IdentificationErrorRate`; [MeetEval](https://github.com/fgnt/meeteval) cpWER and tcpWER; [dscore](https://github.com/nryant/dscore) DER | permissive (MIT; MIT; BSD-2) | n/a | Production | gh tree (`identification.py` present); local MeetEval README; repo-meta | every R |
 | 5 Scoring | [PYLLR](https://github.com/bsxfan/PYLLR) and [expected_cost](https://github.com/luferrer/expected_cost) for Cllr; [net:cal](https://github.com/EFS-OpenSource/calibration-framework) for ECE | permissive (MIT; MIT; Apache-2.0) | n/a | Legacy; Legacy; Production | repo-meta: pushed 2023-02-21, 2025-06-11, 2026-04-16 | R2, R3, R4 |
 | 6 Alignment | torchaudio [`MMS_FA`](https://github.com/pytorch/audio) or [ctc-forced-aligner](https://github.com/MahmoudAshraf97/ctc-forced-aligner) | permissive API (BSD-2; BSD per README); default MMS weights CC BY-NC 4.0 | MMS covers es, ca, eu, gl | Production; Mature research | README §License (raw); `LICENSE` returns 404 at `main`; repo-meta | R1 |
-| 6 Alignment | `HF: Qwen/Qwen3-ForcedAligner-0.6B`, or NeMo NFA with `HF: HiTZ/stt_eu_conformer_ctc_large`, for anything shipped | permissive (Apache-2.0; Apache-2.0 toolkit, HiTZ card not opened) | 11 languages claimed, list not confirmed; eu only on the NFA path | Research; Production (NFA) | search; repo-meta for the parent repos | R1, R6, R7 |
+| 6 Alignment | `HF: Qwen/Qwen3-ForcedAligner-0.6B`, or NeMo NFA with `HF: HiTZ/stt_eu_conformer_ctc_large` (apache-2.0, but **trained on Basque Parliament**, so never scored on it), for anything shipped | permissive (Apache-2.0; Apache-2.0 toolkit, HiTZ card not opened) | 11 languages claimed, list not confirmed; eu only on the NFA path | Research; Production (NFA) | search; repo-meta for the parent repos | R1, R6, R7 |
 | 7 Manifests | [lhotse](https://github.com/lhotse-speech/lhotse) + [pyannote.database](https://github.com/pyannote/pyannote-database) | permissive (Apache-2.0; MIT) | no recipe yet for ParlamentParla, Basque Parliament, Nos_ParlaSpeech-GL, 3CatParla or EuroSpeech (gh) | Production | gh recipe listing; repo-meta | R1, R4 |
 | 8 Adaptation data | `HF: gttsehu/basque_parliament_1` (CC0-1.0); ParlamentParla v2 (CC BY 4.0) | permissive | eu and es bilingual, 1,462 h; ca, 211 h clean + 400 h other, speaker ids with gender, speaker-disjoint splits | access: open | HF cards (search); local ParlamentParla README | R1, R4, R6 |
 | 8 Adaptation data | VoxPopuli speech-to-speech interpretation pairs | data CC0; code and models CC BY-NC 4.0 | es as source ≈1.6k h, es as target ≈1.2k h; no ca/eu/gl | access: open | local VoxPopuli README table | R5 |
@@ -1916,11 +1920,21 @@ American chamber is in scope.
 
 **[Analysis]**
 
-- **Contamination.** VoxPopuli sits in Granary, MOSEL and Granite’s declared training,
-  Common Voice 17 in Granite, Basque Parliament in xezpeleta, ParlamentParla likely in
-  the BSC line, the Diario in every LLM (inventory §10.2.5). Mitigation: a C0/C1/C2 flag
-  on every cell, headlines only from sessions after 2026-03, session dates in the
-  published manifests.
+- **Contamination, now measured rather than suspected.** Reading the model cards
+  (companion report §11) confirmed it reaches the **shortlist**:
+  `BSC-LT/whisper-large-v3-LoS-punctuated`, the baseline ASR model, declares training on
+  **ParlamentParla v3, Nos_ParlaSpeech-GL, 3CatParla and Common Voice**, which are the
+  Catalan and Galician ground truth this plan proposed, so those pairings measure
+  memorisation rather than accuracy.
+  `HiTZ/stt_eu_conformer_ctc_large`, the shortlist aligner, declares **Basque
+  Parliament** and reports 4.21 WER on its own training corpus.
+  VoxPopuli or Europarl-ASR sit in the declared training of Granite Speech 4.1,
+  Qwen3-ASR and Qwen3-ForcedAligner, all four NVIDIA ASR models, distil-whisper and
+  WavLM-base-plus-sv; the Diario is in every LLM. Mitigation: the C0/C1/C2 flag applies
+  per **(system, set) pair**, not per corpus; the Galician leg needs a source LoS has
+  not seen, or is reported C2; F2’s temporal hold-out extends to Catalan and Galician;
+  headlines only from sessions after 2026-03, with session dates in the published
+  manifests.
 - **Agreement is not accuracy.** The paid panel disagrees most on eu and gl, and it
   degrades faster than the systems on low-SNR clips (§10.5). Mitigation: agreement as a
   monthly drift monitor only; ground truth on the tail first.
