@@ -5,8 +5,8 @@ author: Claude Opus 5
 ---
 # Research: The Madrid Open (Vol.1) and the Reversa Real-Time Parliamentary Record Challenge
 
-**Date:** 2026-09-02 (last updated 2026-09-02, second pass: Track 02 technical deep
-dive)
+**Date:** 2026-09-02 (last updated 2026-09-02; second pass: Track 02 technical deep
+dive; third pass: fact-check corrections and companion-report cross-links)
 
 **Author:** Claude Opus 5
 
@@ -931,6 +931,12 @@ what evidence a system can use beyond the audio (§11.10), what data exists (§1
 where the latency budget goes (§11.12), what the official-record editorial layer costs
 (§11.13), and who has already deployed this (§11.14–11.16).
 
+A companion report,
+[Named Speaker Attribution for Parliamentary Transcription — Critical Review and Research Agenda](research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md),
+reviews this section critically, corrects it where its figures came from domains unlike
+a chamber, and turns it into a measurement protocol and research plan.
+The corrections from its fact-check pass have been applied here.
+
 #### 11.1 Why the official record lags
 
 **[Press]** In Spain, the *Diario de Sesiones* is produced by parliamentary
@@ -961,11 +967,14 @@ Same-day capture of floor speech is upstream of that whole chain.
 
 **[Press]** Since **19 September 2023**, deputies in the Congreso de los Diputados may
 speak in the co-official languages, with simultaneous translation into Spanish.
-The reform permits **Catalan, Basque, Galician, Valencian, Aranese, and Asturian
-(bable)**—any language with official status in an autonomous community—not three.
-Contemporary reporting noted that the Congress’s stenographers stated they would not
-take responsibility for translated texts, and the Regulation requires deputies’ words to
-be reproduced **both in the language spoken and in Spanish**.
+The reform permits any language with official status in an autonomous community:
+**Catalan (Valencian being its legal name in the Valencian Community), Basque, Galician,
+and Aranese**—not three.
+Asturian, which has protected but not official status, is **not** covered, although some
+coverage listed it.
+Contemporary reporting noted that the Congress’s stenographers stated
+they would not take responsibility for translated texts, and the Regulation requires
+deputies’ words to be reproduced **both in the language spoken and in Spanish**.
 
 **[Press]** The economics are public and are the clearest statement of the problem’s
 market size:
@@ -974,8 +983,8 @@ market size:
 | --- | --- | --- |
 | Congress adaptation of the chamber for simultaneous interpretation | €280,000 | COPE, Sept 2023 |
 | Adaptation of 8 committee rooms | €1.6M | OKDiario |
-| Framework contract for translation, interpretation, transcription and **live subtitling** (annual ceiling) | **€3,990,315** | Contract CON-2024/9900775.0, awarded Nov 2024 |
-| Actual 2025 spend on those services | **€919,669** (~€2,500 per session day) | Press Digital, June 2026 |
+| Framework contract for translation, interpretation, transcription and **live subtitling** (annual ceiling) | **~€3.99M** (“3,9 millones”; the exact figure €3,990,315.14 appears in one summary and is not independently confirmed) | Contract CON-2024/9900775.0, awarded Nov 2024 |
+| Reported 2025 spend on those services | **~€920,000** (~€2,500 per session day); reported by one outlet, not independently confirmed | Press Digital, June 2026 |
 | **Transcription lot awarded to Pangeanic BI Europa, S.L.** | **€462,835**, at **€2.85/minute** for co-official languages and **€1.65/minute** for Spanish | Pangeanic, contract award |
 
 **[Analysis]** Three things follow.
@@ -1004,6 +1013,11 @@ television, to the press booths, and to the streaming feed—carries **the origi
 with the interpreter’s voice mixed over the top** (*“con el audio original y la voz del
 traductor por encima”*), plus Spanish subtitles.
 Spanish interpretation is Channel 1 on the in-room headset system.
+Three further reports (El Debate, El Español, elDiario.es, September 2023) describe the
+same design; the interpreters work remotely, which puts the interpretation **2–4
+seconds** behind the floor, and their individual feeds exist as separate streams before
+the mix. The European Parliament’s stream, by contrast, offers up to 32 selectable audio
+channels — the floor plus each interpretation.
 
 **[Analysis]** For a transcription-and-attribution system consuming the public stream,
 this is a hostile input:
@@ -1034,12 +1048,14 @@ Parliamentary microphone systems from Bosch (DICENTIS, up to 750 devices, with
 “identification at seat” modules and IP integration) and Televic (chip-card-activated
 personalized microphone units) know exactly which seat’s microphone is open and which
 member is assigned to it.
-Where that metadata is available, speaker attribution is a **database join, not a
-machine-learning problem**, and the accuracy ceiling is 100% minus the rate at which
-members speak from someone else’s microphone.
-A serious production answer to this challenge integrates the conference system; a
-hackathon answer will not have it, and should say so explicitly rather than pretend the
-acoustic route is the only one.
+Both expose it programmatically: Televic’s CoCon API is a publish/subscribe HTTP service
+carrying microphone on/off and delegate-identity events, and Bosch DICENTIS exposes
+delegate, seat, and active-microphone state over a REST API. Where that metadata is
+available, speaker attribution is a **database join, not a machine-learning problem**,
+and the accuracy ceiling is 100% minus the rate at which members speak from someone
+else’s microphone. A serious production answer to this challenge integrates the
+conference system; a hackathon answer will not have it, and should say so explicitly
+rather than pretend the acoustic route is the only one.
 
 #### 11.4 State of the art: ASR
 
@@ -1048,8 +1064,8 @@ acoustic route is the only one.
 VoxPopuli, and Earnings-22—explicitly covering conversational speech, **parliamentary
 speech**, and earnings calls.
 Reported leaders: **ElevenLabs Scribe v2 at 2.3% WER**, **Gemini 3 Pro at 2.9%**, and
-**Gemini 3 Flash at 3.1%**. The architectural trend from 2025 onward is toward **encoder
-\+ LLM-decoder end-to-end** models.
+**Voxtral Small at 3.0%**, and **Gemini 3 Flash at 3.2%**. The architectural trend from
+2025 onward is toward **encoder \+ LLM-decoder end-to-end** models.
 
 **[Technical]** For the Iberian languages, the picture is much worse than the English
 headline and is highly dataset-dependent.
@@ -1058,6 +1074,23 @@ Galician 12.46%, Basque 38.85%** WER; on FLEURS the same model reports **Spanish
 Catalan 5.68%, Galician 10.06%**. The Spanish CV13-versus-FLEURS inversion (4.38 vs
 15.01) is a warning in itself: these numbers measure corpora at least as much as they
 measure models.
+These CV13 and FLEURS figures come from a search summary attributing them
+to the Whisper-LM paper and were not verified against it; the Spanish FLEURS figure is
+implausibly high for large-v3 and should be treated as unconfirmed.
+
+**[Primary]** In-domain evidence exists, from a production operator.
+Parlamento.ai’s `open-source-asr` study (GitHub, August 2026; read directly) runs open
+models over 168 parliamentary clips (13.79 h; 24 each of Spanish, Catalan, Galician,
+Basque, English, Portuguese, and multilingual European Parliament audio) and measures
+word-level **agreement with three paid APIs**, not accuracy — the study has no
+human-corrected reference.
+`whisper-large-v3-turbo` differs from the paid consensus by **3.25%** on Spanish
+(Peninsular and Latin American pooled; the paid APIs differ from each other by 5.10%),
+**9.56%** on Catalan, **14.71%** on Galician and, for the best Basque model, **21.29%**;
+Galician and Basque fall outside the operator’s acceptance band.
+Its 90-day workload shows a median of **3** concurrent sessions per five-minute window
+and a maximum of **31**, and its paid transcription cost was **USD 0.71 per
+audio-hour**. The companion report (§3.3) reads this in full.
 
 **[Technical]** Fine-tuned open models that matter here:
 
@@ -1172,6 +1205,9 @@ Any comparison the team makes on the day must fix one protocol—`md-eval` via `
    42.56% for five to nine**. Clustering-based systems degrade more gracefully but still
    degrade: the count has to be inferred, and splitting one speaker into two or merging
    two into one cascades into confusion error.
+   The cap bounds speakers tracked *concurrently*, so with turn-level windowing from the
+   agenda or the chair’s announcements it does not bind a plenary; the limitation that
+   does bind is that Sortformer emits anonymous labels and takes no enrollment profiles.
 2. **Overlap.** Overlap is measured at **1.2% in news broadcasts, 10.4% in TV debates,
    and ~16% in heated televised debate**; 6–14% of words are overlapped in spontaneous
    multi-party speech. Parliamentary interjection rates are high — in the Bundestag, over
@@ -1180,16 +1216,16 @@ Any comparison the team makes on the day must fix one protocol—`md-eval` via `
 3. **Long-form degradation.** Performance degrades on long recordings, most visibly on
    AMI, from the mismatch between training-segment length and full-session length.
    Practical resource note: `pyannote.audio` 4.0.3 was reported to use ~6× the VRAM of
-   3.3.2 on a 72-minute file (>9.5 GB peak), spiking after clustering during
-   reconstruction — relevant if the plan is one pass over a six-hour session on a single
-   consumer GPU.
+   3.3.2 on a 72-minute file (9.54 GB against 1.59 GB peak in the issue’s profiling
+   table), spiking after clustering during reconstruction — relevant if the plan is one
+   pass over a six-hour session on a single consumer GPU.
 
 **[Technical]** Streaming changes the tradeoff less than expected.
 Streaming Sortformer (Interspeech 2025) maintains competitive DER at chunk sizes down to
 **0.32 s**, reporting **19.32% DER on DIHARD and 11.50% on CALLHOME** at that latency,
 using an arrival-order speaker cache (AOSC) plus a FIFO queue to resolve between-chunk
-permutation. That is the correct component for a bounded-lag design (§11.12) — with the
-four-speaker cap as the binding constraint.
+permutation. That is the correct component for a bounded-lag design (§11.12) — with its
+anonymous-label output, not the speaker cap, as the binding constraint.
 
 #### 11.7 Speaker identification at parliament scale
 
@@ -1244,8 +1280,9 @@ can come from the archive (§11.11).
 Spanish, is the **Albayzin IberSPEECH-RTVE Speaker Diarization and Identity Assignment
 Challenge (SDIAC)** — segment broadcast audio by speaker, link segments, and identify a
 **closed set** of named people.
-The RTVE database provides 500+ hours of Spanish public-broadcaster content across
-genres, with accent diversity, overlapping speech, spontaneous speech and background
+The RTVE database provides several hundred hours of Spanish public-broadcaster content
+across genres — the 2022 identity-assignment task used **74 enrolled speakers over 54
+hours** — with accent diversity, overlapping speech, spontaneous speech and background
 noise.
 
 **[Technical]** On the RTVE 2022 evaluation set, the Intelligent Voice system reported
@@ -1338,6 +1375,11 @@ cheaper and more reliable than the voice:
   is a **fallback, not a primary method**, when used without the structural cues above.
 - **Multimodal enrollment fusion** is validated in-language by the Albayzin 2020
   multimodal track (§11.8).
+- **The task itself has a precedent.** The REPERE challenge (2012–2014) scored *named*
+  person identification on French television by fusing voice, face, and OCR of on-screen
+  name overlays; the PERCOL system reached an estimated global error rate of 24.4%
+  (supervised) on the 2013 test and ranked first in 2014. Unsupervised naming from
+  overlaid text is the same move as naming from the chair’s announcement.
 
 **[Analysis]** The design that follows is evidence fusion with per-attribution
 provenance: each named turn carries the evidence that produced it (chair announcement at
@@ -1356,14 +1398,16 @@ give you:
 | **VoxPopuli** | European Parliament 2009–2020, 23 languages | 400K h unlabelled; 1.8K h transcribed | yes — **Spanish: 166 h transcribed, 305 speakers** | the only large EP set with speaker IDs; no co-official languages |
 | **Europarl-ASR** | European Parliament | ~1.3K h | partial | streaming-ASR benchmarking and verbatimization |
 | **EuroSpeech** (NeurIPS 2025) | **22 national parliaments** | 61K h aligned, 19 languages >1K h | no | **does not include Spain** — see correction below |
-| **ParlaMint** | 17–29 national parliaments, text only | ~500M words, 11K speakers | yes (rich metadata) | transcripts and speaker metadata, no audio |
+| **ParlaMint** | 17–29 national parliaments, text only; includes **ParlaMint-ES** and the ES-CT, ES-GA and ES-PV regional corpora | ~500M words, 11K speakers | yes (rich metadata) | transcripts and speaker metadata; no audio alignment for any Spanish-state corpus |
 | **ParlaSpeech 3.0** | HR, CZ, PL, RS | ~6K h | yes, with role/party/orientation | the model for what a Spanish equivalent would look like |
 | **Basque Parliament** (`gttsehu/basque_parliament_1`) | Basque + Spanish, bilingual | **1,445 h** train + 17 h manually supervised | **yes**, plus a per-segment language tag (eu/es/bilingual) | closest thing to a Spanish-state parliamentary corpus with code-switching labels |
 | **3CatParla** | Catalan broadcast | 710 h | — | training data behind the best open Catalan ASR |
+| **ParlamentParla v2.0** (OpenSLR 59) | Parliament of Catalonia, Catalan | **611 h** (211 clean + 400 other) | **yes**, with gender; speaker-disjoint splits | speaker-labeled Catalan parliamentary audio, CC BY 4.0 |
+| **Nos_ParlaSpeech-GL** (Proxecto Nós) | Parliament of Galicia, Galician | 1,600+ h auto-aligned, plus 53 h manual (TranscriSpeech-GL) | unconfirmed | Galician parliamentary audio, CC BY 4.0 |
 | **Althingi** (LDC2021S01) | Icelandic parliament | 542 h | yes | the reference deployment corpus |
 | **Finnish Parliament ASR** | Eduskunta | **3,130 h**, 449 speakers | yes, with demographics | largest single-parliament ASR corpus with speaker metadata |
 | **FT Speech** | Danish parliament | — | yes | another national precedent |
-| **RTVE** (Albayzin) | Spanish broadcast TV | 500+ h | **yes, named, closed set** | the only Spanish corpus scored on *named* attribution |
+| **RTVE** (Albayzin) | Spanish broadcast TV | several hundred h; SDIAC 2022: 74 speakers, 54 h | **yes, named, closed set** | the only Spanish corpus scored on *named* attribution |
 
 **[Correction]** An earlier draft of this report listed EuroSpeech as directly on point
 for this challenge. Reading the released toolkit shows its parliament set is
@@ -1415,7 +1459,7 @@ the work is pipelined:
 | Component | Reported throughput | Six-hour session implies |
 | --- | --- | --- |
 | `whisper-large-v3-turbo`, single H100 | **597× real time** (120 s audio in 0.2 s); ~404× at batch 32 | **~40 s** of GPU time |
-| `pyannote` community-1, self-hosted H100 | **31 s per hour of audio** | ~3 min |
+| `pyannote` community-1, self-hosted H100 | **31 s per hour of audio** on hour-long AMI files (37 s on five-minute DIHARD3 files) | ~3 min |
 | `pyannote` precision-2, self-hosted H100 | **14 s per hour of audio** | ~1.4 min |
 | `pyannote` 3.1 on a V100 | RTF ~2.5% (~1.5 min per hour) | ~9 min |
 | Whisper-Streaming (LocalAgreement) | **3.3 s average latency**, measured on the ESIC European Parliament test set (A40) | streaming, not batch |
@@ -1484,11 +1528,12 @@ The named deployments most worth studying:
 | --- | --- | --- |
 | **European Parliament** | RWS + CEDAT85 + Bertin IT (live STT, awarded after an 18-month evaluation); Translated + FBK + PerVoice (speech translation) | live transcription and translation across **24 official languages**, on-screen, including as a hearing-accessibility provision; the translation system is described as adapting output in **under one second** |
 | **Estonia (Riigikogu)** | **HANS**, TalTech speech recognition, built by Finestmedia, live since 2020 | the recording system sends **10-minute clips** to the STT service; drafts are produced and **speakers are recognized** — MPs, PM, ministers, president; trained on **1,500 h**; target ≥93–95% correctness, reported error rate **~5%**, with humans correcting the remainder |
-| **Portugal (Assembleia da República)** | **STAAR** — Whisper-based ASR plus diarization (Iscte, IJST 2024) | reported **WER 1.7%–11.3% depending on context and speech style**; explicitly reduces time to produce the official journal |
+| **Portugal (Assembleia da República)** | **STAAR** — Whisper-based ASR plus diarization (Iscte, IJST 2024) | reported **WER 1.7%–11.3% depending on context and speech style** (from a search summary; not verified against the paper); explicitly reduces time to produce the official journal |
 | **Brazil (Câmara dos Deputados)** | **Ulysses** suite, module **U5** | automatic voice-to-text integrated with legislative databases |
 | **Italy (Camera and Senato)** | contributed IPU use cases; 2026 VLM pipeline for historical records | OCR + VLM with speaker identification |
 | **Spain — Senado** | **Etiqmedia** custom deployment | **real-time cataloguing, indexing and transcription while the session is still live**, generating a **draft for the session diary**, plus live and offline subtitling |
 | **Spain — Congreso** | **Pangeanic** (transcription lot, from 1 Jan 2025) | AI transcription of co-official languages into the *Diario de Sesiones*; €2.85/min (co-official), €1.65/min (Spanish) |
+| **Parlamento.ai** (private operator: Spain, Chile, Peru, European Parliament, US, Brazil) | paid ASR APIs; evaluating open models | published a reproducible 168-clip parliamentary ASR study with workload and cost data (§11.4); no ground-truth reference and no speaker metric |
 
 **[Analysis]** Three readings of this table.
 
@@ -1766,6 +1811,8 @@ channels.
   under one fixed DER protocol, before adding any non-acoustic evidence — the delta from
   evidence fusion is the finding worth demoing.
 - [ ] Update this report when the briefs are released the week of 26 September 2026.
+- [ ] Before building for Track 02, read the companion research agenda; its §7 ranks the
+  experiments and its §4 fixes the scoring protocol.
 
 ## Methodology
 
@@ -1804,6 +1851,10 @@ comes from two kinds of source with different reliability, and they are distingu
   before it is relied on.
   All findings are reported here in English; Spanish sources were translated, and the
   Spanish event copy was compared line by line against the English to detect divergence.
+
+A third pass ran a fact-check over eighteen load-bearing figures in this section (10
+confirmed, 5 adjusted, 3 unverified); the adjustments are applied in place and the
+verdict table is in the companion report’s §2.1.
 
 **What could not be verified:**
 
@@ -1918,6 +1969,12 @@ comes from two kinds of source with different reliability, and they are distingu
 - [Por qué las pantallas del Congreso ofrecen una transcripción en castellano — Maldita.es](https://maldita.es/malditateexplica/20230928/presidenta-congreso-armengol-espanol-transcripcion-pantallas/)
 - [El Congreso aclara que transcribe en pantalla intervenciones en castellano por accesibilidad — Servimedia](https://www.servimedia.es/noticias/congreso-aclara-transcribe-pantalla-intervenciones-castellano-accesibilidad-para-personas-discapacidad/3970912)
 - [El Congreso estrena el uso de las lenguas cooficiales — Junior Report (audio original con la voz del traductor por encima)](https://junior-report.media/el-congreso-estrena-el-uso-de-las-lenguas-cooficiales/)
+- [El Debate, 20 September 2023 — doblaje al español en la primera sesión plurilingüe](https://www.eldebate.com/espana/20230920/doblaje-solo-espanol-primera-sesion-plurilinguee-congreso-sirve-reafirmar-lengua-comun_140931.html)
+- [El Español, 19 September 2023 — pinganillos y traductores autónomos](https://www.elespanol.com/espana/politica/20230919/congreso-compra-pinganillos-ficha-autonomos-traducir-plenospoliglotas/795420837_0.html)
+- [European Parliament Multimedia Centre — webstreaming with selectable interpretation channels](https://www.europarl.europa.eu/website/multimedia-centre/en/webstreaming.html)
+- [ParlamentParla — OpenSLR 59](https://www.openslr.org/59/)
+- [proxectonos/Nos_Parlaspeech-GL](https://huggingface.co/datasets/proxectonos/Nos_Parlaspeech-GL)
+- [ParlaMint-ES 5.0 — CLARIN.SI](https://www.clarin.si/repository/xmlui/handle/11356/2004)
 
 **Public code (primary)**
 
@@ -2025,22 +2082,48 @@ comes from two kinds of source with different reliability, and they are distingu
 
 **Deployed parliamentary transcription systems (press and technical)**
 
+- [Parlamento-ai/open-source-asr — reproducible parliamentary ASR study with workload and cost data](https://github.com/Parlamento-ai/open-source-asr)
+
+- [Parlamento.ai — home](https://parlamento.ai/)
+
+- [Televic CoCon API guide](https://manuals.plus/m/e4b32f39ab18a388953d977c4ba39f7919ee60808609d12c8f5469a962fc9c7a)
+
+- [Bosch DICENTIS integration — Extron](https://www.extron.com/article/bosch)
+
+- [PERCOLI at REPERE 2013 — ResearchGate](https://www.researchgate.net/publication/257207780)
+
 - [The role of AI in parliaments — Inter-Parliamentary Union](https://www.ipu.org/ai-guidelines/role-ai-in-parliaments)
+
 - [Automatic transcription of parliamentary sessions — IPU AI use cases](https://www.ipu.org/ai-use-cases/automatic-transcription-parliamentary-sessions)
+
 - [AI-powered verbatim records system (HANS) — IPU AI use cases](https://www.ipu.org/ai-use-cases/ai-powered-verbatim-records-system-hans)
+
 - [Automated Hansard report system: converting parliamentary audio to text using AI — IPU](https://www.ipu.org/ai-use-cases/automated-hansard-report-system-converting-parliamentary-audio-text-using-ai)
+
 - [HANS, AI support tool for the Estonian Parliament — e-Estonia](https://e-estonia.com/hans-ai-support-tool-for-estonian-parliament/)
+
 - [Estonian parliament uses speech recognition technology to create verbatim records — Finestmedia](https://finestmedia.ee/en/2020/09/14/estonian-parliament-uses-speech-recognition-technology-to-create-verbatim-records/)
+
 - [The Althingi ASR System — Interspeech 2019](https://www.isca-archive.org/interspeech_2019/helgadottir19_interspeech.html)
+
 - [Manual Post-editing of Automatically Transcribed Speeches from the Icelandic Parliament — arXiv 1807.11893](https://arxiv.org/pdf/1807.11893)
+
 - [Automatic transcription system for parliamentary debates in the context of the Assembly of the Republic of Portugal (STAAR) — International Journal of Speech Technology](https://link.springer.com/article/10.1007/s10772-024-10126-4)
+
 - [The influence of AI on grammatical correction in Portuguese Parliament plenary session reports — Intersteno](https://tiro.intersteno.org/2026/06/the-influence-of-ai-on-grammatical-correction-in-portuguese-parliament-plenary-session-reports-preliminary-conclusions/)
+
 - [Integrating AI into legislative services: the Ulysses Suite in the Chamber of Deputies of Brazil](https://library.bussola-tech.co/p/ulysses-chamber-deputies-brazil)
+
 - [Catalogación automática en el Senado — Etiqmedia](https://etiqmedia.com/catalogacion-automatica-en-el-senado/)
+
 - [Transcripción automática de audio en directo — Etiqmedia](https://etiqmedia.com/tecnologia/transcripcion-automatica-audio-directo/)
+
 - [Pangeanic will implement AI transcription technology in the Spanish Parliament](https://blog.pangeanic.com/pangeanic-will-implement-ai-transcription-technology-in-spanish-parliament)
+
 - [Parliamentary conferencing systems — Televic Conference](https://www.televic.com/en/conference/markets/parliaments)
+
 - [Bosch DICENTIS for parliaments — product brief](https://www.keenfinity-group.com/media/en/pb/media/products_1/conference_systems_1/190000770-bosch-nl-appl-dicentis-prlmnt-emea.pdf)
+
 - [Hansard — UK Parliament (edited verbatim report)](https://www.parliament.uk/about/how/publications/hansard/)
 
 **European Parliament deployments (press)**
