@@ -1019,6 +1019,593 @@ Hypothesis registry seeds:
 | Q-002 | Which two chambers, and which five languages? | open question | — | — |
 | Q-003 | Does the co-official-language portal serve an original-only or reduced-interpretation audio variant? | open question; settle with `ffprobe` and a listening test | — | — |
 
+### 10. Spikes and quick tests
+
+**[Analysis]** The agenda’s attribution numbers are all borrowed from other domains
+(§3.3), and the benchmark that would settle them is weeks of work (R1). The spikes below
+were chosen to move decisions before R1 exists: each is a time-boxed test of one
+hypothesis or one instrument, run where it could be run.
+Three runnability tiers apply throughout.
+**Sandbox**: this session’s environment, which reached GitHub (including release assets)
+and PyPI only, on four CPU cores with no GPU, no Hugging Face, no congreso.es and no
+YouTube. **Net**: a GPU box with Hugging Face, YouTube and congreso.es access.
+**Chamber**: floor feeds, interpreters’ feeds or conference-system events that only the
+Congreso can supply.
+Nine spikes ran in the sandbox; the rest are catalogued in §10.11 with tier, effort and
+the decision each changes.
+
+Every spike’s code, data and full report live under `attic/spikes/` in the working tree,
+which is gitignored; the reports are summarised here and a separate repository is the
+intended home (see Next Steps).
+Numbers measured in this session are tagged (run); numbers read from documentation
+(readme); numbers from search summaries (search).
+The convention for each entry is hypothesis, what ran, result, verdict, and what to do
+next.
+
+#### 10.1 Chair-announcement parsing as a text-only attribution instrument (H-003, H-002, R3)
+
+**Hypothesis.** H-003: chair-announcement parsing alone attributes at least 80% of
+rostrum turns correctly with no audio.
+Secondary readings for H-002 (agenda-constrained candidate sets) and R3 (what name
+resolution needs).
+
+**What ran (Sandbox).** The official ParlaMint distribution was unreachable and the
+`clarin-eric/ParlaMint` samples hold four utterances per file, so full corpora were
+located on GitHub: ParlaMint-ES 3.0a (450 Congreso sittings, 2015–2023, 76,369
+utterances, 842 speakers) from `calzada/PARLAMINT-ES-MC`; the Congreso XV Diario (183
+sittings to 2026-05-07, 29,476 utterances) parsed from the `OpenParliamentTV-Data-ES`
+proceedings HTML; and ParlaMint-ES-GA (301 Galician sittings) as a cross-language check.
+A 16-rule parser, every rule observed in the data, links each regular turn to the
+preceding chair turn, masks backward-looking sentences (thanks, time warnings, calls to
+order), extracts the governed person mention, and resolves it against the roster with a
+structured token matcher (particles dropped, surname keys, sex from the honorific,
+parliamentary group as tie-break, government portfolios by date).
+Two data-quality corrections were needed first: ParlaMint-ES gives thirteen ministers a
+second person record, and the XV Diario has 23 typographic variants in its own speaker
+labels; merging them moved XV precision from 0.929 to 0.974.
+
+**Result (run).**
+
+| Stratum | ParlaMint-ES (n) | coverage / precision / overall | Congreso XV (n) | coverage / precision / overall |
+| --- | --- | --- | --- | --- |
+| rostrum proxy: ≥150 words and a speaker change | 23,440 | 0.993 / 0.981 / **0.948** | 9,024 | 0.995 / 0.988 / **0.931** |
+| ≥600 words and a speaker change | 11,906 | — / 0.990 / **0.972** | 5,382 | — / 0.988 / **0.971** |
+| all regular turns | 32,551 | 0.836 / 0.961 / 0.773 | 12,179 | 0.867 / 0.974 / 0.784 |
+| all regular turns plus “no announcement ⇒ same speaker continues” | 32,551 | — / — / **0.936** | 12,179 | — / — / **0.922** |
+| turns under 30 words | 3,542 | 0.674 / 0.883 / 0.550 | 922 | 0.601 / 0.929 / 0.485 |
+
+The canonical formula “tiene la palabra” produces 46% of announcements; a bare vocative
+(“Señor Pedreño.”, “Señora ministra.”) another 21%, so a parser matching only the
+canonical formula would miss a fifth of hand-offs.
+The chair supplies both surnames in about half of announcements (precision 0.999), a
+title or role only in 23–30% (precision 0.86–0.94, all the residual errors being the
+wrong minister for a bare “señor ministro”), and a first surname only in 10–19%. Two in
+five members share a first surname with another member, and the parliamentary group only
+halves that; both surnames together are near-unique (97–98%). Catalan hand-offs (“té la
+paraula”) are 1.35% of XV chair turns and 0% of ParlaMint-ES, new since the September
+2023 rule change, and were 48% of the residual failures before Catalan rules were added.
+Precision transfers to Galician (0.953) but coverage does not (0.438) without
+per-language patterns.
+Agenda structure gives a median of 10–12 distinct speakers per Diario debate section and
+37–38 per sitting against a 350-member chamber, a 12–25× reduction available before
+anyone speaks; in the text-only setting the constraint adds only +0.012–0.016 because
+the chair’s formula is already discriminative.
+
+**Verdict.** H-003 is **supported on rostrum turns and refuted as a claim about all
+turns**, on two independently produced records of the same chamber seven years apart.
+The short-turn tail (49–55% under 30 words) is where audio must pay for itself, and the
+whole measurement is an upper bound: the record’s hand-off is a clean sentence, whereas
+live it is clipped, spoken over cross-talk and must survive ASR of exactly the rare
+accented name token.
+
+**Next.** S9 (the TTS-to-ASR round trip on 200 announcement sentences) to see how much
+survives recognition; the LLM-parser comparison (§10.8); a phonetic or fuzzy roster
+matcher for the first-surname stratum; treat the text-only floor of 0.93–0.95 on rostrum
+turns, not chance, as the baseline every acoustic identifier must beat.
+
+#### 10.2 The scoring harness (the R1 instrument, §4.6)
+
+**Hypothesis.** The §4 protocol can be implemented as one versioned harness whose
+invariants are testable before any real data exists.
+
+**What ran (Sandbox).** `attrscore` 0.1.0: JSONL, MeetEval SegLST/STM and NIST RTTM I/O;
+turn matching; TAA@coverage with the full coverage–accuracy curve and stratification;
+ECE and MCE; speaker-count error and hallucination rate; cpWER and tcpWER in
+permutation-invariant and fixed-label forms; identification error rate and DER;
+finalization lag, name revision rate, normalized erasure and first-versus-final
+accuracy; paired comparison with bootstrap and the accept rule; an instrument guard that
+refuses an empty or malformed run; and a synthetic parliament-like generator used only
+as a test fixture. 3,526 lines of source, 882 of tests, 71 tests passing in 8.5 s (run).
+
+**Result (run).** Three findings changed the protocol rather than the code.
+First, the literal “maximal temporal overlap” assignment rule of the first draft is
+degenerate under containment: a 2 s interjection inside a 4-minute rostrum turn
+intersects the rostrum turn by its whole 2 s, so raw overlap assigns it to the wrong
+reference turn. On a perfect hypothesis the literal rule scored TAA 0.837 overall and
+0.493 on interjections where a correct instrument returns 1.000; intersection-over-union
+assignment fixes it and is now the protocol.
+Second, permutation-invariant cpWER and DER cannot score a wrong name: with every word
+right and every name rotated to another member, MeetEval cpWER is 0.0000 and DER 0.0000,
+while fixed-label cpWER is 1.4906, pyannote’s identification error rate 0.9987 and TAA
+0.0000. The fixed-label forms and IER are the outcomes; the permuted forms are reported
+beside them as the name-permutation credit, which on the synthetic baseline forgave
+about half the word-level attribution error (cpWER 0.090 permuted versus 0.185 fixed).
+Third, pyannote.metrics takes a centred collar, so the NIST 0.25 s protocol needs
+`collar=0.5`; with that constant the two DER tools agree to four decimals, and a test
+locks it.
+Tooling quirks worth knowing: `meeteval.der` downloads `md-eval-22.pl` on first
+use (blocked here; vendored instead); MeetEval 0.4.3 imports an undeclared `simplejson`;
+pyannote.metrics 4.1’s low-latency spotting metric cannot be constructed without a
+subclass fix.
+
+**Verdict.** The instrument works and is ready to score real data; two of its findings
+(IoU matching; fixed-label scoring) are now in §4.6, and one (the collar constant) would
+have made every DER incomparable with the literature.
+Open: the guard limits (5 hallucinated words per hour, mean absolute speaker-count error
+1.0) are placeholders to be set from the first real baseline and frozen; record-WER,
+HTER and the trial scorer (Cllr, minDCF, actDCF) await the record layer and per-turn
+score distributions; text normalization is not yet wired in; the comparison statistic
+defaults to the median and should switch to the mean with a paired *t* interval (§10.3,
+§4.7).
+
+#### 10.3 How many sessions R1 needs (§4.7, §5.1)
+
+**Hypothesis.** The proposed 20–50 sessions, paired by session, resolve the differences
+the campaign registers.
+
+**What ran (Sandbox).** A simulation of paired comparisons with real session sizes
+(ParlaMint TEI headers give full-sitting extents for 63 sittings across 21 corpora;
+ParlaMint-ES median 74 utterances; Congreso XV 58.7 speeches per session), stratum
+shares and base accuracies swept, a between-session random effect, a shared per-turn
+difficulty, and a session × system interaction (the heterogeneity of the improvement
+across sessions), with five interval estimators evaluated on 4,000 null benchmarks.
+Nothing in it is a measurement of a real system.
+
+**Result (run).** The accept rule as first written is not a 5% test: the percentile
+bootstrap of the mean rejects a true null 8.2% of the time at 20 sessions and 5.9% at
+100; BCa is worse; the bootstrapped median is conservative (3.8% at 20 sessions, 0.6% at
+100\) and detects a +3-point gain 44% of the time where the mean manages 64%; the paired
+*t* interval on per-session differences is calibrated at every size tested (4.5–5.3%).
+For overall TAA with 80-turn sessions and a moderately uneven gain, 20 sessions resolve
+about 3.6 points, 40 about 2.6, 50 about 2.3; +10 is detectable at any size above the
+15-session floor, +5 with 11 sessions, +3 with 32, +2 with 75. Every stratified claim is
+under-powered at 20 sessions: the smallest detectable change on the interjection stratum
+is 15 points and a determination of its level carries ±9.3; a 10-point gain on
+interjections alone needs 45 sessions, an H-005-shaped subset claim 45–180. The whole
+study collapses to Var(per-session difference) = h² + b²·E[1/nₛ] with b about 37.5 and h
+the per-session gain sd, so the variance runs on the harmonic mean of turns per session
+and lognormal session lengths waste about half the turns; pairing is worth 2.25× at the
+defaults (20 paired sessions do the work of 45 unpaired).
+A pilot cannot size the benchmark, because the interaction term, the one parameter that
+decides the answer, returns exactly zero in 28% of 20-session pilots.
+The reference turn list decides whether the short strata exist at all: on a
+Diario-derived list (about 2/8/90 by stratum) a short-turns-only improvement cannot move
+overall TAA by more than 2.1 points.
+
+**Verdict.** Fix the interval and the statistic first (free, worth 10–15 sessions);
+build **40 sessions** as the campaign minimum, 30 as the absolute floor, 100 as the
+stretch for stratified claims; prefer uniformly medium-length sittings; report the
+standard deviation of per-session differences in the first real comparison so that h
+stops being a guess.
+§4.7 and §9 are amended accordingly.
+Limitations: h is invented; correctness is modelled as Bernoulli given a latent, whereas
+real errors cluster within a turn block, so every MDE here is optimistic by an unknown
+factor.
+
+#### 10.4 A CPU-only audio slice on synthetic Spanish (R1/R2 plumbing)
+
+**Hypothesis.** A full named-attribution pipeline (VAD, ASR, speaker embeddings,
+open-set identification with abstention, LID) can be assembled and run end to end from
+what the sandbox can reach, and each stage’s CPU cost can be measured.
+
+**What ran (Sandbox).** Every model came from a GitHub release asset, Hugging Face,
+OpenSLR and the PyTorch download host being unreachable: Silero VAD v5, Whisper
+tiny/small/medium int8 through sherpa-onnx, a Spanish-only NeMo FastConformer CTC model,
+a Spanish streaming Zipformer (Kroko; licence unresolved), a Spanish Moonshine export,
+seven ONNX speaker embedders (3D-Speaker CAM++ and ERes2Net, WeSpeaker CAM++ and two
+ResNets, NeMo TitaNet small and large), whisper-tiny as a language identifier, and ten
+Piper voices.
+The corpus is Piper VITS voices reading ParlaMint-ES text: nine base voices
+with pitch and rate perturbations fill 25 roster slots (20 enrolled, 5 out-of-set),
+seven sessions, 179 turns, 1,446 s of speech.
+The only human audio is 30 language-identification clips and 8 Mandarin
+speaker-verification clips.
+The run was interrupted by the usage limit after VAD, LID and two embedding passes; the
+ASR stage was completed single-threaded on resumption.
+
+**Result (run).** Cost on four contended cores: VAD at 0.011 real-time factor; NeMo CTC
+0.046 (596 MB); Zipformer 0.061; whisper-tiny 0.203 because sherpa-onnx pads every
+segment to 30 s; CAM++ embedding 0.099; ERes2Net 0.199; LID 0.138. VAD found 192
+segments for 179 turns with 99.9% of reference speech, no spurious and no missed turns.
+Turn-level WER on the synthetic reference (Whisper basic normalizer, no number
+verbalization): NeMo CTC 12.5%, Zipformer 14.6%, whisper-tiny 28.2%, the last driven by
+insertions on long turns.
+Open-set identification: ERes2Net 100% closed-set top-1 with zero out-of-set false
+alarms at every threshold; CAM++ 78% top-1 with in-set and out-of-set scores overlapping
+so that no threshold separates them, and only 47% on segments under 3 s. With CAM++ at
+the 95%-coverage threshold, 13 of 192 segments abstain and 121 of 179 named segments are
+correct. On the eight human clips only ERes2Net and the two TitaNets separate the three
+speakers; CAM++ and the WeSpeaker models do not.
+LID: 29 of 30 human clips, Spanish 24/24 and Catalan 21/24 on the synthetic probes.
+Breakage worth knowing: the default-named `silero_vad.onnx` and v4 over-merge whole
+exchanges; sherpa-onnx 1.13.7 ignores `max_speech_duration`; the NeMo CTC model drops
+segment-initial words on 71 of 179 turns; whisper-medium is out of memory on this box.
+
+**Verdict.** Both questions answered: most of a stack is obtainable from release assets
+alone, and the chain runs well under real time on four cores, given the Spanish-only
+models rather than Whisper.
+Every identification number is TTS fingerprinting, not speaker verification: the
+perturbed sibling voices are too far apart to be hard (same-base centroid cosine 0.43
+against 0.15 for different bases), and the human cross-check reverses the embedder
+ranking. Treat identification as a plumbing test that passed; quote none of it.
+The per-stage costs and the breakage list are the durable output.
+
+**Next.** Human audio before anything else; pyannote 3.1 as the segmentation and
+clustering baseline; large and Spanish-fine-tuned ASR on a GPU; embedders on real trial
+lists; the `attrscore` export so the same run reports TAA; resolve the Kroko licence.
+
+#### 10.5 What the Parlamento.ai study can and cannot teach (§3.3)
+
+**Hypothesis.** The only published in-domain multi-model study on Spanish-state
+parliamentary audio can supply accuracy anchors, speaker-attribution baselines and
+serving figures.
+
+**What ran (Sandbox).** `Parlamento-ai/open-source-asr` at commit `ac431ae` (results of
+2026-08-06; 168 audios, 13.79 h, seven language groups of 24) re-analysed from its
+published JSON; the audio and transcripts are not in the repository.
+
+**Result (run, from the study’s own files).** The metric is word-level edit distance to
+the median of three paid APIs; there is no human transcript anywhere
+(`referencia_humana: false`). The paid panel’s own disagreement is the floor: median 5.1
+points on es, 5.3 on the EP mix, 6.1 en, 8.3 pt, 11.7 ca, 13.0 gl, 15.1 eu, with Nova-3
+absent from gl and eu so those rows are a single vendor pair.
+`whisper-large-v3-turbo` is the best open model in five of seven groups and sits inside
+the floor everywhere except gl (1.13×) and eu (1.41×). Signal-to-noise ratio, not
+silence fraction, drives disagreement, and the strongest SNR dependence belongs to the
+paid panel itself (ρ −0.54): the reference degrades faster than the systems measured
+against it. On one clean-silence Catalan clip, whisper-large-v3 reaches 73% and the
+3CatParla Catalan fine-tune 238% (a decode loop) while turbo scores 24%, below the paid
+floor: the three co-official fine-tunes all lose to their base model (the Nós Galician
+turbo is 38% worse than generic turbo and 1.9× slower), consistent with adaptation on
+clean read or broadcast speech stripping silence robustness.
+On Basque the two leading specialists are the two models that declare Basque Parliament
+training data, and the uncontaminated HiTZ Whisper is indistinguishable from turbo, so
+the entire specialist advantage is consistent with contamination.
+The Open ASR Leaderboard carries no signal here (Spearman ρ −0.14 with parliamentary
+agreement). Serving: turbo sustains 8 concurrent 5 s windows at p95 2.36 s on an 8 GB
+GPU; batching, not concurrency, is the capacity knob (36 → 72 stable 5-minute-chunk
+sessions); the workload is 68% backlog bursts at 10% duty cycle; Nova-3 is 77% of the
+ASR bill; self-hosting beats the USD 0.71 per audio-hour line item below USD 1.83 per
+GPU-hour all-in. Speaker attribution: nothing, anywhere; the one diarization-capable
+candidate (MOSS-Transcribe-Diarize) was discarded on throughput before producing a
+quality number, and the EP sample excludes chunks that mention the interpretation
+channel.
+
+**Verdict.** Agreement is not accuracy and the study says so; it cannot anchor WER,
+cannot separate contamination from skill on Basque, and contains no attribution data.
+It does establish turbo as the baseline to beat, the SNR dependence of the paid
+references, the fragility of the co-official fine-tunes on silence, and realistic
+serving and workload figures.
+Two follow-ups are registered: silence robustness of the fine-tunes (F1) and a temporal
+hold-out for the Basque and Galician specialists (F2).
+
+#### 10.6 Whisper hallucination on chamber-like non-speech (S6; the §4.2 guard)
+
+**Hypothesis.** VAD gating alone satisfies the hallucination guard (inserted words per
+hour of non-speech) before the R1 baseline is run; if not, a decoding-side filter is
+needed.
+
+**What ran (Sandbox).** Three one-hour 16 kHz streams alternating Piper Spanish speech
+(six voices reading ParlaMint-ES text, convolved with a synthetic RT60 0.4 s room on a
+−52 dBFS floor) with non-speech spans from six classes: applause and laughter (ESC-50
+clapping and laughing, three overlapped layers, trimmed to their energetic region),
+gavel (ESC-50 wood knocks), murmur (16-talker babble from the TTS pool), room tone, and
+digital silence; 79 speech chunks (13,951 reference words) and 80 non-speech spans (1.66
+h) with exact ground truth by construction.
+ASR is whisper-small int8 through a purpose-written greedy decoder on onnxruntime,
+because sherpa-onnx does not expose `no_speech_prob`, `avg_logprob` or the compression
+ratio, which are the decoding-side guard under test (the decoder matches sherpa-onnx’s
+C++ output on real speech).
+Two regimes: contiguous 30 s windows over the whole hour, and Silero VAD segments only;
+filters applied after decoding so every threshold is scored from the same units.
+Whisper-medium is out of memory on this box; the VAD arm had one of three streams scored
+when this section was written, and the run was slowed by memory contention with the
+other spikes.
+
+**Result (run).** Without gating, whisper-small emits 401 hallucinated words per hour of
+non-speech: gavel 1,468 (repetition loops such as “toc toc toc…”), applause 697, murmur
+115, laughter 75, digital silence 72 (“y” twenty times), room tone 3.5. The applause
+output is the dangerous case for a record: “aplausos”, “gracias”, “muchas gracias”, “muy
+bien”, plausible chamber language rather than garbage.
+The guard signals overlap badly at this model size: `no_speech_prob` has a p95 of 0.68
+on real speech units and a p05 of 0.64 on non-speech units, so the threshold that
+suppresses every hallucination discards 14% of real words.
+Filter by filter: `no_speech_prob > 0.6` cuts the rate to 89 per hour but raises speech
+WER from 0.276 to 0.362; `avg_logprob < −1.0` alone leaves 318 per hour, because the
+long, confident hallucinations pass it; Whisper’s own default conjunction leaves 337;
+the compression-ratio filter (> 2.4) alone leaves 96 per hour at no WER cost (0.269);
+all three together leave 1.8 per hour at WER 0.355. VAD gating on the scored stream
+removes applause, gavel and both silences almost entirely (0.2%, 0.8%, 1.0% and 0% of
+their time passed as speech) but passes 92.5% of babble and 17% of laughter, so the
+decoded units inside murmur hallucinate at 3,216 words per hour and laughter at 311
+(“jajaja…” loops), 519 per hour overall on that stream; VAD plus all three filters
+leaves 7 per hour. VAD also costs speech: the deletion rate rises from 0.19 to 0.27.
+Speech WER on this synthetic material is high for every configuration (0.27–0.36) and is
+dominated by deletions, a property of the small model on reverberant TTS rather than of
+the guard.
+
+**Verdict.** VAD gating alone does not satisfy the guard: it fixes applause, knocks and
+silence and fails on babble, which a chamber supplies constantly.
+The `no_speech_prob` gate cannot be tuned at whisper-small without losing real words,
+which reproduces the published warning that hallucinations carry high `avg_logprob` and
+low `no_speech_prob` exactly where the naive filters are needed.
+The one free filter is the compression ratio; the practical guard is VAD plus the
+compression-ratio filter plus a babble-aware VAD threshold, and the harness’s
+placeholder of 5 words per hour is reachable only with the full conjunction at a 30%
+speech cost.
+Set the guard from the first real baseline, but expect the order of 10 words
+per hour for a gated pipeline, not 5. Limitations: synthetic streams with a synthetic
+room; ESC-50 clapping close-miked rather than a chamber; one model size; the VAD arm
+partial at the time of writing.
+
+**Next.** Finish the VAD arm on all three streams and the `condition_on_previous_text`
+regime; run F1 (the co-official fine-tunes on the same streams); test the larger Whisper
+sizes and `whisper-large-v3-turbo` on a GPU, since the Parlamento.ai analysis (§10.5)
+found turbo the only Whisper variant that does not loop on silence; add babble to the
+VAD tuning set.
+
+#### 10.7 The interpreter-overlay flip curve and LID on the same mixtures (S10, S11 synthetic; R5, H-005)
+
+**Hypothesis.** There is a level ratio below which an embedding of the mixed Congreso
+feed (deputy in Catalan, Spanish interpreter 2–4 s behind) still identifies the deputy,
+and language identification can flag the mixed condition before identification fails.
+
+**What ran (Sandbox).** Forty deputy turns from two Catalan Piper voices over
+ParlaMint-ES-CT text, forty interpreter renderings from two Spanish Piper voices over
+ParlaMint-ES text (four voice pairings, same and cross gender, seven Spanish impostors),
+each voice with a 28 s held-out enrollment and each Catalan voice a second enrollment on
+Spanish text for the cross-language probe.
+Linear mixing at active-region RMS ratios from −12 to +12 dB in 3 dB steps, lags of 2, 3
+and 4 s, three window types (the deputy’s full span with its clean head; 6 s and 3 s
+slices wholly inside the overlap; a variant with the interpreter’s run-out).
+Four embedders were run; the two CAM++ exports were disqualified by their own
+clean-speech controls (7.7–20% EER on full clips, 37–54% on 3 s clips) and kept only as
+a negative result, leaving ERes2Net with TitaNet-large as a check.
+LID is Whisper’s utterance-level language token, small and tiny, on whole turns and on
+short windows; the frame-level VoxLingua107 model was unreachable.
+
+**Result (run).** On a mid-turn slice the embedding follows the louder talker: the flip
+(mixture closer to the interpreter’s enrollment than to the deputy’s) sits at 0 dB
+within ±0.6 dB for both models, all lags and all pairings; language mismatch and
+cross-gender pairing buy nothing.
+The clean head is the only margin, about +1.5 dB per second of lag: +2.6, +3.8 and +5.7
+dB on the full span at lags of 2, 3 and 4 s. Verification against a mid-point threshold
+fails 1–4 dB before the flip (+1.4 dB on the full span, −2.9 dB on 6 s and −4.0 dB on 3
+s of overlap), and cross-language enrollment costs a further 0.2–0.9 dB. Closed-set
+identification goes from 100% to 0% inside about 9 dB centred on 0 dB. LID fails at or
+before the embedding: at 0 dB whisper-small reports Catalan on 50% of full turns and 15%
+of 3 s slices (whisper-tiny 12% and 0%), and on clean 3 s clips tiny is right only 47%
+of the time, so it is not a segment-level LID at all.
+Letting a window run into the interpreter’s 2.5 s run-out cuts the Catalan rate from 93%
+to 38% at −12 dB.
+
+**Verdict.** The overlay is a level problem with no comfortable operating band: at equal
+level an unextracted pipeline is inverted, not degraded, so H-005’s bar of recovering
+half the loss is a minimum.
+LID is not a safety net; it gates only while the deputy is already 6 dB or more louder,
+and only with whisper-small.
+The §3.2 ordering of attacks stands with sharper reasons: the interpreters’ feeds first,
+interpreter enrollment buys a mixed-condition flag rather than attribution, extraction
+holds the leverage and must move the operating point by more than about 9 dB of
+effective ratio. Usable today is a rule, not a threshold: attribute acoustically only
+below about −6 dB estimated ratio, prefer windows that include the pre-interpretation
+head, never cross the turn end.
+Limitations: TTS voices (0% clean EER gives it away, so only the curve’s shape and the
+flip’s position relative to 0 dB transfer); one global gain, whereas the broadcast
+chain’s AGC and ducking would push the ratio toward the interpreter exactly when the
+interpreter speaks; Catalan only; CPU-only, so whisper-small ran on half the turns.
+
+**Next.** S1 and S2 are blocking: measure the interpreter-to-deputy active-region ratio
+on ten real interpreted clips as a distribution within a turn (below −6 dB this is a
+boundary-detection problem, near 0 dB extraction is mandatory); re-run the grid with AGC
+and ducking once S2 says what the chain does; feed the curve into S22 as its
+before-and-after axis; treat whisper-small as the LID floor and benchmark a real
+segment-level LID on a networked box.
+
+#### 10.8 An LLM as chair parser, against the regex (S21, R3)
+
+**Hypothesis.** An LLM given the chair turn, the agenda title and the session roster
+names the next speaker better than the 16-rule parser, at a cost and latency a live
+pipeline can carry.
+
+**What ran (Sandbox).** 600 Congreso XV chair turns stratified over the regex’s classes
+(200 canonical “tiene la palabra”, 150 bare vocatives, 50 Catalan or other-language
+hand-offs, 100 role-only references such as “Señor ministro.”, 100 regex failures),
+ground truth as in §10.1; `gemini-2.5-flash` at temperature 0 with thinking off,
+prompted with the chair text, the agenda title, the session roster with aliases and
+roles, and the previous speaker (the analogue of the regex’s within-session carry-over);
+responses cached; the same scorer as §10.1; McNemar on paired outcomes.
+Total API spend about USD 1.33.
+
+**Result (run).**
+
+| Stratum | n | regex precision / overall | LLM precision / overall | regex + continuation | hybrid (regex first, LLM fallback) + continuation |
+| --- | --- | --- | --- | --- | --- |
+| canonical | 200 | 1.000 / 0.990 | 1.000 / 0.995 | 0.995 | 1.000 |
+| bare vocative | 150 | 0.958 / 0.907 | 0.978 / 0.880 | 0.940 | 0.960 |
+| other language | 50 | 0.956 / 0.860 | 0.867 / 0.780 | 0.860 | 0.880 |
+| role only | 100 | 0.937 / 0.740 | 0.765 / 0.520 | 0.770 | 0.840 |
+| regex failures | 100 | 0.000 / 0.000 | 0.794 / 0.270 | 0.650 | 0.800 |
+| all 600 | 600 | 0.960 / 0.752 | 0.933 / 0.748 | 0.875 | **0.920** |
+
+Projected to all 12,179 XV regular turns with the design weights: regex plus
+continuation 0.906, hybrid 0.940, with the LLM called on 18.6% of turns.
+Latency p50 0.86 s, p95 1.22 s at 8-way concurrency; cost about USD 0.94 per 1,000 chair
+turns for the flash model and USD 0.18 under hybrid routing, USD 0.30 and 0.06 for
+flash-lite (prices from search, the pricing page being unreachable).
+
+**Verdict.** Alone the LLM does not beat the regex (0.748 versus 0.752, McNemar p =
+0.92): it loses role-only references by as much as it wins the regex’s own failures.
+Behind the regex as a fallback it wins clearly (0.920 versus 0.875 on the sample, 28
+wins to 1 loss, p = 1.1e-7). Neither latency nor cost is the obstacle in a live
+pipeline. The single highest-value follow-up is extracting the per-question agenda
+heading, which names the addressed minister, is empty for 42% of sampled rows today, and
+holds essentially all of the LLM’s residual error.
+Limitation: the input is the edited record, not ASR output (S9 remains the test of the
+live case).
+
+#### 10.9 A cross-service ASR harness, smoke-tested on the one reachable service (A3, §11.5)
+
+**Hypothesis.** The cross-service, cross-language protocol (companion inventory §10) can
+be implemented as one harness with adapters for every service and open model, a
+per-language normalizer, clip-level paired bootstrap intervals, caching, and cost and
+latency logging, and smoke-tested from the sandbox.
+
+**What ran (Sandbox).** `asr-bench`: manifests, fourteen adapters (Gemini, Google
+Speech-to-Text v2, Amazon Transcribe batch and streaming, Deepgram, OpenAI, AssemblyAI,
+Speechmatics, ElevenLabs, Gladia, Soniox, Rev.ai, sherpa-onnx Whisper, faster-whisper),
+a Whisper-basic normalizer with a diacritics variant, WER and CER with a clip-level
+paired bootstrap, response caching keyed by service, model, settings and clip hash, a
+pricing file with (docs)/(search)/(assumed) provenance on every entry, a language-code
+probe with a negative control, and a report writer; 172 tests, no network needed.
+The smoke set is 30 Piper synthetic clips per language for es-ES, es-419, ca and en; eu
+and gl have no Piper voice.
+
+**Result (run).** Only Gemini was reachable with working credentials: two Gemini models,
+240 calls, WER 1.1–1.4% on Spanish, 2.9% on Catalan and English for the general model,
+3.1–7.9% for the transcription model, p50 latency 2–3 s, about USD 0.18–0.20 per
+audio-hour (assumed).
+Amazon Transcribe could not run: the AWS key in the environment is malformed (14
+characters) and every call fails authentication; its language coverage (ca-ES, eu-ES,
+gl-ES) was read from the shipped botocore enum instead.
+Google Speech-to-Text v2 returned 401; the other nine hosts are blocked from the
+sandbox. Gemini’s language code is unvalidated: a `zz-ZZ` hint returned a transcript, so
+“accepted” is not evidence of support, and the hint still steers output (a Catalan clip
+came back Galician-flavoured under `gl-ES`). The Whisper basic normalizer inflates
+Catalan WER by up to 7 points by splitting `l’home` and `col·legi` into two tokens; the
+harness now pins the real behaviour in a test.
+A latent bug had prevented the report from ever building (an unescaped percent sign);
+fixed.
+
+**Verdict.** The instrument exists and is tested; the smoke numbers are synthetic clips
+on one service and say nothing about the question.
+The protocol’s first real pass needs a box with egress to the other services, valid AWS
+credentials or a bucket, mirrored open-model weights, and the ground-truth samples
+(Basque Parliament 1 test, ParlamentParla clean test, the BSC code-switching set,
+VoxPopuli-es, the Congreso verbatim sample).
+Two protocol amendments come out of the smoke: a negative-control language code in every
+run, and a Catalan-aware normalizer rather than Whisper’s basic one.
+
+#### 10.10 The Congreso XV dataset, its generator, and the commercial-cap fit (S23; S7 in part)
+
+**Hypothesis.** A free, in-domain, per-speech dataset with media links exists and can
+supply the text-side benchmark inputs and answer S23 (do agenda-constrained candidate
+sets fit under the 50- and 4-identity caps of commercial enrollment APIs).
+
+**What ran (Sandbox).** `OpenParliamentTV-Data-ES` (HEAD of 2026-06-29, “in
+development”): 180 plenary sessions of the XV legislature, 10,569 speech records, each
+with speaker, speaker type, agenda item and type, minute-resolution timing, a Congreso
+MP4 URL and the Diario text; plus its generator, `OpenParliamentTV-Tools` (GPL-3.0, 4
+stars), whose parse and merge path was run offline on the same inputs.
+
+**Result (run).** Records deduplicate to 9,441 unique clips (1,128 records are the same
+clip fanned out under several agenda items), 907 audio hours; clip duration median 360
+s, p10 60 s, p90 720 s, nothing under 60 s; government members median 120 s, question
+time 60 s; per session a median of 39 distinct speakers (p90 50, max 71); 427 speakers,
+271 with five or more speeches; 39% share a first surname.
+Per numbered agenda item in the media index, distinct speakers are at most 4 for 66.7%
+of items, at most 10 for 90.7% and at most 50 for 100%; per Diario debate section the
+median is 10 (§10.1). So the 50-identity cap of a Speechmatics-style API fits every
+agenda window and the 4-identity cap fits two thirds of numbered items, with the caveat
+that agenda sets exclude interjectors and the chair.
+Co-official-language passages by a stopword heuristic are 54 of 9,399 speeches (0.6%) in
+43 sessions, mostly Catalan; the dataset’s own language tag is `es` for every record and
+is unusable. Quality flags: the generator’s merge is surname-based sequence alignment
+with binary 1.0/0.5 confidence, timing is index matching not audio alignment (aeneas
+covered 3 of 180 sessions), chair turns are dropped by design (61.5% of Diario speaker
+markers), stage directions sit inline in the speech text, three sessions carry
+placeholder MP4 URLs, and the real unmatched share is about 2.4% once the fan-out
+duplicates are removed.
+Verdict on the generator: reuse the scraper and proceedings parser, rewrite the merge
+and timing layer, never treat its output as alignment ground truth.
+
+**Verdict.** The text-side inputs of the benchmark (turn table with durations, roster
+with aliases, agenda candidate sets, dual-language flags) exist today for free; the
+per-clip MP4 manifest (`attic/spikes/manifest/congreso-xv-media.jsonl`) is the input for
+S1 and S13 the day a box with congreso.es access exists.
+S23 is answered: commercial caps are not the obstacle to an enrollment API; the
+350-member roster with agenda windowing fits.
+The record has no sub-minute stratum, which confirms §10.3’s warning that the reference
+turn list decides whether short-turn hypotheses are testable.
+
+#### 10.11 Catalogue of further spikes
+
+**[Proposed]** The remaining spikes, each the cheapest test that could falsify or
+de-risk a hypothesis, with tier, effort and the decision it changes.
+Dependency order: S24 first (longest lead); S1 opens the Net tier and S2, S3, S8 share
+its downloads; S4 and S15 are independent; S13 needs S1 and §10.1; S14 needs S4 or S13
+and §10.2; S11, S16 and S22 follow S2; S12 then S17; S5 then S18 and S19.
+
+| Id | What it measures | Tier | Effort | Decision it changes |
+| --- | --- | --- | --- | --- |
+| S24 | The chamber letter: floor feed, interpreters’ feeds, conference-system event export, archive track layout (drafted; see §3.8, R11) | Chamber | hours to write, weeks to answer | R11, R5 attack 1, Q-001 |
+| S1 | Archive audit: `ffprobe` track layout of session and per-intervention MP4s for three co-official sessions; Diario interventions versus clips; co-official portal variant (Q-003) | Net | half a day | whether §5.1’s enrollment recipe works as written; whether co-official clips enroll the interpreter |
+| S2 | Interpretation listening test: lag and interpreter-to-original level ratio on ten clips | Net | half a day | which of the four R5 attacks to pursue |
+| S3 | Chyron OCR yield on 30 min archive plus 30 min live video at 1 fps | Net | one day | whether OCR joins the chair announcement as a fuser input; defers R10’s face pipeline |
+| S8 | Camera-cut count: for every turn under 10 s, is the speaker on camera | Net | half a day | H-008 lives or dies |
+| S4 | Watchlist-scale identification on a same-room proxy (VoxPopuli-es 305 speakers; ParlamentParla), N in {50, 150, 300}, AS-norm on/off, FAR at FRR 5% versus VoxWatch | Net, CPU | two days | whether the same-room advantage is real; whether R2 suffices without R4 |
+| S5 | Diario-to-audio alignment yield on five sessions through the EuroSpeech pipeline, by language and turn length | Net, GPU | two days | R1’s cost per session; R4’s weak-supervision volume; R6’s paired data |
+| S13 | Per-intervention clip identification on the Congreso: enroll from sessions A–C, test on D; TAA@100% by clip duration; out-of-set via held-out members | Net, CPU | two days | H-001’s rostrum clause on the real chamber; real trials for R2 |
+| S14 | Candidate set, AS-norm and calibration on S4 or S13 scores through the harness: coverage–TAA curve | Net | one day | H-002 on proxies; whether the constraint alone carries the gain |
+| S15 | Cross-lingual enrollment shift in-domain on Basque Parliament 1 (enroll es, test eu and vice versa; language-dependent s-norm) | Net, CPU | one day | whether bilingual members need per-language enrollment |
+| S9 | Parser robustness to ASR name errors: 200 announcement sentences, Piper to Whisper to parser, with and without fuzzy matching | Sandbox | one day | how much of H-003 survives ASR; whether a phonetic matcher is needed |
+| S7 | Record census: stage directions per hour by class, unattributed turns, turn length by role (turn length done in §10.1 and §10.10) | Sandbox | half a day | R9’s class prior; R11’s residual; whether the record holds a sub-3 s stratum (it does not, §10.10) |
+| S12 | Editorial gap on 30 hand-verbatimized minutes (rostrum, bench, chair): record-WER and HTER of verbatim against the Diario | Net, human | two days | whether the campaign can score against the record before R6 |
+| S17 | Prompted-LLM normalizer on S12’s pairs, post-cutoff sessions only | Net | one day | whether H-006 needs training |
+| S16 | Interpreter pool count: embed interpreter-only windows from ten sessions, cluster, check stability | Net, CPU | one day | R5 attack 2 |
+| S22 | Target-speaker extraction on real interpreted clips with archive enrollment; cosine before and after; WER against the Diario’s original-language block; LID after extraction | Net, GPU | three days | H-005; whether attack 3 deserves a research effort |
+| S18 | Joint speaker-attributed ASR off the shelf (MOSS-Transcribe-Diarize chunked by agenda item; DiCoW with pyannote) on three sessions | Net, GPU | two days | whether R8 survives six-hour audio |
+| S19 | Revision replay: one session through the audio stack at a 2-minute finalization window with the harness logger | Net | two days | H-007; whether R7 needs a two-pass design |
+| S20 | Sortformer under turn windowing, whole session versus per-window reset | Net, GPU | one day | only if R7 chooses Sortformer |
+| F1 | Silence robustness of the co-official fine-tunes (3CatParla, LoS, Nós-gl, xezpeleta-eu) versus turbo on the S6 non-speech streams | Net | one day | whether adapted models need a decoding-side guard |
+| F2 | Temporal hold-out for Basque and Galician specialist contamination: audio dated after their training cutoffs versus before | Net | two days | whether the specialists’ advantage is skill or contamination |
+
+Dead ends, recorded so they are not re-proposed: aligner yield on synthetic speech
+(measures the aligner, whose CER curve EuroSpeech already published); re-measuring
+Spanish WER on parliamentary audio (settled by §3.3); blind separation of interpreter
+mixtures as a first spike; a face gallery before S8; Sortformer as a session-level
+diarizer over six hours; any spike whose only outcome is DER; hallucination tests on
+isolated 5 s clips; a same-room enrollment test on TTS voices; estimating the commercial
+cap from an API trial rather than from the candidate-set histogram.
+
+#### 10.12 What the spikes changed
+
+- **§4.6 harness.** Turn assignment by intersection over union, not raw overlap;
+  fixed-label cpWER/tcpWER and identification error rate as outcomes with the permuted
+  forms as the name-permutation credit; the pyannote collar constant; an instrument
+  guard.
+- **§4.7 and §9 accept rule.** A paired *t* interval on per-session differences, “the
+  interval excludes zero”, mean rather than median, turn- or precision-weighted once the
+  gain’s heterogeneity is known.
+- **§5.1 benchmark.** 40 sessions as the campaign minimum, uniformly medium-length
+  sittings preferred; the reference turn list (Diario-derived versus audio-aligned) is a
+  prior decision because the Diario-derived list has no sub-minute stratum; the Congreso
+  XV dataset supplies the record layer, the roster and the per-clip manifest for free.
+- **§7 R3 and §9 H-003.** Supported for rostrum turns on two records (0.93–0.95),
+  refuted for all turns (0.77–0.78, 0.92–0.94 with the continuation rule), open for
+  short turns and for the live setting; the text-only floor becomes the baseline
+  acoustic identifiers must beat.
+- **§7 R2 and §9 H-002.** Candidate-set sizes are measured (median 2 per numbered item,
+  10–12 per debate section, 37–39 per session); the commercial caps fit (S23), so an
+  enrollment API is admissible as a comparison row.
+- **§3.3 and §6.** `whisper-large-v3-turbo` is the open baseline; the co-official
+  fine-tunes are fragile on silence and the Basque specialists are contamination-suspect
+  until F2 runs; API agreement is a drift monitor, never a ranking.
+- **Environment.** Everything acoustic that matters next (S1, S2, S4, S5, S13) needs one
+  box with a GPU, Hugging Face, YouTube and congreso.es access; the sandbox’s reach
+  (GitHub release assets and PyPI) was enough for the instrument, the text side and
+  synthetic guards, and for nothing that touches real chamber audio.
+
 ### 11. Evaluation strategy
 
 **[Analysis]** The user-level question is whether credible, realistic evaluations can be
