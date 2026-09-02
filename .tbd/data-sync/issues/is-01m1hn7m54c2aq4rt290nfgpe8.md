@@ -5,7 +5,7 @@ title: "Spike: scoring harness — TAA@coverage, cpWER/tcpWER/DER, ECE, latency/
 kind: task
 status: in_progress
 priority: 1
-version: 6
+version: 7
 spec_path: docs/project/research/research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md
 labels:
   - spike
@@ -20,6 +20,6 @@ dependencies:
     target: is-01m1hnqpd689spmp39gq0rpsx3
 parent_id: is-01m1hn7gch0xb2sv9fw6a4qes1
 created_at: 2026-09-02T18:13:52.419Z
-updated_at: 2026-09-02T18:22:39.013Z
+updated_at: 2026-09-02T18:28:59.505Z
 ---
-Opus agent; code attic/spikes/scoring-harness (package attrscore, pytest); report scratchpad/spike-scoring-harness.md. Must refuse empty hypotheses (instrument guard).
+Opus agent; code attic/spikes/scoring-harness (package attrscore, pytest); report scratchpad/spike-scoring-harness.md. Must refuse empty hypotheses (instrument guard). MID-FLIGHT ADDITION (sent to the agent): fixed-label (no permutation) cpWER/tcpWER variants and pyannote.metrics IdentificationErrorRate, plus a test showing a consistent-but-wrong name mapping scores 0 under permutation-invariant cpWER and full error under the fixed-label variant.
