@@ -19,7 +19,7 @@ October 2026** at Mad Tech Campus in Madrid, jointly presented by three Madrid-c
 startups: **Talky** (accounting), **Reversa** (regulation and democracy), and **Tunen**
 (agriculture).
 
-It covers five things:
+It covers six things:
 
 1. The competition itself: format, rules, selection, schedule, scoring rubric, prizes,
    and logistics.
@@ -27,9 +27,12 @@ It covers five things:
    whose site hosts the event.
 3. All nine identifiable founders and principals across the three companies, with what
    is and is not on the public record for each.
-4. All three challenge tracks as stated, with the discrepancies between the two official
+4. Every public GitHub repository belonging to the three companies and their founders,
+   cloned locally and read — including a complete starter kit from a hackathon Talky ran
+   six months earlier.
+5. All three challenge tracks as stated, with the discrepancies between the two official
    descriptions surfaced rather than smoothed over.
-5. The problem domain behind **Track 02 (Reversa / Democracy)**—real-time parliamentary
+6. The problem domain behind **Track 02 (Reversa / Democracy)**—real-time parliamentary
    transcription and speaker attribution—including the state of the art, the public
    datasets and models that bear on it, and why the stated target is hard.
 
@@ -63,18 +66,23 @@ Where a number appears only in vendor or aggregator copy, it is labeled as such.
 2. Who are Talky, Reversa, and Tunen, and what does each already run in production?
 3. Who founded each company, what are their backgrounds, and what does the composition
    of the teams reveal?
-4. What precisely is each challenge asking for, and what is the measured metric?
-5. For the Reversa track: what is the real-world problem, why does the official record
+4. What code have these companies published, and what does it reveal about their systems
+   and about how they run a hackathon?
+5. What precisely is each challenge asking for, and what is the measured metric?
+6. For the Reversa track: what is the real-world problem, why does the official record
    lag, and what is the current state of the art in the relevant technologies?
-6. What does the scoring rubric imply about how a twelve-hour build should be
+7. What does the scoring rubric imply about how a twelve-hour build should be
    prioritized?
-7. What remains unknown until the briefs are released?
+8. What remains unknown until the briefs are released?
 
 ## Scope
 
 **Included:** the public record on the event, its organizers, and their founders as of
 2026-09-02; the technical literature bearing on multilingual ASR, speaker diarization,
 and speaker identification in parliamentary settings; and analysis of the stated rubric.
+
+Public source code published by the companies and their founders was cloned and read;
+see §9.
 
 **Excluded:** the challenge briefs and datasets themselves, which are not public and are
 distributed only to registered participants the week before the event.
@@ -608,7 +616,194 @@ together:
    one to three years, not a decade.
    That is worth knowing before assuming the frontier is further away than it is.
 
-### 9. The three challenges as stated
+### 9. Public code: what is on GitHub
+
+**[Analysis]** All three companies were searched on GitHub by organization handle, user
+search, and code search against their domains.
+The results are lopsided: **Tunen and Talky both have public code, Reversa has none**,
+and one of the Talky finds is the most operationally useful artifact discovered in this
+entire report — a complete starter kit from a hackathon Talky ran six months before the
+Madrid Open.
+
+Everything below is public code in public repositories, verified by commit authorship
+and domain references rather than by name similarity.
+A scan for exposed credentials (AWS keys, private keys, provider tokens) across all
+cloned repositories found **none**.
+
+#### 9.1 Verified accounts
+
+| Handle | Entity | Public repos | Basis for the identification |
+| --- | --- | --- | --- |
+| [`tunen-org`](https://github.com/tunen-org) | **Tunen Limited** | 6 | Org name is “Tunen Limited”; website field is tunen.ai; created 2023-08-23, matching the UK incorporation month |
+| [`a-shine`](https://github.com/a-shine) | **Alexandre Shinebourne** | 20 | Profile name, and bio reading “CTO @ Tunen \| ex-Google \| University of Cambridge \| University of Warwick”; sole member of `tunen-org` |
+| [`Talky-SP`](https://github.com/Talky-SP) | **Talky Labs** | 2 | Org display name “Talky”, created 2025-01-04; repos configure `api.usetalky.com` production endpoints |
+| [`jorgebp226`](https://github.com/jorgebp226) | **Jorge Beamonte** (high confidence, not certain) | 20 | Sole contributor to both Talky-SP repos; personal repos include `Frontend-Talky-Sender`, `appfacturas`/`appfacturas-frontend` (invoice apps) and `frontend-app-restauracion` (restaurant sector — Talky’s origin market); handle matches the initials |
+| [`reversa-ai`](https://github.com/reversa-ai) | **Reversa** (probable) | **0** | Handle and creation date (2026-04-08) fit, but the org has no public repositories and no public members, so it cannot be positively confirmed |
+
+**[Analysis]** **Reversa publishes no code at all.** For the company hosting the event
+and owning Track 02, there is nothing on GitHub to read.
+Anyone preparing for the democracy track gets no head start from their public
+engineering.
+
+#### 9.2 Accounts that look right and are not
+
+**[Analysis]** Name-matching produces several convincing false positives.
+Each was checked and rejected:
+
+- **[`talkylabs`](https://github.com/talkylabs)** (7 repos) — client libraries in
+  Python, Ruby, Node, Go, PHP, Java, and C# for the “Reach@TalkyLabs API,” documented at
+  `reach.talkylabs.com`, all pushed in September 2023. A communications/messaging API
+  company, unrelated to Madrid accounting.
+  **This is a fourth distinct “Talky”**, on top of the three already catalogued in §8.2.
+- **[`talky`](https://github.com/talky)** (1 repo, 2014) — “domen’s discussion
+  platform.”
+- **[`disruptive-labs`](https://github.com/disruptive-labs)** — a startup studio at
+  disruptivelabs.io, created 2018, unrelated to **Disruptive Labs SL**, the Madrid
+  entity behind Reversa (founded 2025).
+- **`@Santiago-58`** — real name “Santiago Luis Aliaga Choque,” not Santiago Aliaga
+  Estella.
+- **`@AvdDGit`** — real name “Alv von der Decken,” not Jacob.
+- **`@burgaleta`**, **`@Beamonte`**, **`@tunen`** — all empty accounts with no
+  repositories, no name, and no bio.
+  No evidence connects any of them to these companies.
+
+**No GitHub presence was found** for Julius von Davier, Jacob von der Decken, Íñigo
+Martín Llorente, Tomás Burgaleta Alonso, Santiago Aliaga Estella, or Maximilian Letón.
+
+#### 9.3 Talky’s previous hackathon — the most useful find in this report
+
+**[Primary]** `Talky-SP` contains exactly two repositories, both created **6 March
+2026** for a prior Talky hackathon:
+
+- **`hackathon-base-2026-03-06`** — “Base code for AI Evals Hackathon.”
+  React + TypeScript + Vite + Tailwind.
+  One commit, “Base for Hackathon,” by `jorgebp226`.
+- **`hackathon-backend-base-2026-03-06`** — “Backend base on AWS for the Hackathon.”
+  Python AWS CDK. Commits run to 23 March 2026, ending with “End of hackt.”
+
+**[Analysis]** This is a **precedent for how Talky runs a hackathon**, published in
+full. Read it before choosing Track 01.
+
+**The brief, quoted from the scaffold’s own Objectives page** (bilingual ES/EN in the
+source): the framing question is “In traditional software, 1 + 1 is always 2. In the era
+of Artificial Intelligence, 1 + 1 is 'approximately 2, but sometimes it’s 2.01 and I’ll
+explain it in a paragraph'.
+How do we ensure quality when the base system changes its mind?”
+The context given to participants was: “We have built an AI-powered pipeline that
+automates the financial and logistics back-office: extracts data, normalizes products,
+reconciles documents and matches bank statements.
+It works exceptionally well, but we need advanced instrumentation.”
+Notably, the brief also told participants their work would feed “a research paper we are
+working on about the automation of prompt engineering.”
+
+**What the scaffold provided.** Pre-built pages for Welcome, Getting Started,
+Objectives, Docs with an API explorer, Golden Dataset, Annotation, Analytics, Test, and
+Resources; Cognito authentication wired up; an i18n layer with full Spanish and English
+translations; and design tokens.
+The backend shipped AWS CDK stacks for DynamoDB, Lambda, API Gateway with a Cognito
+authorizer, and self-mutating dev/pre/prod pipelines, plus a LocalStack stage.
+
+**What it reveals about Talky’s production system.** The repositories document the real
+platform in some detail:
+
+- **Infrastructure**: AWS in **eu-west-3 (Paris)** — Cognito, API Gateway, Lambda,
+  DynamoDB, CDK, “following the Talky-App architecture pattern.”
+- **Live microservices** on `api.usetalky.com`: `tpv-api` (point of sale),
+  `user-expenses-api`, `analytics-v2`, `delivery-notes-api` (albaranes), `analytics-v3`
+  (payroll search), and `invoice-learning-api`.
+- **The data model**, from a committed DynamoDB reference: `User_Expenses` (described as
+  “the main financial table”), `User_Invoice_Incomes`, `Delivery_Notes`,
+  `Payroll_Slips`, `Bank_Reconciliations`, `Vendors_AI` and `Clients_AI` (AI-grouped
+  counterparty names for reconciliation), `Reconciliation_Suggestions` (for complex 1-N
+  and N-1 matches), and `Supplier_Payment_Patterns` (described as “temporal guardrails
+  for payments”).
+- **The agent architecture**, from a committed design doc for an “AI CFO Agent”: a fast
+  classifier (**gpt-5-mini**) splits fast chat from complex tasks, an orchestrator
+  (**claude-sonnet-4.5**) decides whether it can answer directly or needs data, and a
+  `fetch_financial_data` tool call hands off to a DB query agent.
+- The backend repo also carries a `.claude/settings.json`, so the team develops with
+  Claude Code.
+
+**[Analysis]** Three things follow for Track 01. First, the “buried problems a good
+accountant would catch” almost certainly live in structures resembling these tables, and
+`Supplier_Payment_Patterns` — explicitly labelled guardrails — signals that Talky
+already thinks about the abstention problem temporally.
+Second, Talky’s own framing of the hard part is **not extraction but instrumentation**:
+knowing whether a change made the system better.
+Third, the March scaffold’s centerpiece pages were **Golden Dataset** and
+**Annotation**, which is the same calibration-and-evidence theme that the Madrid Open
+rubric scores at 20% and 15%.
+
+#### 9.4 Tunen’s public code — infrastructure, not product
+
+**[Primary]** `tunen-org`’s six repositories contain no product code.
+Four are original, all authored solely by `a-shine`, and two are forks:
+
+| Repo | Language | Origin | Purpose |
+| --- | --- | --- | --- |
+| `gcp_artifact_registry_dart_pub` | Dart | original | Implements the Dart Hosted Pub Repository Specification v2 on top of GCP Artifact Registry |
+| `gcp-artifact-registry-dart` | Python | original | Wrapper around the same registry |
+| `firebase-tools-dart` | Shell | original | Docker image with Dart and Firebase Tools |
+| `github-gcp-repo-sync` | HCL/Terraform | original | GitHub-to-GCP repository sync |
+| `dart_firebase_admin` | Dart | fork of `firebase/firebase-admin-dart` | Firebase Admin SDK |
+| `flutter_map_geojson` | Dart | fork of `jozes/flutter_map_geojson` | GeoJSON layer for Flutter maps |
+
+**[Analysis]** The stack is unambiguous: **Dart and Flutter on Firebase and GCP**, with
+enough friction around private Dart package distribution that they built their own
+hosted pub repository.
+The `flutter_map_geojson` fork is the only hint of the geospatial side — GeoJSON
+rendering on Flutter maps is how field boundaries reach a farmer’s phone.
+Nothing here touches remote sensing, yield modelling, or the Track 03 problem.
+
+#### 9.5 The Track 03 challenge owner’s own thesis code
+
+**[Primary]** `a-shine/niab-automated-phenotyping` is Alexandre Shinebourne’s
+**Cambridge AI4ER MRes project (2024)**, done with NIAB and carrying UKRI and University
+of Cambridge branding.
+It is a complete, open-source computer-vision phenotyping pipeline for **teff**
+(*Eragrostis tef*), an underutilized East African cereal, tracking Plant Canopy Coverage
+ratio as an indicator of weed resilience.
+
+Its contents matter more than its subject:
+
+- **U-Net and DeepLabV3+** semantic segmentation models, compared.
+- **Monte Carlo dropout for uncertainty quantification**, with the best model being an
+  MC-dropout U-Net.
+- An **active learning** strategy that uses that uncertainty to choose what to annotate
+  next, shown to improve performance with minimal additional annotation.
+- Tooling for semi-automated annotation, mask editing, HSV thresholding, benchmarking,
+  and uncertainty visualisation.
+- A candid limitations section: automated tracking broke down on instance segmentation
+  and shoot-to-sector assignment (phenotype-to-genotype mapping).
+
+**[Analysis]** This is the single most revealing artifact about how the Tunen track will
+be judged. The person who wrote the Track 03 challenge spent a Cambridge master’s on
+**uncertainty quantification and active learning in agricultural computer vision**, and
+published the code. The rubric’s 20% for “safe autonomy and restraint” is not a generic
+hackathon platitude when the challenge owner’s own thesis is about calibrated
+uncertainty driving what a model refuses to answer alone.
+His stated methodological instinct — “we try to take a pragmatic approach” — and his
+willingness to publish a limitations section suggest that a team documenting where its
+model fails will be rewarded rather than penalized.
+
+#### 9.6 Local checkouts
+
+**[Primary]** Seven repositories were cloned into the gitignored `attic/` directory per
+this repository’s `checkout-third-party-repo` convention:
+
+```
+attic/hackathon-base-2026-03-06           # Talky evals hackathon frontend
+attic/hackathon-backend-base-2026-03-06   # Talky hackathon AWS CDK backend + internal docs
+attic/gcp-artifact-registry-dart          # Tunen
+attic/gcp_artifact_registry_dart_pub      # Tunen
+attic/github-gcp-repo-sync                # Tunen
+attic/firebase-tools-dart                 # Tunen
+attic/niab-automated-phenotyping          # Shinebourne's Cambridge/NIAB thesis code
+```
+
+The two `tunen-org` forks were not cloned, being unmodified upstream code.
+
+### 10. The three challenges as stated
 
 Common rules across tracks: **[Primary]** “the brief states the question, the data and
 the metric, and nothing about the method.”
@@ -672,7 +867,7 @@ Spanish plus the co-official languages (Catalan, Basque, Galician, and Valencian
 separately) gives five; but “different parts of the world” cuts against a Spain-only
 reading, and this should be treated as unresolved.
 The phrase “into official records” is also doing work: an official parliamentary record
-is not a raw transcript, a point developed in §10.
+is not a raw transcript, a point developed in §11.
 
 #### Track 03 — Tunen / Agriculture: “Building the future of farming.”
 
@@ -718,9 +913,9 @@ moment in the challenge design.
 The briefs, released the week before the event, are the authority.
 This is the single most important open question for anyone choosing a track.
 
-### 10. Deep dive: the Reversa problem domain
+### 11. Deep dive: the Reversa problem domain
 
-#### 10.1 Why the official record lags
+#### 11.1 Why the official record lags
 
 **[Press]** In Spain, the *Diario de Sesiones* is produced by parliamentary
 stenographers and stenotypists who record the session and then draft the record.
@@ -746,7 +941,7 @@ late on every obligation it derives.
 procedures “from the moment a text moves to the obligation it lands on a team.”
 Same-day capture of floor speech is upstream of that whole chain.
 
-#### 10.2 The multilingual complication
+#### 11.2 The multilingual complication
 
 **[Press]** Since **19 September 2023**, deputies in the Congreso de los Diputados may
 speak in the co-official languages, with simultaneous translation into Spanish.
@@ -768,7 +963,7 @@ session or per speaker.
 Second, the co-official languages are **lower-resource** than Spanish, so off-the-shelf
 multilingual ASR degrades exactly where the human process also degrades.
 
-#### 10.3 State of the art: ASR
+#### 11.3 State of the art: ASR
 
 **[Technical]** The most relevant independent English benchmark is Artificial Analysis’s
 **AA-WER v2.0**, which tested 41 models across three real-world datasets—AgentTalk,
@@ -801,7 +996,7 @@ punctuated variant removes a separate restoration stage.
 model measurably improves low-resource performance (*Whisper-LM*, arXiv 2503.23542),
 which is a cheap, well-trodden accuracy lever.
 
-#### 10.4 State of the art: diarization versus speaker identification
+#### 11.4 State of the art: diarization versus speaker identification
 
 **[Technical]** These are two different problems and the challenge needs the harder one:
 
@@ -843,7 +1038,7 @@ A system that fuses acoustic identification with the chair’s announcements and
 agenda should substantially outperform acoustic-only diarization, and—critically for the
 15% auditability weight—can *cite* its evidence for each attribution.
 
-#### 10.5 Prior deployments and available corpora
+#### 11.5 Prior deployments and available corpora
 
 **[Press/Technical]** The **European Parliament** is the closest existing production
 analogue.
@@ -882,7 +1077,7 @@ That is the single highest-value piece of pre-work available under the rules, wh
 explicitly permit designing ahead.
 It also supplies the enrollment clips needed for speaker identification.
 
-#### 10.6 Why “five minutes” is hard, if that is the target
+#### 11.6 Why “five minutes” is hard, if that is the target
 
 **[Analysis]** Assuming the Luma target, the latency budget has to cover, after a
 session ends, the following for a multi-hour session:
@@ -956,11 +1151,24 @@ This should be an early question for the challenge owners at 09:00.
    and Reversa were both founded in 2025; Tunen incorporated in August 2023. “The part
    nobody has cracked” is a problem each team has been living with for a short time, not
    a decade — which makes it more tractable in twelve hours than the framing suggests.
-9. **This is a hiring funnel run by three founders from one ecosystem, and it says so.**
-   Google for Startups Campus Madrid produced the relationships; its successor venue
-   hosts the event; Reversa’s CRO comes from a founding partner of that venue.
-   The stated reward includes “a conversation about doing it for real.”
-   Optimizing purely for the leaderboard misreads the room.
+9. **Talky published a full starter kit from its previous hackathon, and Reversa
+   published nothing.** `Talky-SP` carries the March 2026 “AI Evals Hackathon” frontend
+   and AWS CDK backend, including committed internal documentation of Talky’s DynamoDB
+   schema and its AI CFO agent architecture (§9.3). Reversa’s GitHub organization has
+   zero public repositories.
+   The asymmetry in available pre-work between Track 01 and Track 02 is large, and runs
+   opposite to the direction the public data availability runs (§10 favours Track 02 for
+   evaluation data, §9 favours Track 01 for system knowledge).
+10. **The Track 03 owner’s master’s thesis is about calibrated uncertainty, and it is on
+    GitHub.** Alexandre Shinebourne’s Cambridge/NIAB phenotyping code implements an
+    MC-dropout U-Net whose uncertainty estimates drive an active-learning loop (§9.5).
+    When the rubric awards 20% for “safe autonomy and restraint,” that is not
+    boilerplate — it is the challenge owner’s own research question.
+11. **This is a hiring funnel run by three founders from one ecosystem, and it says
+    so.** Google for Startups Campus Madrid produced the relationships; its successor
+    venue hosts the event; Reversa’s CRO comes from a founding partner of that venue.
+    The stated reward includes “a conversation about doing it for real.”
+    Optimizing purely for the leaderboard misreads the room.
 
 ## Comparison Matrix: choosing a track
 
@@ -971,6 +1179,7 @@ This should be an early question for the challenge owners at 09:00.
 | Problem clarity | High — precision-constrained coverage | Medium — two objectives, exact weighting unknown | Low — two conflicting official framings |
 | Metric legibility | Very high — one number with a stated floor | Medium — composite of latency and attribution | Medium — distance to held-out ground truth |
 | Public data for pre-work | Low — proprietary ledgers, nothing comparable public | **Very high** — open session video, official transcripts, VoxPopuli, Europarl-ASR, EuroSpeech | High — Sentinel/Landsat, weather, soil, and topography are public but fragmented |
+| Owner’s public code | **High** — full hackathon scaffold, DynamoDB schema and agent architecture on GitHub (§9.3) | **None** — Reversa’s GitHub org has zero public repos | Medium — no product code, but the owner’s uncertainty-quantification thesis is public (§9.5) |
 | Off-the-shelf model availability | Medium — document extraction is mature, ledger reasoning is not | **High** — strong open multilingual ASR and diarization | Medium — remote sensing needs assembly |
 | Dominant difficulty | Calibrated abstention at 99% precision | Named speaker attribution; editorial normalization | Source reconciliation; field-edge mixed pixels |
 | 12-hour feasibility | Medium — broad surface area | Medium-high if pre-built | Low-medium — heavy data engineering |
@@ -1006,7 +1215,10 @@ This should be an early question for the challenge owners at 09:00.
 6. **Have a thin end-to-end slice running before the 17:00 checkpoint**, and rehearse
    the 21:00 demo. Ambition and live demo are 10%, and a system that fails live scores
    nothing on the other 90%.
-7. **Do not depend on the provider credits.** They arrive during the event.
+7. **Read Talky’s March 2026 hackathon repositories before choosing a track.** They are
+   public, cloned in `attic/`, and show the brief style, the scaffold, the stack, and
+   the data model you would be working against (§9.3).
+8. **Do not depend on the provider credits.** They arrive during the event.
    Keep a local or free-tier fallback for every external service.
 
 ## Next Steps
@@ -1020,6 +1232,12 @@ This should be an early question for the challenge owners at 09:00.
 - [ ] Update this report when the briefs are released the week of 26 September 2026.
 
 ## Methodology
+
+GitHub was searched by organization handle, by user search, and by code search against
+each company’s domain; every candidate account was verified through commit authorship,
+profile bio, or configured production endpoints rather than name similarity, and the
+repositories that matched were cloned into `attic/` and read.
+A credential scan across the clones found nothing exposed.
 
 Sources were gathered on 2026-09-02 by fetching the English and Spanish event pages
 directly and extracting their full text, fetching the three company sites and the Luma
@@ -1118,6 +1336,18 @@ Spanish event copy was compared line by line against the English to detect diver
 - [Las taquígrafas del Congreso se plantan — The Objective](https://theobjective.com/espana/politica/2023-09-23/congreso-taquigrafas-lenguas/)
 - [La reforma del Reglamento del Congreso para el uso de las lenguas cooficiales — Newtral](https://www.newtral.es/uso-lenguas-cooficiales-congreso-diputados/20230919/)
 - [El Congreso destina más de 53.000 euros en la traducción de las lenguas cooficiales — Newtral](https://www.newtral.es/traduccion-congreso-cooficiales/20230918/)
+
+**Public code (primary)**
+
+- [Talky-SP — GitHub organization](https://github.com/Talky-SP)
+- [Talky-SP/hackathon-base-2026-03-06 — AI Evals Hackathon frontend](https://github.com/Talky-SP/hackathon-base-2026-03-06)
+- [Talky-SP/hackathon-backend-base-2026-03-06 — hackathon AWS CDK backend](https://github.com/Talky-SP/hackathon-backend-base-2026-03-06)
+- [jorgebp226 — GitHub profile](https://github.com/jorgebp226)
+- [tunen-org — Tunen Limited GitHub organization](https://github.com/tunen-org)
+- [a-shine — Alexandre Shinebourne GitHub profile](https://github.com/a-shine)
+- [a-shine/niab-automated-phenotyping — Cambridge AI4ER MRes / NIAB project](https://github.com/a-shine/niab-automated-phenotyping)
+- [reversa-ai — GitHub organization](https://github.com/reversa-ai) (no public
+  repositories; identification unconfirmed)
 
 **Speech technology (technical)**
 
