@@ -417,8 +417,10 @@ directly:
 
 **[Technical]** Commercial enrollment: Speechmatics accepts voiceprints (5–30 s clips)
 and names, **up to 50 identities per session**; OpenAI’s `gpt-4o-transcribe-diarize`
-accepts **up to four** named reference clips; pyannoteAI and Azure Speaker Recognition
-offer voiceprint identification; Gemini transcription, ElevenLabs Scribe v2, AssemblyAI
+accepts **up to four** named reference clips; pyannoteAI and Picovoice Eagle offer
+voiceprint identification (Azure AI Speaker Recognition was retired on 2025-09-30 and
+Amazon Connect Voice ID reached end of support on 2026-05-20, so neither hyperscaler
+enrollment API exists any more); Gemini transcription, ElevenLabs Scribe v2, AssemblyAI
 Universal-3.5 and Deepgram expose anonymous diarization only.
 
 **[Analysis] What this changes.** No system outputs real names from audio alone; every
@@ -656,12 +658,13 @@ explains and never decides.
 | Metric | Definition | Role | Why |
 | --- | --- | --- | --- |
 | **Turn attribution accuracy at coverage c** (TAA@c) | among reference interventions the system chose to name at the threshold giving coverage c, the fraction named correctly; report the full coverage–accuracy curve and TAA@{100, 95, 90}% | outcome | the stated objective, with the restraint weighting built in |
-| **cpWER**, **tcpWER** (5 s collar), verbatim reference | MeetEval, with roster ids as speaker labels | outcome | word-level attribution; what a fully automatic record would score |
+| **cpWER**, **tcpWER** (5 s collar), verbatim reference — **fixed-label form** | roster ids as speaker labels with **no permutation search**; MeetEval’s permutation-invariant cpWER is reported alongside but cannot score a wrong name, because it re-maps labels to the best match | outcome | word-level attribution; what a fully automatic record would score |
 | **record-WER** | WER of record-form output against the record layer | outcome for normalization work | the number a stenographer cares about |
 | **HTER against the record**; **edited-segment fraction** | word-level edits (with shifts) per reference word to reach the record; share of interventions needing any edit | outcome for normalization work | post-editing effort, the metric deployments implicitly optimize |
 | **Editorial gap** | record-WER of the verbatim reference itself against the record layer | mechanism | the floor imposed by editing |
 | **WER**, verbatim reference, Whisper-normalized | speaker-agnostic | mechanism | isolates transcription |
-| **DER**, dscore, 0.25 s collar, overlap scored, named labels without permutation |  | mechanism | comparability with the literature; never decides |
+| **DER**, dscore, 0.25 s collar, overlap scored | anonymous labels, optimal mapping | mechanism | comparability with the literature; never decides |
+| **Identification error rate** (pyannote.metrics `identification`), 0.25 s collar | time-weighted error with **fixed named labels**, no permutation | mechanism | the time-based counterpart of TAA; the only off-the-shelf scorer that penalizes a wrong name |
 | **Cllr, minDCF, actDCF** at the deployed threshold | on the identification trials a session generates | mechanism / guard | actDCF far above minDCF means the threshold is wrong |
 | **Speaker-count error** | predicted vs reference distinct speakers | guard | collapse or over-splitting |
 | **Hallucination rate** | inserted words per hour in reference non-speech | guard | invented text fails regardless of attribution |
@@ -698,10 +701,12 @@ only.
 
 #### 4.6 Fixing the protocol
 
-**[Proposed]** One versioned scoring harness: MeetEval for cpWER, tcpWER and DER; a
-per-turn scorer for TAA and the coverage curve; the Whisper normalizer for WER; fixed
-collars; overlap always scored; roster ids, not name strings.
-A figure without the harness version and the regime fields of §3.1 is not a result.
+**[Proposed]** One versioned scoring harness: MeetEval for permutation-invariant cpWER,
+tcpWER and DER, plus fixed-label variants of cpWER and tcpWER and pyannote.metrics’
+identification error rate for named labels; a per-turn scorer for TAA and the coverage
+curve; the Whisper normalizer for WER; fixed collars; overlap always scored; roster ids,
+not name strings. A figure without the harness version and the regime fields of §3.1 is
+not a result.
 
 #### 4.7 Statistical discipline
 
