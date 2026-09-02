@@ -1577,7 +1577,71 @@ S23 is answered: commercial caps are not the obstacle to an enrollment API; the
 The record has no sub-minute stratum, which confirms §10.3’s warning that the reference
 turn list decides whether short-turn hypotheses are testable.
 
-#### 10.11 Catalogue of further spikes
+#### 10.11 The record census (S7; bounds for R9 and R11)
+
+**Hypothesis.** The published record bounds three quantities from text alone, before any
+audio work: how often stage directions occur and in what classes (R9’s detector target),
+what fraction of voice events the record cannot attribute to a person (R11’s residual),
+and whether a sub-three-second stratum exists in the record at all.
+
+**What ran (Sandbox).** One shared classifier over two conventions so the sources are
+comparable: ParlaMint TEI `vocal`, `kinesic`, `incident`, `gap` and `note` elements
+against Congreso XV Diario parentheticals, split on the Diario’s own compound separator
+into atoms, each multi-labelled, editorial apparatus rejected.
+Denominators are the XV media-index span (956.9 h over 180 sessions) and, for Galician,
+the Diario’s own session open and suspend time notes (1,283 h over 268 sittings); the
+ParlaMint-ES denominator is estimated from word counts and is judgment, roughly ±20%.
+
+**Result (run).** Stage directions run at about **50 atoms per audio-hour in all three
+corpora** (47,391 in Congreso XV, 83,421 in ParlaMint-ES, 67,754 in ParlaMint-ES-GA).
+**Applause dominates at 29.7 per hour in XV**, 24.6 and 25.5 in the other two, roughly
+one every two minutes, followed by murmurs 5.7, quoted interjections 4.9, pauses 2.3,
+protests 2.1, gestures 1.9 and laughter 1.6. **91.6% of XV applause marks are the bare
+word “Aplausos”** and only 6.1% carry an intensity word, so the record offers almost no
+gradation to learn from.
+The rate is not stationary: applause per sitting rises 2.6-fold across ParlaMint-ES from
+2015 to 2022.
+
+On attribution, the Diario **never opens an unattributed turn**: zero of 29,476 speaker
+markers carry a non-person label.
+Voices it cannot name are demoted into parentheses instead — 4,680 quoted interjections,
+of which 2,233 (47.7%) name nobody, split between one unnamed deputy, several deputies
+at once, and the public gallery.
+That gives **R11 a record-layer residual of 6.8%** (2,323 of 34,156 voice events), a
+floor microphone metadata cannot touch because those voices are off-mic by definition,
+and a lower bound besides, since editors omit what they do not hear.
+Separately, 12,159 chair markers give an office rather than a name.
+
+Turn length by role is starkly asymmetric: the chair’s median turn is 22 words in XV
+against a member’s 638, and **the chair takes 54–59% of turns but only 5–12% of the
+words** — which is why a time-weighted metric cannot see the chair and a per-turn metric
+is dominated by it.
+
+The short-turn question is now settled empirically rather than by inference.
+At the measured 145 words per minute, three seconds is about seven words; 16.4% of XV
+turns are under ten words and 41.9% under thirty.
+But **all 9,441 XV clip durations are exact multiples of 60 seconds**, the smallest
+non-zero being 60 s, so the media index is quantised to the minute and the sub-minute
+stratum cannot exist in it.
+Only **32.0% of Diario speaker markers have a clip at all**.
+
+**Verdict.** R9 gains a numeric target and a scoring shape: binary event detection at
+about 30 events per hour, recall measured per sitting because the spread runs from 20 to
+41 per hour, and no corpus-wide rate prior as a decoding constraint.
+R11 gains a hard 6.8% floor plus a design item it must own, a chair registry driven by
+the 482 handover marks.
+H-001’s short-turn clause is unscoreable on the media-linked layer and needs either the
+verbatim layer or a Diario re-parse that restores the chair turns.
+
+**Two corrections to earlier notes.** The XV Diario carries **42,860 stage-direction
+marks**, not the approximately 28,300 estimated when the dataset was first described.
+And **ParlaMint-ES is a worse resolution target than the Diario it derives from**: it
+drops the `who` attribute on 74.5% of chair utterances and truncates 1,457 of 1,636
+action descriptions to a bare “El señor” or “La señora”, which are exactly the
+chair-handover lines the Diario writes in full.
+Work that needs chair attribution should parse the Diario, not ParlaMint.
+
+#### 10.12 Catalogue of further spikes
 
 **[Proposed]** The remaining spikes, each the cheapest test that could falsify or
 de-risk a hypothesis, with tier, effort and the decision it changes.
@@ -1598,7 +1662,6 @@ and §10.2; S11, S16 and S22 follow S2; S12 then S17; S5 then S18 and S19.
 | S14 | Candidate set, AS-norm and calibration on S4 or S13 scores through the harness: coverage–TAA curve | Net | one day | H-002 on proxies; whether the constraint alone carries the gain |
 | S15 | Cross-lingual enrollment shift in-domain on Basque Parliament 1 (enroll es, test eu and vice versa; language-dependent s-norm) | Net, CPU | one day | whether bilingual members need per-language enrollment |
 | S9 | Parser robustness to ASR name errors: 200 announcement sentences, Piper to Whisper to parser, with and without fuzzy matching | Sandbox | one day | how much of H-003 survives ASR; whether a phonetic matcher is needed |
-| S7 | Record census: stage directions per hour by class, unattributed turns, turn length by role (turn length done in §10.1 and §10.10) | Sandbox | half a day | R9’s class prior; R11’s residual; whether the record holds a sub-3 s stratum (it does not, §10.10) |
 | S12 | Editorial gap on 30 hand-verbatimized minutes (rostrum, bench, chair): record-WER and HTER of verbatim against the Diario | Net, human | two days | whether the campaign can score against the record before R6 |
 | S17 | Prompted-LLM normalizer on S12’s pairs, post-cutoff sessions only | Net | one day | whether H-006 needs training |
 | S16 | Interpreter pool count: embed interpreter-only windows from ten sessions, cluster, check stability | Net, CPU | one day | R5 attack 2 |
@@ -1617,7 +1680,7 @@ diarizer over six hours; any spike whose only outcome is DER; hallucination test
 isolated 5 s clips; a same-room enrollment test on TTS voices; estimating the commercial
 cap from an API trial rather than from the candidate-set histogram.
 
-#### 10.12 What the spikes changed
+#### 10.13 What the spikes changed
 
 - **§4.6 harness.** Turn assignment by intersection over union, not raw overlap;
   fixed-label cpWER/tcpWER and identification error rate as outcomes with the permuted
@@ -1640,6 +1703,13 @@ cap from an API trial rather than from the candidate-set histogram.
 - **§3.3 and §6.** `whisper-large-v3-turbo` is the open baseline; the co-official
   fine-tunes are fragile on silence and the Basque specialists are contamination-suspect
   until F2 runs; API agreement is a drift monitor, never a ranking.
+- **§7 R9 and R11.** R9 gains a numeric target (about 30 applause events per audio-hour,
+  50 stage directions of all classes, 92% of applause marks carrying no intensity word)
+  and a per-sitting recall protocol.
+  R11 gains a hard 6.8% record-layer residual that microphone metadata cannot reach, and
+  a chair registry as a design item.
+  The record’s chair turns must come from the Diario, not from ParlaMint, which drops
+  the speaker attribute on three quarters of them (§10.11).
 - **Environment.** Everything acoustic that matters next (S1, S2, S4, S5, S13) needs one
   box with a GPU, Hugging Face, YouTube and congreso.es access; the sandbox’s reach
   (GitHub release assets and PyPI) was enough for the instrument, the text side and
@@ -2122,7 +2192,7 @@ American chamber is in scope.
 6. **Use the campaign discipline in §9.** The ranking in §7 is a prior; the ledger
    should be what changes it.
 7. **Stand up one box with a GPU, Hugging Face, YouTube and congreso.es access** and run
-   S1, S2, S8 and S13 in its first week (§10.11); everything the sandbox could not touch
+   S1, S2, S8 and S13 in its first week (§10.12); everything the sandbox could not touch
    is on the other side of that box.
 8. **Run the evaluation loop by tier (§11.3)** with the harness as the instrument and
    the text-side evals in every commit; take headline numbers only from sessions after
