@@ -6,7 +6,8 @@ author: Claude Opus 5
 # Research: The Madrid Open (Vol.1) and the Reversa Real-Time Parliamentary Record Challenge
 
 **Date:** 2026-09-02 (last updated 2026-09-02; second pass: Track 02 technical deep
-dive; third pass: fact-check corrections and companion-report cross-links)
+dive; third pass: fact-check corrections and companion-report cross-links, fourth pass
+2026-09-02 (inventory corrections))
 
 **Author:** Claude Opus 5
 
@@ -1114,6 +1115,23 @@ different distribution.
 `BSC-LT/whisper-large-v3-LoS-punctuated` remains the best single starting point: four of
 the likely five languages in one model, with punctuation restoration folded in.
 
+**[Technical]** Open Whisper derivatives are not the only route to the co-official
+languages; two commercial services document them directly.
+**Speechmatics** lists Catalan, Basque and Galician among 55+ languages, in realtime as
+well as batch, and is the one major vendor that pairs that coverage with
+enrollment-based speaker identification (§11.7)
+([languages](https://www.speechmatics.com/languages),
+[realtime speaker ID](https://docs.speechmatics.com/speech-to-text/realtime/speaker-identification)).
+**Amazon Transcribe** covers Catalan, Basque and Galician in **streaming** as well as
+batch — among 54 streaming languages — with speaker partitioning on both paths and
+included in the base price, though its speaker labels are anonymous
+([streaming-language announcement](https://aws.amazon.com/about-aws/whats-new/2024/10/amazon-transcribe-streaming-transcription-additional-languages)).
+Coverage for the other major APIs is weaker or unconfirmed: Google Chirp 3 has `ca-ES`
+generally available but `eu-ES` and `gl-ES` unconfirmed, and AssemblyAI, Deepgram and
+OpenAI publish no confirmed ca/eu/gl support.
+These are vendor-documented capabilities read from vendor and aggregator pages, not
+measured accuracy on parliamentary audio.
+
 **[Technical]** Code-switching has a directly on-point 2025 result.
 *Optimizing ASR for Catalan-Spanish Code-Switching* (Interspeech 2025, BSC) compares
 three strategies—synthetic CS data, concatenated monolingual audio, and real CS data
@@ -1138,6 +1156,24 @@ benchmark audio:
 - **Repetition loops and omissions** in long-form decoding, which is why WhisperX-style
   VAD-chunked pipelines with forced alignment are the practical default rather than
   naive long-form decoding.
+
+**[Technical]** The aligner in that pipeline is itself a four-language problem, and the
+usual default does not solve it.
+The **Montreal Forced Aligner** model zoo ships acoustic models and dictionaries for
+**Spanish and Basque only — there is no Catalan and no Galician acoustic model or
+dictionary** in the `mfa-models` repository
+([mfa-models](https://github.com/MontrealCorpusTools/mfa-models)). Three things do cover
+the gap.
+`ctc-forced-aligner` aligns over MMS checkpoints, which include es/ca/eu/gl, but
+its default weights are CC-BY-NC and the repository returns no SPDX licence
+([ctc-forced-aligner](https://github.com/MahmoudAshraf97/ctc-forced-aligner)).
+**WhisperX** ships a default alignment model for each of the four — torchaudio
+`VOXPOPULI_ASR_BASE_10K_ES` for Spanish, and the community XLSR checkpoints
+`softcatala/wav2vec2-large-xlsr-catala`, `stefan-it/wav2vec2-large-xlsr-53-basque` and
+`ifrz/wav2vec2-large-xlsr-galician` for the rest, whose parliamentary-domain quality is
+unmeasured ([whisperX](https://github.com/m-bain/whisperX)). `Qwen3-ForcedAligner-0.6B`
+(Apache-2.0) is the newest option, but its claim of 11 languages comes without the list,
+so ca/eu/gl support is unproven ([Qwen3-ASR](https://github.com/QwenLM/Qwen3-ASR)).
 
 **[Analysis]** For the restraint/abstention weighting in the rubric (20%), hallucination
 is the specific behaviour to instrument.
@@ -1274,6 +1310,34 @@ clustering pass carry errors forward.
 In a parliament the profiles do not have to come from a clustering pass at all — they
 can come from the archive (§11.11).
 
+**[Technical]** If the enrollment step is bought rather than built, the hyperscaler
+options are gone. **Azure AI Speaker Recognition was retired on 2025-09-30** — the
+enrollment and identification APIs are no longer accessible, although diarization inside
+Azure STT is unaffected
+([release notes](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/releasenotes))
+— and **Amazon Connect Voice ID** closed to new customers on 2025-05-20 and reached
+**end of support on 2026-05-20**
+([end-of-support notice](https://docs.aws.amazon.com/connect/latest/adminguide/amazonconnect-voiceid-end-of-support.html)).
+Both dates are in the past.
+Three enrollment services remain, each with a caveat that matters at 350 deputies:
+
+- **pyannoteAI voiceprints** — voiceprint from up to 30 s of clean audio, but
+  identification requires the Precision-2 model; €0.112/hr on the Developer tier and
+  €0.096/hr on Starter; the trial allows 10 voiceprints and no paid-tier ceiling is
+  published.
+- **Picovoice Eagle** — on-device enrollment, free tier 100 min/month, no fixed speaker
+  limit claimed, but the model is closed and **no public EER** exists.
+- **Speechmatics speaker identification** — enrollment from 5–30 s of single-speaker
+  audio, in batch and realtime, capped at **50 speaker identifiers per session**: an
+  order of magnitude short of ~350 members, so the candidate set has to be pre-filtered
+  per sitting. The separate `max_speakers` parameter (2–20) applies only to non-enrolled
+  speakers
+  ([speaker identification](https://docs.speechmatics.com/speech-to-text/features/speaker-identification)).
+
+Every figure here is vendor-documented rather than independently measured, and each
+service is a lock-in point; self-hosted embeddings with AS-norm remain the only route
+with a documented open-set protocol.
+
 #### 11.8 The in-language anchor: Albayzin / IberSPEECH-RTVE
 
 **[Technical]** The closest published evaluation to this challenge’s actual metric, in
@@ -1403,10 +1467,12 @@ give you:
 | **Basque Parliament** (`gttsehu/basque_parliament_1`) | Basque + Spanish, bilingual | **1,445 h** train + 17 h manually supervised | **yes**, plus a per-segment language tag (eu/es/bilingual) | closest thing to a Spanish-state parliamentary corpus with code-switching labels |
 | **3CatParla** | Catalan broadcast | 710 h | — | training data behind the best open Catalan ASR |
 | **ParlamentParla v2.0** (OpenSLR 59) | Parliament of Catalonia, Catalan | **611 h** (211 clean + 400 other) | **yes**, with gender; speaker-disjoint splits | speaker-labeled Catalan parliamentary audio, CC BY 4.0 |
-| **Nos_ParlaSpeech-GL** (Proxecto Nós) | Parliament of Galicia, Galician | 1,600+ h auto-aligned, plus 53 h manual (TranscriSpeech-GL) | unconfirmed | Galician parliamentary audio, CC BY 4.0 |
+| **Nos_ParlaSpeech-GL** (Proxecto Nós) | Parliament of Galicia, Galician | 1,600+ h auto-aligned, plus 53 h manual (TranscriSpeech-GL) | unconfirmed | Galician parliamentary audio; released under the Galician Parliament’s own terms of use, not a CC licence (search-sourced, unverified); TranscriSpeech-GL needs an access request |
 | **Althingi** (LDC2021S01) | Icelandic parliament | 542 h | yes | the reference deployment corpus |
 | **Finnish Parliament ASR** | Eduskunta | **3,130 h**, 449 speakers | yes, with demographics | largest single-parliament ASR corpus with speaker metadata |
-| **FT Speech** | Danish parliament | — | yes | another national precedent |
+| **FT Speech** | Danish parliament | 1,857 h, 434 speakers (search-sourced) | yes | another national precedent |
+| **FalAR** ([arXiv 2605.27062](https://arxiv.org/abs/2605.27062)) | Portuguese parliament (Assembleia da República), ~20 years | **5,800 h**, of which **4,850 h with speaker identity** | **yes** — 1,180 speakers with age, gender, party and parliamentary role | the closest published analogue to the speaker-annotated Congreso corpus this challenge lacks; 2026 preprint, **access not confirmed** |
+| **SloPal / SloPalSpeech** ([arXiv 2509.19270](https://arxiv.org/abs/2509.19270)) | Slovak parliament, 2001–2024 | 330k speaker-segmented transcripts, 66M words; **SloPalSpeech 2,806 h** aligned into ≤30 s segments | yes, speaker-segmented | a language-agnostic anchor-based alignment pipeline — an alternative to EuroSpeech’s two-stage method; **access not confirmed** |
 | **RTVE** (Albayzin) | Spanish broadcast TV | several hundred h; SDIAC 2022: 74 speakers, 54 h | **yes, named, closed set** | the only Spanish corpus scored on *named* attribution |
 
 **[Correction]** An earlier draft of this report listed EuroSpeech as directly on point
