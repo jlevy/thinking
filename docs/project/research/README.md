@@ -6,10 +6,12 @@ Each report links primary sources near the claims they support and includes a
 consolidated reference list.
 
 Most are on computation, mathematical foundations, physics, and biology.
-Two are on a current problem in speech technology: a dossier on a competition, which
+Three are on a current problem in speech technology: a dossier on a competition, which
 applies the same evidential discipline to marketing copy, press coverage, and benchmark
-numbers, and a companion research agenda that reviews the dossier’s technical analysis
-and specifies how the problem should be measured.
+numbers; a companion research agenda that reviews the dossier’s technical analysis and
+specifies how the problem should be measured; and a tooling inventory that lists every
+tool, dataset, service and evaluation resource the agenda draws on, with maturity and
+access labels.
 
 ## Reports
 
@@ -19,8 +21,10 @@ and specifies how the problem should be measured.
 | 2026-07-13 | [Stephen Wolfram’s Ruliad](research-2026-07-13-ruliad-foundations.md) | Formal construction, observers, physics and mathematics claims, criticisms, and research milestones |
 | 2026-07-14 | [Chaitin, the Ruliad, and the Foundations of Physics](research-2026-07-14-chaitin-ruliad-foundations-physics.md) | Their exact mathematical intersection and its qualified connections to quantum observation, black holes, thermodynamics, and physical undecidability |
 | 2026-07-14 | [Michael Levin, Platonic Forms, and the Mathematics of Living Systems](research-2026-07-14-michael-levin-platonic-forms-biology.md) | Developmental bioelectricity, synthetic organisms, diverse intelligence, Platonic Space, and mainstream mathematical and evolutionary biology |
-| 2026-09-02 | [The Madrid Open (Vol.1) and the Reversa Real-Time Parliamentary Record Challenge](research-2026-09-02-madrid-open-reversa-challenge.md) | The 3 October 2026 Madrid competition, the three startups behind it, and the state of the art in real-time multilingual parliamentary transcription and speaker attribution |
-| 2026-09-02 | [Named Speaker Attribution for Parliamentary Transcription — Critical Review and Research Agenda](research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md) | A critical review of the Madrid Open dossier’s technical analysis, an evaluation protocol for named speaker attribution, the datasets and tools to use, and a ranked research agenda with pre-registered hypotheses |
+| 2026-09-02 | [The Madrid Open (Vol.1) and the Reversa Real-Time Parliamentary Record Challenge](research-2026-09-02-madrid-open-reversa-challenge.md) | The 3 October 2026 Madrid competition, the three startups behind it, the state of the art in real-time multilingual parliamentary transcription and speaker attribution, and a strategy section for a team entering the democracy track |
+| 2026-09-02 | [Named Speaker Attribution for Parliamentary Transcription — Critical Review and Research Agenda](research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md) | A critical review of the Madrid Open dossier’s technical analysis, an evaluation protocol for named speaker attribution, the datasets and tools to use, a ranked research agenda of sixteen directions with pre-registered hypotheses, the results of eleven sandbox spikes with a catalogue of the rest, and an evaluation strategy for research–eval loops |
+| 2026-09-02 | [Tooling Inventory for Real-Time Parliamentary Transcription with Named Speaker Attribution](research-2026-09-02-parliamentary-transcription-tooling-inventory.md) | Every tool, dataset, service and evaluation resource surveyed for the agenda, with links, licences, language coverage, same-day repository signals, maturity and access labels, a shortlist by pipeline stage, and an index from research direction to toolchain |
+| 2026-09-02 | [Track 02 Team Strategy — Four Analyses in Full](research-2026-09-02-track02-team-strategy-analyses.md) | Five team bets with rubric arithmetic, five architectures differing in where the speaker’s name comes from, a differentiation memo, a hedging plan for a brief revealed only on the day, and the design of a member knowledge base and multimodal identity stack |
 
 ## Suggested Reading Order
 
@@ -37,6 +41,12 @@ Read it on its own terms.
 The speaker-attribution research agenda is its companion: it reviews the dossier’s §11
 critically and turns it into a measurement protocol and a set of experiments, so read
 the dossier’s §11 first and the agenda second.
+The tooling inventory is the reference behind the agenda’s §6 and §11 and is meant to be
+consulted rather than read straight through.
+The team-strategy analyses expand the dossier’s §12 and assume its rubric and technical
+landscape, so read them last.
+The tooling inventory is a reference behind the agenda’s §6 and §11: consult it by stage
+or by research direction rather than reading it through.
 
 ## Maintenance
 
