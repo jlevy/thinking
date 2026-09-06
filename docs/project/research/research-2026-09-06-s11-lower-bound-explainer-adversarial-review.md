@@ -30,9 +30,9 @@ certificate checks, found no placement below mass 1.
 
 The explainer’s own presentation of the argument does not stand as written.
 Its Contradiction box asserts that every unit square, “whatever its angle,” contains a
-concentric side-`B` square at one of the 181 net angles and attributes that to Condition
-4\. That is false for every angle past `π/4`: the net covers only `[0, π/4]`, and the
-proof needs the diagonal reflection and Conditions 1 and 3 to get there.
+concentric side-`B` square at one of the 181 net angles, and credits Condition 4 for it.
+That is false for every angle past `π/4`: the net covers only `[0, π/4]`, and the proof
+needs the diagonal reflection and Conditions 1 and 3 to get there.
 The same omission runs through the section that derives the shrink.
 The Five Conditions box leaves out two hypotheses the proof uses (`t₀ = 0` and the sign
 of the weights). The budget section’s informal argument double-counts boundary atoms.
@@ -144,7 +144,8 @@ The sweep-exactness argument is also correct: mass is constant on each open cell
 arrangement, a boundary point carries at least its neighbouring cell’s mass because the
 coverage boxes are closed and the weights nonnegative, and each admissible centre lies
 in the closure of a cell that meets the centre domain.
-The cell-meets-domain test in both verifiers is exact.
+The cell-meets-domain test in `verify_claim.py` is exact; `minimal_verify.py` admits a
+few cells outside the domain (B1), which is conservative.
 
 Every number on the page reproduces from the certificate with independent code:
 
@@ -169,10 +170,10 @@ descent, and starts placed along the edges, in the corners, on the ring inside t
 corners, and at angles halfway between net directions.
 The least mass found is `1.00025 = 4001/4000`, at angle 0, the same value the exact
 sweep reports for `B`-squares at net angles.
-The shrink argument costs nothing at this certificate: the axis-parallel placement is
-the global minimum.
-The worst value of `B(cos d + sin d)` over all mismatches `d` the net
-allows is `0.99999325…`, at the midpoint of the widest gap, matching Figure 6.
+The shrink costs nothing at the tightest placement: the unit square there covers the
+same atoms as the `B`-square, and the axis-parallel placement is the global minimum.
+The worst value of `B(cos d + sin d)` over all mismatches `d` the net allows is
+`0.99999325…`, at the midpoint of the widest gap, matching Figure 6.
 
 ## Part A: Logical and Mathematical Gaps in the Explainer
 
@@ -200,10 +201,10 @@ not a net-angle square.
 The box’s conclusion needs Conditions 1, 3, and 4 together; “That is Condition 4”
 credits one of them.
 
-The Atom Set section does say, two pages earlier, that invariance “lets the proof check
-angles only up to $\pi/4$, since a square at any other angle reflects onto that arc and
-covers the same mass,” and the sentence introducing Condition 3 calls `π/4` “the end of
-the arc that Condition 1 reflects every angle onto.”
+The Atom Set section does say, two sections earlier, that invariance “lets the proof
+check angles only up to $\pi/4$, since a square at any other angle reflects onto that
+arc and covers the same mass,” and the sentence introducing Condition 3 calls `π/4` “the
+end of the arc that Condition 1 reflects every angle onto.”
 Neither is wired into the box’s chain of reasoning, which is the place a reader will
 check.
 
@@ -894,7 +895,7 @@ because that is what the verifier’s theorem proves without it.)
   knowledge; Friedman’s survey, Stromquist’s paper, and the 2026 posts could not be
   fetched.
 - No formal (proof-assistant) check of the theorem exists, and this review adds none.
-  The theorem was checked by hand and by three independent readers.
+  The theorem was checked by hand and by three reviewing agents working independently.
 - The numerical attack is a search, not a proof; its value is that it found the same
   minimum the exact sweep reports, not that it excludes a lower one.
   The exact sweep does that.
