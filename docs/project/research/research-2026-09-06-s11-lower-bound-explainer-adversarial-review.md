@@ -61,6 +61,9 @@ The highest-priority corrections, in order:
 5. Replace “third-party check” with the package’s own description (C2).
 6. Say what the covering linear program ranges over, so that the two sentences drawn
    from it are true of it (A6).
+7. Name the second decision route (the interval branch-and-bound) and close with what
+   remains open: the 3.82 attempt, the form’s ceiling near 3.99, and the gap to Trump’s
+   packing (C3, D7).
 
 ## Scope and Method
 
@@ -392,22 +395,31 @@ this is optional. Naming the placement makes the sentence carry information: “
 $4001/4000 = 1.00025$, attained at direction 0 by the square centred at $(27/50,
 27/50)$.”
 
-### A9. The sweep-exactness argument in the claim document skips one clause (Nit, linked document)
+### A9. The sweep-exactness argument in the claim document compresses its topological step (Low, linked document)
 
 **Where.** `t-018-verifiable-claim-381-100.md`, “Why the Sweep Is Exact”: “every
 admissible center lies in the closure of some open cell that meets the admissible
 square, since that square has interior and finitely many lines cannot cover an open
-set.”
+set.” The comment block in `verify_claim.py` says the same.
 
-**Problem.** The stated reason gives, for each $\varepsilon$, a cell within
-$\varepsilon$ of the point, not one cell whose closure contains it.
-The missing clause is that there are finitely many cells, so one of them meets the
-domain within every distance of the point.
-The comment block in `verify_claim.py` has the same gap.
-The paragraph does say two sentences earlier that the cells are finitely many; what is
-compressed is the inference from that to a single cell.
-Harmless, and one clause closes it.
-One refuter judged the compression standard.
+**Problem.** The stated reason establishes only that the interior of the domain minus
+the arrangement lines is nonempty.
+The universal claim needs three further facts, all standard and all unstated: a finite
+union of lines is nowhere dense, so its complement is dense in the domain’s interior;
+the domain is a closed square, so each of its boundary points (a centre on the edge of
+the admissible region, say) is a limit of interior points; and the cells are finitely
+many, so a sequence of cell points converging to a given point eventually lies in one
+cell, which then has the point in its closure.
+The paragraph does say the cells are finitely many; the density and the passage to one
+cell are compressed into “cannot cover an open set.”
+The argument is correct, and one refuter judged the compression standard; in a document
+offered for step-by-step checking it is the one step whose stated reason does not match
+what it must show.
+
+**Fix.** “…every admissible centre lies in the closure of some open cell that meets the
+admissible square: the square is closed with nonempty interior, a finite union of lines
+is nowhere dense, so points of the interior off the lines are dense in the square, and
+since the cells are finitely many, one of them has the centre in its closure.”
 
 ### A10. “The four lines bounding the admissible centers” is not what the verifier adds (Medium, linked document)
 
@@ -432,6 +444,13 @@ join the events, so no cell straddles the domain’s edge").
 plane into finitely many open cells.
 A cell may straddle the admissible square’s oblique edge; the clipping test decides
 exactly which cells meet it.”
+
+A smaller point in the same passage: “The covered mass is constant on each open cell” is
+justified by the rectangle edges alone; the domain’s own bounding lines refine the
+partition without changing any atom’s membership.
+Saying so ("each atom’s contribution changes only at the edges of its own rectangle; the
+domain’s lines only subdivide") spares a reader the separate check that the oblique
+lines are inert.
 
 ## Part B: The Verifiers and Supporting Documents
 
@@ -575,12 +594,14 @@ driver.
 written from the theorem that decides the 19/5 certificate without importing anything
 else here. It was written by this project; no outside party has yet checked the result.”
 
-### C3. “Independent validation methods” (Medium)
+### C3. “Independent validation methods,” and the second method is never named (Medium)
 
 **Where.** What Is This?: “a retention gate that keeps results only when independent
 validation methods agree.”
+The word “interval” does not occur on the page.
 
-**Problem.** The gate’s own docstring says the two routes “share the Certificate
+**Problem.** Two things.
+First, the gate’s own docstring says the two routes “share the Certificate
 representation and Conditions 2–4 but decide Condition 5 by different methods with
 different failure modes.”
 The epistemics rubric defines the rung the result holds as “confirmed by distinct
@@ -588,11 +609,25 @@ methods” and warns that “two independently written implementations using the
 still derive C3, not C4.” The register scopes “independent in method” to Condition 5.
 “Independent” on the page reads as independent validation of the whole result.
 
-**Fix.** “a retention gate that keeps a certificate only when two methods that decide
-Condition 5 differently, an exact sweep and an interval branch-and-bound, both accept
-it.” That sentence would also be the page’s first mention of the interval route, which
-the register calls the basis of the result’s confirmation rung and which the page never
-names.
+Second, the page never says what the second method is.
+Both claim documents describe it: an interval branch-and-bound with directed rounding,
+run on the doubled net (the net directions and their reflections across the diagonal),
+which “never invokes Condition 1 and covers every orientation directly,” and which the
+gate requires to agree with the exact sweep to the digit.
+The register lists that decision as one of the two evidence entries behind the result’s
+confirmation rung.
+It is the strongest independence argument the project has, it does not
+depend on the reflection step the page’s argument omits, and the page’s reader never
+hears of it.
+
+**Fix.** Replace the clause with a sentence that names both routes: “a retention gate
+that keeps a certificate only when two decisions of Condition 5 agree: the exact
+event-cell sweep described below, at the 181 net directions, and an interval
+branch-and-bound with directed rounding on the doubled net of 361 directions, which
+needs no reflection and covers every orientation directly.
+They share the certificate and Conditions 1 to 4 and share nothing in how they decide
+Condition 5.” One more sentence in Generator and Verifier, after the sweep, would carry
+the same content at the point where the reader can use it.
 
 ### C4. “One of 21 results registered over a few days” (Nit)
 
@@ -744,6 +779,53 @@ allows), and $0.9999932\ldots$ at the certificate’s own $B = 0.9977$.”
   appositive disambiguates it.
   “The covering requirement” avoids the collision.
 - Figure 4 caption uses “covering linear program” four sections before it is defined.
+
+### D6. No proof sketch before the machinery (Low)
+
+**Where.** Between Packing 11 Squares and The Five Conditions.
+The opening says only “Five exact conditions and a pigeonhole-style argument then imply
+the claim”; the budget section says “The rest of the proof makes the first one finite to
+check” without saying how.
+
+**Problem.** The assembled argument first appears in The Contradiction, the tenth of
+twelve sections. The reader takes in the five conditions, the atom set, the event-cell
+sweep, the angle reduction, and the net-coarsening measurement without having been told
+the shape of the proof they build.
+The proof card’s “The Argument” paragraph is exactly the sketch the page lacks, and it
+already exists.
+
+**Fix.** One paragraph after Packing 11 Squares, adapted from the proof card: the atoms
+and their total below 11; that they are arranged so that every unit square at any
+position and angle covers weight at least 1; how that is made finite (symmetry folds
+angles onto $[0, \pi/4]$, a net of 181 directions discretises the angle, a slight shrink
+makes containment strict, an event-cell decomposition makes each direction’s position
+check finite); and the count.
+Then “The five conditions below make each step exact.”
+
+### D7. The page stops at the contradiction and says nothing about what remains open (Medium)
+
+**Where.** After The Contradiction the page turns to reproducibility (Generator and
+Verifier, Verifiable Claim) and ends.
+The remaining gap is mentioned once, in Figure 3’s caption, as a width.
+
+**Problem.** A reader learns nothing about whether a higher side was tried, whether the
+method has a ceiling, or what would settle $s(11)$. The proof card says “It says nothing
+about an upper bound.
+The case stays open,” and the register carries the material: side 3.82 was attacked from
+both sides and neither closed (the covering program on two site sets stopped at an
+objective of exactly 11, so no certificate exists on either; the rejection route reaches
+a feasible total of 6.58 against the 11 a ceiling needs); the certificate form cannot
+reach a side above $4B \approx 3.99$ for $n = 11$, so 3.82 is a covering wall for the
+sites tried and not the method’s limit; and the remaining gap to Trump’s packing is
+0.067, which this approach does not close.
+None of this is on the page, and it is what a mathematical reader asks next.
+
+**Fix.** A short closing section, “What Remains Open,” after The Contradiction: the
+bracket $3.81 \le s(11) \le 3.8770835\ldots$; that 3.82 was tried and no certificate was
+found on two site sets; that the form’s ceiling is near 3.99, so a better bound is a
+search question rather than a limit of the method; and that nothing here bears on
+Trump’s packing being optimal.
+Three or four sentences; the register and the card carry the detail.
 
 ## Considered and Set Aside
 
