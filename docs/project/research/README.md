@@ -25,6 +25,7 @@ access labels.
 | 2026-09-02 | [Named Speaker Attribution for Parliamentary Transcription — Critical Review and Research Agenda](research-2026-09-02-parliamentary-speaker-attribution-research-agenda.md) | A critical review of the Madrid Open dossier’s technical analysis, an evaluation protocol for named speaker attribution, the datasets and tools to use, a ranked research agenda of sixteen directions with pre-registered hypotheses, the results of eleven sandbox spikes with a catalogue of the rest, and an evaluation strategy for research–eval loops |
 | 2026-09-02 | [Tooling Inventory for Real-Time Parliamentary Transcription with Named Speaker Attribution](research-2026-09-02-parliamentary-transcription-tooling-inventory.md) | Every tool, dataset, service and evaluation resource surveyed for the agenda, with links, licences, language coverage, same-day repository signals, maturity and access labels, a shortlist by pipeline stage, and an index from research direction to toolchain |
 | 2026-09-02 | [Track 02 Team Strategy — Four Analyses in Full](research-2026-09-02-track02-team-strategy-analyses.md) | Five team bets with rubric arithmetic, five architectures differing in where the speaker’s name comes from, a differentiation memo, a hedging plan for a brief revealed only on the day, and the design of a member knowledge base and multimodal identity stack |
+| 2026-09-06 | [Adversarial Review of the s(11) ≥ 381/100 Explainer](research-2026-09-06-s11-lower-bound-explainer-adversarial-review.md) | An adversarial review of the published explainer for the new lower bound on eleven unit squares in a square and of its verifiable-claim documents: the theorem and certificate hold; the page’s own argument, its hypotheses, its provenance, and its exposition are faulted item by item, each with a fix |
 
 ## Suggested Reading Order
 
@@ -47,6 +48,10 @@ The team-strategy analyses expand the dossier’s §12 and assume its rubric and
 landscape, so read them last.
 The tooling inventory is a reference behind the agenda’s §6 and §11: consult it by stage
 or by research direction rather than reading it through.
+
+The square-packing review stands alone.
+It is organised by severity, so read its overview and Part A first; the later parts are
+reference material for whoever edits the page it reviews.
 
 ## Maintenance
 
